@@ -139,6 +139,7 @@
   }
   .card:hover { border-color:#78909c; transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.14); }
 
+  .card { --acc: #78909c; } /* 알 수 없는 카테고리 fallback */
   .card[data-cat="치과"]   { --acc:var(--teal); }
   .card[data-cat="AI교육"] { --acc:var(--blue2); }
   .card[data-cat="플랫폼"] { --acc:var(--purple); }
@@ -268,6 +269,16 @@
     font-weight:700; display:none; font-family:inherit; line-height:1.4;
   }
   .card.user-card:hover .btn-del-proj { display:block; }
+  /* 카드 수정 버튼 */
+  .btn-edit-card {
+    position:absolute; top:7px; right:7px; z-index:2;
+    background:#e3f2fd; border:1.5px solid #90caf9; color:#1565c0;
+    border-radius:5px; font-size:0.65rem; padding:2px 7px; cursor:pointer;
+    font-weight:700; display:none; font-family:inherit; line-height:1.4;
+  }
+  .card:hover .btn-edit-card { display:block; }
+  /* 삭제 버튼 있는 user-card는 수정버튼 위치 조정 */
+  .card.user-card .btn-edit-card { right:56px; }
 
   /* 추가 카테고리 체크박스 */
   .extra-cats-grid { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
@@ -413,7 +424,7 @@
     <div class="form-row">
       <label>폴더 경로 <span style="color:#90a4ae;font-weight:400">(입력하면 자동 완성)</span></label>
       <input id="mPath" type="text" placeholder="예: C:\01 Claude-Code\52 새프로젝트" oninput="autoFillFromPath(this.value)">
-      <div class="form-hint">ROOT 경로 이하 폴더명만 입력해도 됩니다.</div>
+      <div class="form-hint">ROOT 경로 이하 폴더명만 입력해도 됩니다. 번호·이름·미리보기 경로가 자동 완성됩니다.</div>
     </div>
 
     <div class="form-row-3">
@@ -458,7 +469,7 @@
 
     <div class="form-row">
       <label>미리보기 경로 <span style="color:#90a4ae;font-weight:400">(선택사항)</span></label>
-      <input id="mPreview" type="text" placeholder="예: 52 새프로젝트/index.html">
+      <input id="mPreview" type="text" placeholder="예: 52 새프로젝트/index.html" oninput="autoCompletePreview(this)" onblur="autoCompletePreview(this)">
       <div class="form-hint">C:\01 Claude-Code\ 이후의 상대 경로</div>
     </div>
 
@@ -475,12 +486,84 @@
   </div>
 </div>
 
+<!-- ══════════ 카드 수정 모달 ══════════ -->
+<div class="modal-backdrop" id="editModal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal">
+    <h3>✏️ 프로젝트 수정</h3>
+
+    <div class="form-row-3">
+      <div>
+        <label>아이콘</label>
+        <input id="eMIcon" type="text" placeholder="📁">
+      </div>
+      <div>
+        <label>프로젝트 이름</label>
+        <input id="eMName" type="text">
+      </div>
+    </div>
+
+    <div class="form-row-2">
+      <div>
+        <label>번호</label>
+        <input id="eMNum" type="text">
+      </div>
+      <div>
+        <label>카테고리</label>
+        <select id="eMCat">
+          <option value="치과">🦷 치과/의료</option>
+          <option value="AI교육">📚 AI 교육</option>
+          <option value="플랫폼">⚙️ 플랫폼/앱</option>
+          <option value="선거">🗳 선거</option>
+          <option value="미디어">🎙 미디어</option>
+          <option value="컨설팅">💼 컨설팅</option>
+          <option value="도구">🛠 도구</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>설명</label>
+      <textarea id="eMDesc"></textarea>
+    </div>
+
+    <div class="form-row">
+      <label>태그 <span style="color:#90a4ae;font-weight:400">(쉼표로 구분)</span></label>
+      <input id="eMTags" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>미리보기 경로</label>
+      <input id="eMPreview" type="text" placeholder="예: 52 새프로젝트/index.html" oninput="autoCompletePreview(this)" onblur="autoCompletePreview(this)">
+      <div class="form-hint">C:\01 Claude-Code\ 이후의 상대 경로</div>
+    </div>
+
+    <div class="form-row">
+      <label>추가 카테고리 <span style="color:#90a4ae;font-weight:400">(중복 표시)</span></label>
+      <div id="eMExtraCats" class="extra-cats-grid"></div>
+    </div>
+
+    <input type="hidden" id="eMDir">
+    <input type="hidden" id="eMIsUser">
+
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeEditModal()">취소</button>
+      <button class="btn-modal-save" onclick="saveEditCard()">저장</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const ROOT = 'C:\\01 Claude-Code\\';
 
 // ── 사용자 추가 프로젝트 ──────────────────────────────────────────
-let userProjects = JSON.parse(localStorage.getItem('userProjects') || '[]');
-function getAllProjects() { return [...PROJECTS, ...userProjects]; }
+let userProjects  = JSON.parse(localStorage.getItem('userProjects')   || '[]');
+let cardOverrides = JSON.parse(localStorage.getItem('cardOverrides')  || '{}');
+
+function getAllProjects() {
+  // 기본 카드에 오버라이드 적용
+  const base = PROJECTS.map(p => cardOverrides[p.dir] ? {...p, ...cardOverrides[p.dir]} : p);
+  return [...base, ...userProjects];
+}
 
 // ── 프로젝트 데이터 ─────────────────────────────────────────────
 const PROJECTS = [
@@ -694,21 +777,24 @@ function render(list) {
 
   // 카테고리별 그룹
   const cats = [...new Set(list.map(p => p.cat))];
-  const catIcon = { 치과:'🦷', AI교육:'📚', 플랫폼:'⚙️', 선거:'🗳', 미디어:'🎙', 컨설팅:'💼', 도구:'🛠' };
+  const builtInIcon = { 치과:'🦷', AI교육:'📚', 플랫폼:'⚙️', 선거:'🗳', 미디어:'🎙', 컨설팅:'💼', 도구:'🛠' };
+  // 커스텀 탭은 🔖 아이콘 fallback
+  const catIcon = cat => builtInIcon[cat] || '🔖';
 
   area.innerHTML = cats.map(cat => {
     const items = list.filter(p => p.cat === cat);
     return `
-    <div class="category-label">${catIcon[cat]||''} ${cat} <span style="color:var(--text2);font-size:0.7rem;font-weight:400;margin-left:4px;">${items.length}개</span></div>
+    <div class="category-label">${catIcon(cat)} ${cat} <span style="color:var(--text2);font-size:0.7rem;font-weight:400;margin-left:4px;">${items.length}개</span></div>
     <div class="grid">${items.map(card).join('')}</div>`;
   }).join('');
 }
 
 function card(p) {
-  const folderPath = ROOT + p.dir;
+  // data-dir 속성으로 경로 전달 → onclick에 직접 삽입 시 백슬래시 escape 문제 완전 방지
+  const dirAttr     = p.dir.replace(/"/g, '&quot;');
   const previewHref = p.preview ? 'file:///' + ROOT.replace(/\\/g, '/') + p.preview.replace(/\\/g, '/') : '';
-  const typeClass  = p.preview ? (p.sub ? 'type-sub' : 'type-direct') : '';
-  const typeBadge  = p.preview
+  const typeClass   = p.preview ? (p.sub ? 'type-sub' : 'type-direct') : '';
+  const typeBadge   = p.preview
     ? (p.sub
         ? `<div class="type-badge sub">📂 서브폴더</div>`
         : `<div class="type-badge direct">⚡ 직접연결</div>`)
@@ -716,19 +802,22 @@ function card(p) {
   const previewBtnClass = p.sub ? 'btn-action sub-preview' : 'btn-action primary';
 
   // 편집 모드
-  const isSelected = editMode && selectedDirs.has(p.dir);
+  const isSelected  = editMode && selectedDirs.has(p.dir);
   const selectClass = editMode ? ` selectable${isSelected ? ' selected' : ''}` : '';
-  const selectAttr  = editMode ? `onclick="toggleSelect('${p.dir.replace(/'/g,"\\'")}')"` : '';
+  const selectAttr  = editMode ? `onclick="toggleSelect(this)"` : '';
   const checkBox    = editMode ? `<div class="check-box">${isSelected ? '✓' : ''}</div>` : '';
 
-  const delBtn = p.isUserAdded && !editMode
-    ? `<button class="btn-del-proj" onclick="deleteUserProject('${p.dir.replace(/'/g,"\\'")}')">✕ 삭제</button>`
+  const delBtn  = p.isUserAdded && !editMode
+    ? `<button class="btn-del-proj"  onclick="deleteUserProject(this)">✕ 삭제</button>`
+    : '';
+  const editBtn = !editMode
+    ? `<button class="btn-edit-card" onclick="openEditModal(event,this)">✏️ 수정</button>`
     : '';
   const userClass = p.isUserAdded ? ' user-card' : '';
 
   return `
-  <div class="card ${typeClass}${selectClass}${userClass}" data-cat="${p.cat}" data-name="${p.name}" data-tags="${p.tags.join(' ')}" ${selectAttr}>
-    ${checkBox}${delBtn}
+  <div class="card ${typeClass}${selectClass}${userClass}" data-dir="${dirAttr}" data-cat="${p.cat}" data-name="${p.name}" data-tags="${p.tags.join(' ')}" ${selectAttr}>
+    ${checkBox}${delBtn}${editBtn}
     <div class="card-top">
       <div class="card-icon">${p.icon}</div>
       <div class="card-info">
@@ -740,11 +829,11 @@ function card(p) {
     <div class="card-desc">${p.desc}</div>
     <div class="card-badges">${p.tags.map(t=>`<span class="badge">${t}</span>`).join('')}</div>
     <div class="card-actions">
-      <button class="btn-action" onclick="copyPath('${folderPath.replace(/'/g,"\\'")}')">
+      <button class="btn-action" onclick="copyPath(this)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         경로 복사
       </button>
-      <button class="btn-action" onclick="openFolder('${folderPath.replace(/'/g,"\\'")}')">
+      <button class="btn-action" onclick="openFolder(this)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         폴더 열기
       </button>
@@ -776,14 +865,14 @@ function filter() {
     const assigned = customTabCards[key];
 
     if (assigned && assigned.length > 0) {
-      // 커스텀 지정 카드 우선 + extraCats 포함 (중복 표시)
-      list = list.filter(p => assigned.includes(p.dir) || (p.extraCats||[]).includes(key));
+      // 커스텀 지정 카드 + extraCats + 해당 cat을 기본으로 갖는 카드
+      list = list.filter(p => assigned.includes(p.dir) || (p.extraCats||[]).includes(key) || p.cat === key);
     } else if (isBuiltIn(activeTab)) {
-      // 내장 탭 기본: cat 필터 + extraCats 포함 (중복 표시)
+      // 내장 탭: cat 필터 + extraCats
       list = list.filter(p => p.cat === activeTab || (p.extraCats||[]).includes(activeTab));
     } else {
-      // 커스텀 탭인데 카드 없음
-      list = [];
+      // 커스텀 탭: cat이 이 탭인 카드 + extraCats
+      list = list.filter(p => p.cat === key || (p.extraCats||[]).includes(key));
     }
   }
 
@@ -835,7 +924,7 @@ function enterEditMode(e, key) {
     selectedDirs = new Set(existing);
   } else if (isBuiltIn('__dummy__') || ['치과','AI교육','플랫폼','선거','미디어','컨설팅','도구'].includes(key)) {
     // 내장 탭: 해당 cat의 카드를 기본으로 선택
-    selectedDirs = new Set(PROJECTS.filter(p => p.cat === key).map(p => p.dir));
+    selectedDirs = new Set(getAllProjects().filter(p => p.cat === key).map(p => p.dir));
   } else {
     selectedDirs = new Set();
   }
@@ -868,16 +957,12 @@ function resetEdit() {
   showToast('🔄 기본값으로 복원되었습니다');
 }
 
-function toggleSelect(dir) {
+function toggleSelect(el) {
+  const dir = el.closest ? el.closest('.card').dataset.dir : el.dataset.dir;
   if (selectedDirs.has(dir)) selectedDirs.delete(dir);
   else selectedDirs.add(dir);
   document.getElementById('editSelCount').textContent = selectedDirs.size;
-  // 해당 카드 UI만 갱신
-  document.querySelectorAll('.card.selectable').forEach(el => {
-    const d = el.getAttribute('data-name');
-    // dir을 data 속성으로 추가했으므로 찾아서 갱신
-  });
-  filter(); // 전체 재렌더 (편집모드에서는 빠름)
+  filter();
 }
 
 function saveEdit() {
@@ -932,27 +1017,16 @@ function deleteTab(e, kw) {
 
 renderCustomTabs();
 
-function copyPath(path) {
+function copyPath(el) {
+  const dir  = el.closest('.card').dataset.dir;
+  const path = ROOT + dir;
   navigator.clipboard.writeText(path).then(() => showToast('📋 경로가 클립보드에 복사되었습니다'));
 }
 
-// 서버 사용 가능 여부 (비동기 확인)
-let serverAvailable = false;
-fetch('http://localhost:9999/open?path=__check__', { signal: AbortSignal.timeout(800) })
-  .then(() => { serverAvailable = true; })
-  .catch(() => { serverAvailable = false; });
-
-function openFolder(path) {
-  if (serverAvailable) {
-    fetch('http://localhost:9999/open?path=' + encodeURIComponent(path))
-      .catch(() => fallbackCopy(path));
-  } else {
-    fallbackCopy(path);
-  }
-}
-
-function fallbackCopy(path) {
-  navigator.clipboard.writeText(path).then(() => showToast('📋 경로 복사됨 (서버 없이는 직접 붙여넣기)'));
+function openFolder(el) {
+  const dir  = el.closest('.card').dataset.dir;
+  const path = ROOT + dir;
+  navigator.clipboard.writeText(path).then(() => showToast('📋 경로가 클립보드에 복사되었습니다'));
 }
 
 function showToast(msg) {
@@ -1035,6 +1109,23 @@ function closeDd() {
 
 document.addEventListener('click', closeDd);
 
+// ── 카테고리 드롭다운 공통 헬퍼 ──────────────────────────────────
+function populateCatSelect(selectEl, currentVal) {
+  const builtIn = CAT_LIST.map(c =>
+    `<option value="${c.key}"${currentVal === c.key ? ' selected' : ''}>${c.icon} ${c.key}</option>`
+  ).join('');
+
+  const custom = customTabs.length
+    ? `<optgroup label="─── 내 카테고리 ───">` +
+        customTabs.map(kw =>
+          `<option value="${kw}"${currentVal === kw ? ' selected' : ''}>🔖 ${kw}</option>`
+        ).join('') +
+      `</optgroup>`
+    : '';
+
+  selectEl.innerHTML = builtIn + custom;
+}
+
 // ── 새 프로젝트 추가 모달 ────────────────────────────────────────
 const CAT_LIST = [
   { key:'치과',   icon:'🦷' },
@@ -1047,13 +1138,24 @@ const CAT_LIST = [
 ];
 
 function openAddModal() {
-  // 추가 카테고리 체크박스 렌더
+  // 기본 카테고리 드롭다운에 커스텀 탭 추가
+  populateCatSelect(document.getElementById('mCat'), '치과');
+
+  // 추가 카테고리 체크박스 렌더: 기본 7개 + 사용자 추가 탭
   const ec = document.getElementById('mExtraCats');
-  ec.innerHTML = CAT_LIST.map(c =>
-    `<label class="extra-cat-label" id="ec_${c.key}">
+  const builtInHtml = CAT_LIST.map(c =>
+    `<label class="extra-cat-label">
        <input type="checkbox" value="${c.key}" onchange="syncPrimaryCheck()"> ${c.icon} ${c.key}
      </label>`
   ).join('');
+  const customHtml = customTabs.length
+    ? customTabs.map(kw =>
+        `<label class="extra-cat-label" style="border-color:#9c27b0;color:#6a1b9a;">
+           <input type="checkbox" value="__kw__${kw}" onchange="updateCustomCatLabel(this)"> 🔖 ${kw}
+         </label>`
+      ).join('')
+    : '';
+  ec.innerHTML = builtInHtml + customHtml;
   syncPrimaryCheck();
   document.getElementById('addModal').classList.add('show');
   document.getElementById('mPath').focus();
@@ -1085,24 +1187,44 @@ function syncPrimaryCheck() {
   });
 }
 
+function updateCustomCatLabel(cb) {
+  cb.closest('.extra-cat-label').classList.toggle('checked', cb.checked);
+}
+
 function autoFillFromPath(val) {
   let folder = val.trim();
-  // ROOT 제거
   if (folder.startsWith(ROOT)) folder = folder.slice(ROOT.length);
   const prefix = 'C:\\01 Claude-Code\\';
   if (folder.startsWith(prefix)) folder = folder.slice(prefix.length);
   folder = folder.replace(/[\\\/]+$/, '');
   if (!folder) return;
-  // 번호 + 이름 분리: "52 새프로젝트" → num=52, name=새프로젝트
+
+  // 번호 + 이름 자동 분리: "52 새프로젝트" → num=52, name=새프로젝트
   const m = folder.match(/^([\d\-\.]+)\s+(.*)/);
   if (m) {
-    document.getElementById('mNum').value  = m[1];
-    document.getElementById('mName').value = m[2];
+    if (!document.getElementById('mNum').value)  document.getElementById('mNum').value  = m[1];
+    if (!document.getElementById('mName').value) document.getElementById('mName').value = m[2];
   } else {
-    document.getElementById('mName').value = folder;
+    if (!document.getElementById('mName').value) document.getElementById('mName').value = folder;
   }
-  // 기본 미리보기 placeholder
-  document.getElementById('mPreview').placeholder = folder + '/index.html';
+  // 미리보기 경로 기본값
+  if (!document.getElementById('mPreview').value)
+    document.getElementById('mPreview').value = folder + '/index.html';
+}
+
+function autoCompletePreview(el) {
+  let val = el.value.trim();
+  if (!val) return;
+  // 이미 .html로 끝나면 그대로
+  if (val.toLowerCase().endsWith('.html')) return;
+  // 슬래시 없이 폴더명만 입력 → 폴더/index.html
+  if (!val.includes('/') && !val.includes('\\')) {
+    el.value = val + '/index.html';
+  }
+  // 슬래시로 끝나면 index.html만 추가
+  else if (val.endsWith('/') || val.endsWith('\\')) {
+    el.value = val.replace(/[\\\/]+$/, '') + '/index.html';
+  }
 }
 
 function saveNewProject() {
@@ -1117,7 +1239,10 @@ function saveNewProject() {
   if (!dir || !name) { showToast('⚠️ 경로와 이름을 입력하세요'); return; }
 
   const primaryCat = document.getElementById('mCat').value;
-  const extraCats  = [...document.querySelectorAll('#mExtraCats input:checked')].map(c => c.value);
+  const allChecked = [...document.querySelectorAll('#mExtraCats input:checked')].map(c => c.value);
+  // 기본 카테고리(built-in)와 커스텀 탭(__kw__...) 분리
+  const extraCats      = allChecked.filter(v => !v.startsWith('__kw__'));
+  const extraCustomKws = allChecked.filter(v => v.startsWith('__kw__')).map(v => v.replace('__kw__', ''));
   const tagsRaw    = document.getElementById('mTags').value.trim();
   const tags       = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
   const previewVal = document.getElementById('mPreview').value.trim();
@@ -1128,7 +1253,7 @@ function saveNewProject() {
   const newProj = {
     num:        document.getElementById('mNum').value.trim() || '?',
     cat:        primaryCat,
-    extraCats:  extraCats,
+    extraCats:  extraCats,   // built-in 중복 카테고리
     icon:       document.getElementById('mIcon').value.trim() || '📁',
     name:       name,
     dir:        dir,
@@ -1144,6 +1269,13 @@ function saveNewProject() {
   userProjects.push(newProj);
   localStorage.setItem('userProjects', JSON.stringify(userProjects));
 
+  // 커스텀 탭에 선택된 경우 → customTabCards에 자동 등록
+  extraCustomKws.forEach(kw => {
+    if (!customTabCards[kw]) customTabCards[kw] = [];
+    if (!customTabCards[kw].includes(dir)) customTabCards[kw].push(dir);
+  });
+  localStorage.setItem('customTabCards', JSON.stringify(customTabCards));
+
   closeAddModal();
   document.getElementById('totalCount').textContent = getAllProjects().length;
   renderCustomTabs(); // 드롭다운 갱신용
@@ -1151,13 +1283,111 @@ function saveNewProject() {
   showToast('✅ 프로젝트가 추가되었습니다');
 }
 
-function deleteUserProject(dir) {
+function deleteUserProject(el) {
+  const dir = el.closest('.card').dataset.dir;
   if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
   userProjects = userProjects.filter(p => p.dir !== dir);
   localStorage.setItem('userProjects', JSON.stringify(userProjects));
   document.getElementById('totalCount').textContent = getAllProjects().length;
   filter();
   showToast('🗑 프로젝트가 삭제되었습니다');
+}
+
+// ── 카드 수정 모달 ────────────────────────────────────────────────
+function openEditModal(e, el) {
+  e.stopPropagation();
+  const dir = (typeof el === 'string') ? el : el.closest('.card').dataset.dir;
+  const p = getAllProjects().find(x => x.dir === dir);
+  if (!p) return;
+
+  document.getElementById('eMIcon').value    = p.icon || '📁';
+  document.getElementById('eMName').value    = p.name || '';
+  document.getElementById('eMNum').value     = p.num  || '';
+  document.getElementById('eMDesc').value    = p.desc || '';
+  document.getElementById('eMTags').value    = (p.tags || []).join(', ');
+  document.getElementById('eMPreview').value = p.preview || '';
+  document.getElementById('eMDir').value     = p.dir;
+  document.getElementById('eMIsUser').value  = p.isUserAdded ? '1' : '0';
+
+  // 카테고리 선택 (커스텀 탭 포함)
+  const catSel = document.getElementById('eMCat');
+  populateCatSelect(catSel, p.cat || '치과');
+
+  // 추가 카테고리 체크박스
+  const ec = document.getElementById('eMExtraCats');
+  const extraCats = p.extraCats || [];
+  ec.innerHTML = CAT_LIST.map(c =>
+    `<label class="extra-cat-label${extraCats.includes(c.key) ? ' checked' : ''}">
+       <input type="checkbox" value="${c.key}" ${extraCats.includes(c.key) ? 'checked' : ''}
+         onchange="this.closest('.extra-cat-label').classList.toggle('checked',this.checked)">
+       ${c.icon} ${c.key}
+     </label>`
+  ).join('') + (customTabs.length ? customTabs.map(kw => {
+    const ck = extraCats.includes('__kw__' + kw);
+    return `<label class="extra-cat-label${ck ? ' checked' : ''}" style="border-color:#9c27b0;color:#6a1b9a;">
+      <input type="checkbox" value="__kw__${kw}" ${ck ? 'checked' : ''}
+        onchange="this.closest('.extra-cat-label').classList.toggle('checked',this.checked)">
+      🔖 ${kw}</label>`;
+  }).join('') : '');
+
+  // 기본 카테고리 = 현재 cat → 비활성화
+  ec.querySelectorAll('input').forEach(cb => {
+    if (cb.value === p.cat) { cb.checked = false; cb.disabled = true; cb.closest('.extra-cat-label').style.opacity = '0.4'; }
+  });
+
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+}
+
+function saveEditCard() {
+  const dir    = document.getElementById('eMDir').value;
+  const isUser = document.getElementById('eMIsUser').value === '1';
+
+  const updated = {
+    dir:     dir,
+    icon:    document.getElementById('eMIcon').value.trim()    || '📁',
+    name:    document.getElementById('eMName').value.trim(),
+    num:     document.getElementById('eMNum').value.trim()     || '?',
+    cat:     document.getElementById('eMCat').value,
+    desc:    document.getElementById('eMDesc').value.trim(),
+    tags:    document.getElementById('eMTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    preview: document.getElementById('eMPreview').value.trim(),
+  };
+
+  // 추가 카테고리
+  const allChecked = [...document.querySelectorAll('#eMExtraCats input:checked')].map(c => c.value);
+  updated.extraCats     = allChecked.filter(v => !v.startsWith('__kw__'));
+  const extraCustomKws  = allChecked.filter(v => v.startsWith('__kw__')).map(v => v.replace('__kw__',''));
+
+  // sub 자동 판별
+  updated.sub = updated.preview.includes('/') &&
+                !updated.preview.startsWith(updated.dir + '/index.html');
+
+  if (isUser) {
+    // 사용자 추가 카드 → userProjects 수정
+    updated.isUserAdded = true;
+    userProjects = userProjects.map(p => p.dir === dir ? {...p, ...updated} : p);
+    localStorage.setItem('userProjects', JSON.stringify(userProjects));
+  } else {
+    // 기본 카드 → 오버라이드 저장 (별도 localStorage)
+    cardOverrides[dir] = updated;
+    localStorage.setItem('cardOverrides', JSON.stringify(cardOverrides));
+  }
+
+  // 커스텀 탭 등록
+  extraCustomKws.forEach(kw => {
+    if (!customTabCards[kw]) customTabCards[kw] = [];
+    if (!customTabCards[kw].includes(dir)) customTabCards[kw].push(dir);
+  });
+  localStorage.setItem('customTabCards', JSON.stringify(customTabCards));
+
+  closeEditModal();
+  document.getElementById('totalCount').textContent = getAllProjects().length;
+  filter();
+  showToast('✅ 수정되었습니다');
 }
 
 // 초기 렌더
