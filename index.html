@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>심재우 · AI 플랫폼 프로젝트 인덱스</title>
+<style>
+  :root {
+    --bg:     #eef2f7;
+    --bg2:    #ffffff;
+    --bg3:    #f0f4f8;
+    --border: #b0bec5;
+    --text:   #0d1b2a;
+    --text2:  #37474f;
+    --blue:   #1565c0;
+    --blue2:  #1976d2;
+    --green:  #2e7d32;
+    --purple: #6a1b9a;
+    --orange: #e65100;
+    --red:    #c62828;
+    --pink:   #ad1457;
+    --teal:   #00695c;
+    --gold:   #f57f17;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Malgun Gothic','맑은 고딕',sans-serif; min-height:100vh; }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, #0f2744 0%, #1a365d 100%);
+    padding: 20px 40px 16px;
+    border-bottom: 1px solid #1e3a5f;
+    position: sticky; top:0; z-index:100;
+  }
+  .header-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:1.25rem; font-weight:800; color:#fff; }
+  .header h1 span { color:#fcd34d; }
+  .stat-chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+          padding:3px 12px; border-radius:20px; font-size:0.75rem; color:rgba(255,255,255,0.8); }
+  .chip b { color:#fff; }
+
+  /* ── 검색·필터 바 (sticky) ── */
+  .toolbar {
+    padding: 12px 40px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap:10px; align-items:center; flex-wrap:wrap;
+    position: sticky; z-index:99;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .search-wrap { position:relative; width:280px; flex-shrink:0; }
+  .search-wrap > svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text2); pointer-events:none; }
+  #search { width:100%; background:var(--bg3); border:1px solid var(--border);
+            color:var(--text); padding:8px 36px 8px 34px; border-radius:7px;
+            font-size:0.85rem; outline:none; font-family:inherit; }
+  #search:focus { border-color:var(--blue2); box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+  #search::placeholder { color:#94a3b8; }
+
+  /* 드롭다운 버튼 */
+  .search-dd-btn {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; color:var(--text2);
+    font-size:0.8rem; padding:4px 6px; border-radius:4px; line-height:1;
+    transition:all .15s;
+  }
+  .search-dd-btn:hover { background:var(--border); color:var(--text); }
+  .search-dropdown {
+    display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:300;
+    background:#fff; border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.12); max-height:320px; overflow-y:auto;
+  }
+  .search-dropdown.show { display:block; }
+  .dd-section { padding:6px 0; border-bottom:1px solid var(--border); }
+  .dd-section:last-child { border-bottom:none; }
+  .dd-section-title { padding:4px 12px; font-size:0.68rem; font-weight:700; color:#94a3b8; letter-spacing:1px; text-transform:uppercase; }
+  .dd-item {
+    padding:7px 14px; font-size:0.82rem; color:var(--text); cursor:pointer;
+    display:flex; align-items:center; gap:8px; transition:background .1s;
+  }
+  .dd-item:hover { background:var(--bg3); color:var(--blue); }
+  .dd-item .dd-num { font-size:0.7rem; color:var(--gold); font-weight:700; min-width:32px; }
+  .dd-item.pinned { font-weight:700; color:#1565c0; background:#f0f7ff; }
+  .dd-item.pinned:hover { background:#dbeafe; }
+
+  .filter-tabs { display:flex; gap:5px; flex-wrap:wrap; }
+  .tab { padding:5px 12px; border-radius:6px; border:1.5px solid #90a4ae;
+         background:#fff; color:#37474f; font-size:0.78rem; font-weight:600;
+         cursor:pointer; transition:all .2s; font-family:inherit; white-space:nowrap; }
+  .tab:hover { border-color:var(--blue2); color:var(--blue); background:#e3f2fd; }
+  .tab.active { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:700; }
+  .tab.custom { border-color:#9c27b0; color:#6a1b9a; background:#f3e5f5; padding-right:6px; display:inline-flex; align-items:center; gap:4px; }
+  .tab.custom:hover { background:#e1bee7; border-color:#6a1b9a; }
+  .tab.custom.active { background:#7b1fa2; border-color:#7b1fa2; color:#fff; }
+  .tab.custom .del-tab { font-size:0.75rem; opacity:0.5; line-height:1; padding:1px 3px; border-radius:3px; cursor:pointer; }
+  .tab.custom .del-tab:hover { opacity:1; background:rgba(0,0,0,0.15); }
+  /* + 추가 버튼 */
+  .tab-add-btn {
+    padding:5px 10px; border-radius:6px; border:1.5px dashed #90a4ae;
+    background:transparent; color:#90a4ae; font-size:0.82rem; font-weight:700;
+    cursor:pointer; font-family:inherit; transition:all .2s; white-space:nowrap;
+  }
+  .tab-add-btn:hover { border-color:var(--blue); color:var(--blue); background:#e3f2fd; }
+  /* 인라인 입력 폼 */
+  .tab-input-wrap { display:none; align-items:center; gap:4px; }
+  .tab-input-wrap.show { display:inline-flex; }
+  .tab-input-wrap input {
+    padding:4px 10px; border-radius:6px; border:1.5px solid var(--blue);
+    font-size:0.78rem; font-family:inherit; outline:none; width:120px; color:var(--text);
+    background:#fff;
+  }
+  .tab-input-wrap button {
+    padding:4px 10px; border-radius:6px; border:none; font-size:0.78rem;
+    font-family:inherit; cursor:pointer; font-weight:700;
+  }
+  .tab-confirm { background:var(--blue); color:#fff; }
+  .tab-cancel  { background:#e0e0e0; color:#555; }
+
+  /* ── 그리드 ── */
+  .grid-wrapper { padding: 20px 40px 60px; }
+  .category-label {
+    font-size:0.75rem; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    color:#455a64; margin: 24px 0 10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .category-label::after { content:''; flex:1; height:1.5px; background:#b0bec5; }
+
+  .grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; }
+
+  /* ── 카드 ── */
+  .card {
+    background:#fff; border:1.5px solid var(--border); border-radius:10px;
+    padding:14px 16px; transition:all .2s; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    border-radius:10px 10px 0 0; opacity:1; transition:.2s;
+  }
+  .card:hover { border-color:#78909c; transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.14); }
+
+  .card[data-cat="치과"]   { --acc:var(--teal); }
+  .card[data-cat="AI교육"] { --acc:var(--blue2); }
+  .card[data-cat="플랫폼"] { --acc:var(--purple); }
+  .card[data-cat="선거"]   { --acc:var(--red); }
+  .card[data-cat="미디어"] { --acc:var(--pink); }
+  .card[data-cat="컨설팅"] { --acc:var(--orange); }
+  .card[data-cat="도구"]   { --acc:var(--green); }
+  .card::before { background: var(--acc); }
+
+  .card-top { display:flex; align-items:flex-start; gap:10px; }
+  .card-icon {
+    width:34px; height:34px; border-radius:8px; display:flex; align-items:center;
+    justify-content:center; font-size:1rem; flex-shrink:0;
+    background: color-mix(in srgb, var(--acc) 15%, #f0f4f8);
+    border: 1px solid color-mix(in srgb, var(--acc) 30%, #dde3ea);
+  }
+  .card-info { flex:1; min-width:0; }
+  .card-num { font-size:0.75rem; color:#e65100; margin-bottom:1px; font-weight:800; letter-spacing:0.5px; }
+  .card-name { font-size:0.87rem; font-weight:800; color:#0d1b2a; line-height:1.3;
+               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-desc { font-size:0.76rem; color:#37474f; line-height:1.5; font-weight:400;
+               display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .card-badges { display:flex; gap:4px; flex-wrap:wrap; }
+  .badge {
+    font-size:0.66rem; padding:2px 8px; border-radius:20px; font-weight:700;
+    background: color-mix(in srgb, var(--acc) 15%, #fff);
+    color: color-mix(in srgb, var(--acc) 100%, #000 20%);
+    border: 1.5px solid color-mix(in srgb, var(--acc) 40%, transparent);
+  }
+
+  .card-actions { display:flex; gap:6px; margin-top:4px; }
+  .btn-action {
+    flex:1; padding:6px 8px; border-radius:6px; font-size:0.72rem; font-weight:700;
+    cursor:pointer; text-align:center; text-decoration:none; font-family:inherit;
+    border:1.5px solid #90a4ae; background:#f5f7fa; color:#37474f;
+    transition:all .2s; display:flex; align-items:center; justify-content:center; gap:4px;
+  }
+  .btn-action:hover { border-color:var(--acc); color:var(--acc); background:color-mix(in srgb, var(--acc) 8%, #fff); }
+  .btn-action.primary { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:700; }
+  .btn-action.primary:hover { background:#1976d2; border-color:#1976d2; }
+  .btn-action.sub-preview { background:#fff8e1; border-color:#f9a825; color:#e65100; font-weight:700; }
+  .btn-action.sub-preview:hover { background:#fff3cd; border-color:#e65100; }
+
+  /* ── 카드 타입 구분 ── */
+  .card.type-direct { border-color:#81c784; border-width:2px; }
+  .card.type-sub    { border-color:#ffb74d; border-width:2px; }
+
+  .type-badge {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:0.65rem; font-weight:800; padding:2px 7px;
+    border-radius:4px; margin-bottom:2px; letter-spacing:0.3px;
+  }
+  .type-badge.direct { background:#c8e6c9; color:#1b5e20; border:1.5px solid #66bb6a; }
+  .type-badge.sub    { background:#fff9c4; color:#e65100; border:1.5px solid #ffb74d; }
+
+
+  /* 복사 토스트 */
+  #toast {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:#0f172a; color:#fff; padding:10px 22px; border-radius:10px;
+    font-size:0.85rem; border:1px solid #1e293b;
+    transition:transform .3s ease; z-index:999;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* 검색 없음 */
+  .empty { text-align:center; padding:60px 20px; color:var(--text2); display:none; }
+  .empty svg { margin-bottom:16px; opacity:.3; }
+
+  /* ── 프로젝트 추가 모달 ── */
+  .modal-backdrop {
+    display:none; position:fixed; inset:0; z-index:500;
+    background:rgba(0,0,0,0.45); backdrop-filter:blur(3px);
+    align-items:center; justify-content:center;
+  }
+  .modal-backdrop.show { display:flex; }
+  .modal {
+    background:#fff; border-radius:16px; padding:32px 36px;
+    width:540px; max-width:94vw; max-height:90vh; overflow-y:auto;
+    box-shadow:0 24px 60px rgba(0,0,0,0.2);
+  }
+  .modal h3 { font-size:1.1rem; font-weight:800; color:var(--text); margin-bottom:22px;
+              display:flex; align-items:center; gap:10px; }
+  .form-row { margin-bottom:16px; }
+  .form-row label { display:block; font-size:0.78rem; font-weight:700;
+                    color:var(--text2); margin-bottom:6px; letter-spacing:0.3px; }
+  .form-row input, .form-row select, .form-row textarea {
+    width:100%; padding:9px 12px; border:1.5px solid var(--border);
+    border-radius:8px; font-size:0.88rem; font-family:inherit;
+    color:var(--text); background:#fff; outline:none; transition:border .15s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color:var(--blue); box-shadow:0 0 0 3px rgba(21,101,192,0.1);
+  }
+  .form-row textarea { height:64px; resize:vertical; }
+  .form-hint { font-size:0.72rem; color:#90a4ae; margin-top:4px; }
+  .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .form-row-3 { display:grid; grid-template-columns:80px 1fr; gap:12px; margin-bottom:16px; }
+  .modal-actions { display:flex; gap:10px; margin-top:24px; justify-content:flex-end; }
+  .modal-actions button {
+    padding:10px 24px; border-radius:8px; border:none;
+    font-size:0.88rem; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .btn-modal-cancel { background:#f1f5f9; color:#64748b; }
+  .btn-modal-cancel:hover { background:#e2e8f0; }
+  .btn-modal-save { background:var(--blue); color:#fff; }
+  .btn-modal-save:hover { background:#1976d2; }
+  /* 추가 버튼 (헤더) */
+  .btn-add-project {
+    padding:4px 14px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.12); color:#fff; font-size:0.8rem;
+    font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
+  }
+  .btn-add-project:hover { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.6); }
+  /* 사용자 추가 카드 표시 */
+  .card.user-card { border-style:dashed; border-color:#7986cb; }
+  .card.user-card::after {
+    content:'직접추가'; position:absolute; bottom:6px; right:8px;
+    font-size:0.6rem; color:#9fa8da; font-weight:700; letter-spacing:0.5px;
+  }
+  .btn-del-proj {
+    position:absolute; top:7px; right:7px; z-index:2;
+    background:#fff0f0; border:1.5px solid #ef9a9a; color:#c62828;
+    border-radius:5px; font-size:0.65rem; padding:2px 7px; cursor:pointer;
+    font-weight:700; display:none; font-family:inherit; line-height:1.4;
+  }
+  .card.user-card:hover .btn-del-proj { display:block; }
+
+  /* 추가 카테고리 체크박스 */
+  .extra-cats-grid { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .extra-cat-label {
+    display:inline-flex; align-items:center; gap:5px; padding:5px 10px;
+    border:1.5px solid var(--border); border-radius:6px; cursor:pointer;
+    font-size:0.8rem; background:#f8fafc; transition:all .15s; user-select:none;
+  }
+  .extra-cat-label:hover { border-color:var(--blue); background:#e3f2fd; }
+  .extra-cat-label input[type=checkbox] { cursor:pointer; accent-color:var(--blue); }
+  .extra-cat-label.checked { border-color:var(--blue); background:#dbeafe; color:var(--blue); font-weight:700; }
+
+  /* ── 편집 모드 ── */
+  .card.selectable { cursor:pointer; user-select:none; }
+  .card.selectable:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+  .card.selectable .check-box {
+    position:absolute; top:10px; right:10px;
+    width:22px; height:22px; border-radius:50%;
+    border:2px solid #90a4ae; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; transition:all .15s;
+  }
+  .card.selectable.selected .check-box {
+    background:var(--blue); border-color:var(--blue); color:#fff;
+  }
+  .card.selectable.selected {
+    border-color:var(--blue) !important;
+    box-shadow:0 0 0 3px rgba(21,101,192,0.2) !important;
+  }
+  /* 편집 모드 안내 배너 */
+  #editBar {
+    position:fixed; bottom:0; left:0; right:0; z-index:150;
+    background:#1565c0; color:#fff;
+    padding:14px 40px; display:none;
+    align-items:center; justify-content:space-between;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.18);
+    font-size:0.9rem;
+  }
+  #editBar.show { display:flex; }
+  #editBar strong { color:#ffd54f; }
+  .edit-bar-btns { display:flex; gap:10px; }
+  .edit-bar-btns button {
+    padding:8px 22px; border-radius:8px; border:none;
+    font-size:0.85rem; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .btn-save   { background:#ffd54f; color:#1a237e; }
+  .btn-save:hover { background:#ffca28; }
+  .btn-cancel-edit { background:rgba(255,255,255,0.18); color:#fff; }
+  .btn-cancel-edit:hover { background:rgba(255,255,255,0.3); }
+  /* 편집 중 카드 액션 숨기기 */
+  .edit-mode .card-actions { display:none; }
+  .edit-mode .card { padding-bottom:14px; }
+  /* 커스텀 탭 편집 아이콘 */
+  .tab.custom .edit-tab { font-size:0.72rem; opacity:0.55; padding:1px 3px; border-radius:3px; }
+  .tab.custom .edit-tab:hover { opacity:1; background:rgba(0,0,0,0.12); }
+
+  /* 반응형 */
+  @media(max-width:1400px) { .grid { grid-template-columns:repeat(4, 1fr); } }
+  @media(max-width:1100px) { .grid { grid-template-columns:repeat(3, 1fr); } }
+  @media(max-width:760px)  { .grid { grid-template-columns:repeat(2, 1fr); } }
+  @media(max-width:640px) {
+    .header, .toolbar, .grid-wrapper { padding-left:16px; padding-right:16px; }
+    .grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ══════════ 헤더 ══════════ -->
+<div class="header">
+  <div class="header-top">
+    <h1>🗂 <span>심재우</span> · AI 플랫폼 프로젝트 인덱스</h1>
+    <div class="stat-chips">
+      <div class="chip">전체 <b id="totalCount">0</b>개</div>
+      <div class="chip">표시 <b id="showCount">0</b>개</div>
+      <div class="chip">📁 C:\01 Claude-Code</div>
+      <button class="btn-add-project" onclick="openAddModal()">＋ 프로젝트</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 검색·필터 ══════════ -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search" type="text" placeholder="프로젝트 이름, 키워드로 검색…" oninput="filter()" onfocus="closeDd()">
+    <button class="search-dd-btn" onclick="toggleDd(event)" title="목록에서 선택">▾</button>
+    <div class="search-dropdown" id="searchDd"></div>
+  </div>
+  <div class="filter-tabs" id="filterTabs">
+    <button class="tab active" data-cat="전체" onclick="setTab(this)">전체</button>
+    <button class="tab" data-cat="치과"   onclick="setTab(this)">🦷 치과/의료 <span class="edit-tab" onclick="enterEditMode(event,'치과')">✏️</span></button>
+    <button class="tab" data-cat="AI교육" onclick="setTab(this)">📚 AI 교육 <span class="edit-tab" onclick="enterEditMode(event,'AI교육')">✏️</span></button>
+    <button class="tab" data-cat="플랫폼" onclick="setTab(this)">⚙️ 플랫폼/앱 <span class="edit-tab" onclick="enterEditMode(event,'플랫폼')">✏️</span></button>
+    <button class="tab" data-cat="선거"   onclick="setTab(this)">🗳 선거 <span class="edit-tab" onclick="enterEditMode(event,'선거')">✏️</span></button>
+    <button class="tab" data-cat="미디어" onclick="setTab(this)">🎙 미디어 <span class="edit-tab" onclick="enterEditMode(event,'미디어')">✏️</span></button>
+    <button class="tab" data-cat="컨설팅" onclick="setTab(this)">💼 컨설팅 <span class="edit-tab" onclick="enterEditMode(event,'컨설팅')">✏️</span></button>
+    <button class="tab" data-cat="도구"   onclick="setTab(this)">🛠 도구 <span class="edit-tab" onclick="enterEditMode(event,'도구')">✏️</span></button>
+    <!-- 커스텀 탭들이 여기에 추가됨 -->
+    <div id="customTabs"></div>
+    <!-- + 추가 버튼 & 입력 -->
+    <button class="tab-add-btn" id="tabAddBtn" onclick="showTabInput()">+ 추가</button>
+    <div class="tab-input-wrap" id="tabInputWrap">
+      <input id="tabInput" type="text" placeholder="키워드 입력…"
+             onkeydown="if(event.key==='Enter')confirmTab(); if(event.key==='Escape')cancelTab();">
+      <button class="tab-confirm" onclick="confirmTab()">확인</button>
+      <button class="tab-cancel"  onclick="cancelTab()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 편집 모드 하단 바 -->
+<div id="editBar">
+  <div>
+    <strong id="editTabLabel"></strong> 카테고리 &nbsp;·&nbsp;
+    <span id="editSelCount">0</span>개 선택됨
+    <span style="opacity:.6; font-size:0.8rem; margin-left:12px;">카드를 클릭해서 추가/제거</span>
+  </div>
+  <div class="edit-bar-btns">
+    <button class="btn-cancel-edit" onclick="cancelEdit()">취소</button>
+    <button class="btn-cancel-edit" id="resetBtn" onclick="resetEdit()" style="display:none">기본값 복원</button>
+    <button class="btn-save" onclick="saveEdit()">저장</button>
+  </div>
+</div>
+
+<!-- ══════════ 카드 그리드 ══════════ -->
+<div class="grid-wrapper">
+  <div class="empty" id="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <p>검색 결과가 없습니다.</p>
+  </div>
+  <div id="cardArea"></div>
+</div>
+
+<div id="toast">📋 경로가 클립보드에 복사되었습니다</div>
+
+<!-- ══════════ 새 프로젝트 추가 모달 ══════════ -->
+<div class="modal-backdrop" id="addModal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <h3>📁 새 프로젝트 추가</h3>
+
+    <div class="form-row">
+      <label>폴더 경로 <span style="color:#90a4ae;font-weight:400">(입력하면 자동 완성)</span></label>
+      <input id="mPath" type="text" placeholder="예: C:\01 Claude-Code\52 새프로젝트" oninput="autoFillFromPath(this.value)">
+      <div class="form-hint">ROOT 경로 이하 폴더명만 입력해도 됩니다.</div>
+    </div>
+
+    <div class="form-row-3">
+      <div>
+        <label>아이콘</label>
+        <input id="mIcon" type="text" placeholder="📁" value="📁">
+      </div>
+      <div>
+        <label>프로젝트 이름</label>
+        <input id="mName" type="text" placeholder="예: 새 프로젝트">
+      </div>
+    </div>
+
+    <div class="form-row-2">
+      <div>
+        <label>번호</label>
+        <input id="mNum" type="text" placeholder="예: 52">
+      </div>
+      <div>
+        <label>기본 카테고리</label>
+        <select id="mCat" onchange="syncPrimaryCheck()">
+          <option value="치과">🦷 치과/의료</option>
+          <option value="AI교육">📚 AI 교육</option>
+          <option value="플랫폼">⚙️ 플랫폼/앱</option>
+          <option value="선거">🗳 선거</option>
+          <option value="미디어">🎙 미디어</option>
+          <option value="컨설팅">💼 컨설팅</option>
+          <option value="도구">🛠 도구</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>설명</label>
+      <textarea id="mDesc" placeholder="프로젝트 설명을 입력하세요..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <label>태그 <span style="color:#90a4ae;font-weight:400">(쉼표로 구분)</span></label>
+      <input id="mTags" type="text" placeholder="예: AI, 웹앱, 교육">
+    </div>
+
+    <div class="form-row">
+      <label>미리보기 경로 <span style="color:#90a4ae;font-weight:400">(선택사항)</span></label>
+      <input id="mPreview" type="text" placeholder="예: 52 새프로젝트/index.html">
+      <div class="form-hint">C:\01 Claude-Code\ 이후의 상대 경로</div>
+    </div>
+
+    <div class="form-row">
+      <label>추가 카테고리 <span style="color:#90a4ae;font-weight:400">(중복 표시할 탭 선택)</span></label>
+      <div id="mExtraCats" class="extra-cats-grid"></div>
+      <div class="form-hint">선택한 탭에도 이 카드가 함께 나타납니다.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn-modal-save" onclick="saveNewProject()">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ROOT = 'C:\\01 Claude-Code\\';
+
+// ── 사용자 추가 프로젝트 ──────────────────────────────────────────
+let userProjects = JSON.parse(localStorage.getItem('userProjects') || '[]');
+function getAllProjects() { return [...PROJECTS, ...userProjects]; }
+
+// ── 프로젝트 데이터 ─────────────────────────────────────────────
+const PROJECTS = [
+  // ── 치과 / 의료 ──
+  { num:'01',    cat:'치과', icon:'🦷', name:'덴탈클리닉파인더',
+    dir:'01 dentalclinicfinder', desc:'치과 병원 검색·비교 플랫폼. 지역·진료과목 필터, 비용 비교, AI 어시스턴트 탑재.',
+    tags:['웹앱','치과','검색'], preview:'01 dentalclinicfinder/index.html' },
+  { num:'01',    cat:'치과', icon:'🎴', name:'치과 카드뉴스 생성기',
+    dir:'01 치과 카드뉴스 생성기', desc:'치과 마케팅용 SNS 카드뉴스를 AI로 자동 생성.',
+    tags:['AI','카드뉴스','마케팅'], preview:'01 치과 카드뉴스 생성기/index.html' },
+  { num:'11',    cat:'치과', icon:'🏫', name:'덴탈클리닉파인더 아카데미',
+    dir:'11 덴탈클리닉파인더 아카데미 - 복사본', desc:'치과 원장 대상 아카데미 교육 플랫폼.',
+    tags:['교육','치과'], preview:'11 덴탈클리닉파인더 아카데미 - 복사본/index.html' },
+  { num:'11',    cat:'치과', icon:'🏢', name:'덴탈클리닉파인더 프랜차이즈',
+    dir:'11 덴탈클리닉파인더 프랜차이즈', desc:'치과 프랜차이즈 네트워크 관리 시스템.',
+    tags:['프랜차이즈','치과'], preview:'11 덴탈클리닉파인더 프랜차이즈/index.html' },
+  { num:'12',    cat:'치과', icon:'📣', name:'치과 애드 AI솔루션',
+    dir:'12 치과 애드 AI솔루션 - 진단-콘텐츠 생성-카드뉴스 생성', desc:'치과 광고 3단계 통합 솔루션. 진단 → 콘텐츠 생성 → 카드뉴스.',
+    tags:['AI','광고','통합'], preview:'12 치과 애드 AI솔루션 - 진단-콘텐츠 생성-카드뉴스 생성/index.html' },
+  { num:'12-1',  cat:'치과', icon:'🩺', name:'치과 병원 진단지 분석 앱',
+    dir:'12-1 1단계-치과 병원 진단지 분석 앱 개발', desc:'치과 병원 현황 진단지를 AI로 분석하는 1단계 앱.',
+    tags:['AI','진단'], preview:'12-1 1단계-치과 병원 진단지 분석 앱 개발/index.html' },
+  { num:'12-2',  cat:'치과', icon:'✍️', name:'치과 광고 콘텐츠 생성 AI 플랫폼',
+    dir:'12-2 2단계-치과 광고 콘텐츠 생성 AI 플랫폼', desc:'진단 결과 기반으로 맞춤 광고 콘텐츠를 자동 생성.',
+    tags:['AI','콘텐츠'], preview:'12-2 2단계-치과 광고 콘텐츠 생성 AI 플랫폼/index.html' },
+  { num:'12-3',  cat:'치과', icon:'🖼', name:'콘텐츠 카드뉴스 생성기',
+    dir:'12-3 3단계 콘텐츠 카드뉴스 생성기', desc:'광고 콘텐츠를 SNS용 카드뉴스 이미지로 변환.',
+    tags:['카드뉴스','이미지'], preview:'12-3 3단계 콘텐츠 카드뉴스 생성기/index.html' },
+  { num:'14',    cat:'치과', icon:'🏗', name:'개원의 빌드업 프로그램',
+    dir:'14 개원의 빌드업 프로그램', desc:'치과 개원 준비를 단계별로 지원하는 빌드업 플랫폼.',
+    tags:['개원','컨설팅'], preview:'14 개원의 빌드업 프로그램/index.html' },
+  { num:'15',    cat:'치과', icon:'🏠', name:'구강 방문케어 센터',
+    dir:'15 구강 방문케어 센터', desc:'방문 구강케어 서비스 센터 운영 시스템.',
+    tags:['방문케어','구강'], sub:true, preview:'15 구강 방문케어 센터/27-Dental-Visit-Care/index.html' },
+  { num:'16',    cat:'치과', icon:'🗺', name:'치과 개업 의사결정 맵',
+    dir:'16 치과 개업 의사결정 맵', desc:'개업 의사결정을 돕는 인터랙티브 로드맵.',
+    tags:['의사결정','개업'], preview:'16 치과 개업 의사결정 맵/index.html' },
+  { num:'25',    cat:'치과', icon:'🎓', name:'대한치과위생사협회 조직진단',
+    dir:'25 대한치과위생사-유은미 교수', desc:'협회 전용 7대 조직진단 AI플랫폼. 진단결과 리포트·워크숍 솔루션 포함.',
+    tags:['조직진단','협회','AI'], preview:'25 대한치과위생사-유은미 교수/website/index.html' },
+
+  // ── AI 교육 ──
+  { num:'00',    cat:'AI교육', icon:'📖', name:'AI 노벨 문해력5 v1',
+    dir:'00 AI노벨문해력5 01', desc:'AI 기반 독서·문해력 향상 플랫폼 1차 버전.',
+    tags:['AI','교육','독서'], preview:'00 AI노벨문해력5 01/index.html' },
+  { num:'02',    cat:'AI교육', icon:'📗', name:'AI 노벨 문해력5 v2',
+    dir:'02 AI노벨문해력5 02-전체 연령', desc:'전체 연령 대상으로 확장된 문해력 플랫폼 2차 버전.',
+    tags:['AI','교육','독서'], preview:'02 AI노벨문해력5 02-전체 연령/index.html' },
+  { num:'03-0',  cat:'AI교육', icon:'🧑‍🏫', name:'AITutorHub 8가지 모음',
+    dir:'03-0 AITutorHub - 8가지 모음', desc:'다양한 AI 튜터 유형 8종 모음 플랫폼.',
+    tags:['AI튜터','교육'], sub:true, preview:'03-0 AITutorHub - 8가지 모음/aitutorhub/index.html' },
+  { num:'03-1',  cat:'AI교육', icon:'💼', name:'AI솔루션 포트폴리오',
+    dir:'03-1 aitutorhub 심재우대표 - AI솔루션 포트폴리오', desc:'심재우 대표 AI솔루션 포트폴리오 웹사이트.',
+    tags:['포트폴리오','AI'], preview:'03-1 aitutorhub 심재우대표 - AI솔루션 포트폴리오/index.html' },
+  { num:'04',    cat:'AI교육', icon:'🔬', name:'미래역량 AI Lab',
+    dir:'04 future_competency_ai_lab', desc:'미래 핵심 역량 개발을 위한 AI 실습 연구소.',
+    tags:['AI','역량개발'], preview:'' },
+  { num:'31',    cat:'AI교육', icon:'🏫', name:'AI 노벨 문해력5 학교용',
+    dir:'31 Ai노벨문해력5 앱-학교용', desc:'학교 교육 환경에 최적화된 문해력5 앱.',
+    tags:['학교','교육','앱'], preview:'31 Ai노벨문해력5 앱-학교용/index.html' },
+  { num:'41',    cat:'AI교육', icon:'📘', name:'바이브코딩 매뉴얼',
+    dir:'41 바이브코딩 매뉴얼', desc:'비개발자를 위한 AI 바이브코딩 완벽 가이드 매뉴얼.',
+    tags:['바이브코딩','매뉴얼'], preview:'41 바이브코딩 매뉴얼/index.html' },
+  { num:'41-2',  cat:'AI교육', icon:'📙', name:'바이브코딩 셀프스터디',
+    dir:'41-2 바이브코딩 셀프스터디', desc:'바이브코딩 독학용 셀프스터디 교재·실습 모음.',
+    tags:['자기학습','코딩'], preview:'41-2 바이브코딩 셀프스터디/index.html' },
+  { num:'41-5',  cat:'AI교육', icon:'👴', name:'시니어 1인 창업',
+    dir:'41-5 시니어 1인 창업', desc:'AI를 활용한 시니어 1인 창업 가이드 플랫폼.',
+    tags:['시니어','창업','AI'], preview:'' },
+
+  // ── 플랫폼 / 앱 ──
+  { num:'00',    cat:'플랫폼', icon:'📚', name:'AUTOBOOK STUDIO',
+    dir:'00 AUTOBOOK STUDIO (오토북 스튜디오)', desc:'AI 기반 자동 전자책 생성 스튜디오 플랫폼.',
+    tags:['AI','전자책','생성'], sub:true, preview:'00 AUTOBOOK STUDIO (오토북 스튜디오)/frontend/index.html' },
+  { num:'001',   cat:'플랫폼', icon:'🚀', name:'스타트업파인더',
+    dir:'001 스타트업파인더', desc:'스타트업 발굴·매칭·지원 서비스 플랫폼.',
+    tags:['스타트업','매칭'], preview:'001 스타트업파인더/index.html' },
+  { num:'01',    cat:'플랫폼', icon:'📖', name:'Book Store',
+    dir:'01 Book Store', desc:'AI 큐레이션 온라인 서점 플랫폼.',
+    tags:['서점','AI'], preview:'01 Book Store/index.html' },
+  { num:'03-2',  cat:'플랫폼', icon:'🎨', name:'UI & 유틸리티 쇼케이스',
+    dir:'03-2 UI & 유틸리티 쇼케이스', desc:'다양한 UI 컴포넌트 및 유틸리티 도구 쇼케이스.',
+    tags:['UI','컴포넌트'], preview:'03-2 UI & 유틸리티 쇼케이스/index.html' },
+  { num:'05',    cat:'플랫폼', icon:'⚡', name:'Sales Spark',
+    dir:'05 sales_spark', desc:'영업 성과 향상을 위한 AI 세일즈 플랫폼.',
+    tags:['영업','AI','CRM'], preview:'' },
+  { num:'06',    cat:'플랫폼', icon:'🤖', name:'RQTDW',
+    dir:'06 RQTDW', desc:'RQTDW AI 기반 플랫폼.',
+    tags:['AI','플랫폼'], preview:'' },
+  { num:'00',    cat:'플랫폼', icon:'🏋', name:'RQTDW AI 트레이너',
+    dir:'00 RQTDW AI트레이너', desc:'AI 퍼스널 트레이너 솔루션.',
+    tags:['AI','트레이너','헬스'], preview:'' },
+  { num:'24',    cat:'플랫폼', icon:'🔧', name:'OPS & AI-BM',
+    dir:'24 OPS & AI-BM', desc:'운영(OPS)과 AI 비즈니스 모델 플랫폼.',
+    tags:['운영','AI','BM'], sub:true, preview:'24 OPS & AI-BM/ops-website/index.html' },
+  { num:'29',    cat:'플랫폼', icon:'🎯', name:'Ad Gen Engine',
+    dir:'29-Ad_Gen_Engine_InOu', desc:'광고 콘텐츠 자동 생성 엔진.',
+    tags:['광고','생성','AI'], preview:'29-Ad_Gen_Engine_InOu/index.html' },
+  { num:'32-1',  cat:'플랫폼', icon:'⚙️', name:'오토북 엔진',
+    dir:'32-1 오토북 엔진', desc:'전자책 자동 생성 핵심 엔진 모듈.',
+    tags:['엔진','전자책'], preview:'32-1 오토북 엔진/index.html' },
+  { num:'33',    cat:'플랫폼', icon:'🤝', name:'M&A BuySell',
+    dir:'33 M&A_BuySell', desc:'기업 인수·합병 매칭 및 거래 플랫폼.',
+    tags:['M&A','거래','매칭'], preview:'33 M&A_BuySell/index.html' },
+  { num:'33',    cat:'플랫폼', icon:'🎨', name:'씽크드로우 AI',
+    dir:'33 씽크드로우 AI', desc:'AI 기반 씽킹 드로잉 시각화 도구.',
+    tags:['AI','드로잉','시각화'], preview:'33 씽크드로우 AI/index.html' },
+  { num:'34',    cat:'플랫폼', icon:'🎬', name:'텍스트 2 비디오 생성',
+    dir:'34 텍스트 2 비디오 생성', desc:'텍스트를 입력하면 AI가 영상을 자동 생성.',
+    tags:['AI','영상','생성'], preview:'' },
+  { num:'41-4',  cat:'플랫폼', icon:'🌍', name:'GEO-AIO',
+    dir:'41-4-2 GEO-AIO', desc:'지역 기반 AI 통합 운영 플랫폼.',
+    tags:['GEO','AI','지역'], preview:'' },
+  { num:'41-6',  cat:'플랫폼', icon:'©️', name:'특허·저작권 등록 솔루션',
+    dir:'41-6 특허-저작권 등록 고도화 솔루션', desc:'AI로 특허·저작권 등록을 지원하는 고도화 솔루션.',
+    tags:['특허','저작권','AI'], preview:'41-6 특허-저작권 등록 고도화 솔루션/index.html' },
+  { num:'51-1',  cat:'플랫폼', icon:'🎼', name:'클로드코드 오케스트레이션',
+    dir:'51-1 클로드코드 오케스트레이션', desc:'Claude Code 멀티 에이전트 오케스트레이션 시스템.',
+    tags:['Claude','오케스트레이션','AI'], preview:'51-1 클로드코드 오케스트레이션/index.html' },
+
+  // ── 선거 ──
+  { num:'35',    cat:'선거', icon:'🗳', name:'AI 선거솔루션',
+    dir:'35 AI선거솔루션', desc:'AI 기반 선거 전략 분석·후보자 지원 통합 솔루션.',
+    tags:['AI','선거','분석'], preview:'35 AI선거솔루션/index.html' },
+  { num:'35-1',  cat:'선거', icon:'📊', name:'선거 리포트',
+    dir:'35-1 선거 리포트', desc:'선거 판세 분석 AI 인텔리전스 리포트.',
+    tags:['리포트','분석'], preview:'35-1 선거 리포트/index.html' },
+  { num:'35-2',  cat:'선거', icon:'🚗', name:'선거 차량 이동 최적화',
+    dir:'35-2 선거 차량 이동 최적화 솔루션', desc:'선거 유세 차량의 이동 경로를 AI로 최적화.',
+    tags:['AI','경로최적화','유세'], preview:'35-2 선거 차량 이동 최적화 솔루션/index.html' },
+
+  // ── 미디어 / 콘텐츠 ──
+  { num:'37',    cat:'미디어', icon:'📻', name:'클라라 라디오카페',
+    dir:'37 클라라 라디오카페', desc:'AI DJ 클라라가 운영하는 감성 라디오카페 플랫폼.',
+    tags:['라디오','AI DJ','감성'], preview:'37 클라라 라디오카페/index.html' },
+  { num:'37-1',  cat:'미디어', icon:'☕', name:'스타벅스 라디오카페',
+    dir:'37-1-Starbucks_RadioKafe', desc:'스타벅스 브랜드 감성의 라디오카페 버전.',
+    tags:['라디오','스타벅스'], preview:'37-1-Starbucks_RadioKafe/index.html' },
+  { num:'37-2',  cat:'미디어', icon:'🔵', name:'더불어민주당 라디오카페',
+    dir:'37-2 더블어민주당 라디오카페', desc:'더불어민주당 특화 라디오카페 플랫폼.',
+    tags:['라디오','정치'], preview:'37-2 더블어민주당 라디오카페/index.html' },
+  { num:'37-3',  cat:'미디어', icon:'🏙', name:'오세훈 서울시장 라디오카페',
+    dir:'37-3 오세훈 서울시장 라디오카페', desc:'오세훈 서울시장 전용 라디오카페.',
+    tags:['라디오','서울시'], preview:'37-3 오세훈 서울시장 라디오카페/index.html' },
+  { num:'37-4',  cat:'미디어', icon:'⛪', name:'장경동 목사 중문교회',
+    dir:'37-4 장경동 목사 중문교회', desc:'장경동 목사 교회 특화 미디어 플랫폼.',
+    tags:['교회','미디어'], preview:'37-4 장경동 목사 중문교회/index.html' },
+
+  // ── 컨설팅 / 개인 ──
+  { num:'00',    cat:'컨설팅', icon:'⚔️', name:'삼국지 전략 플랫폼',
+    dir:'00 삼국지', desc:'삼국지 기반 전략 시뮬레이션 및 학습 플랫폼.',
+    tags:['게임','전략','역사'], preview:'' },
+  { num:'03-3',  cat:'컨설팅', icon:'🚕', name:'택시기사 빈차 AI내비',
+    dir:'03-3 택시기사용 빈차 운행 AI내비', desc:'빈차 운행 효율을 극대화하는 AI 내비게이션.',
+    tags:['AI','택시','내비'], preview:'03-3 택시기사용 빈차 운행 AI내비/index.html' },
+  { num:'21',    cat:'컨설팅', icon:'🍺', name:'케르비시아 브루잉',
+    dir:'21 케르비시아 브르잉 수제맥주', desc:'수제맥주 브루어리 브랜딩 및 관리 플랫폼.',
+    tags:['수제맥주','브랜딩'], sub:true, preview:'21 케르비시아 브르잉 수제맥주/01 홈페이지-사업전략 및 투자제안서/index.html' },
+  { num:'22',    cat:'컨설팅', icon:'😊', name:'미소미 - 이병목 대표',
+    dir:'22 미소미-이병목 대표', desc:'미소미 브랜드 이병목 대표 전용 플랫폼.',
+    tags:['브랜딩','개인'], preview:'22 미소미-이병목 대표/index.html' },
+  { num:'23',    cat:'컨설팅', icon:'👤', name:'이장춘',
+    dir:'23 이장춘', desc:'이장춘 개인 브랜딩 및 컨설팅 플랫폼.',
+    tags:['개인브랜딩'], sub:true, preview:'23 이장춘/리젠메드컨설팅/index.html' },
+  { num:'36',    cat:'컨설팅', icon:'🧠', name:'브레인트러스트 - 장석화',
+    dir:'36 장석화 대표-브레인트러스트', desc:'장석화 대표 브레인트러스트 전략 컨설팅 플랫폼.',
+    tags:['컨설팅','전략'], sub:true, preview:'36 장석화 대표-브레인트러스트/33-M-A_BuySell/index.html' },
+  { num:'42',    cat:'컨설팅', icon:'🍳', name:'어머니의 손맛 레시피',
+    dir:'42 어머니의 손맛 레시피', desc:'전통 손맛 레시피를 AI로 기록·공유하는 플랫폼.',
+    tags:['레시피','음식','AI'], preview:'42 어머니의 손맛 레시피/index.html' },
+
+  // ── 도구 ──
+  { num:'38',    cat:'도구', icon:'📑', name:'PDF 슬라이드 편집기',
+    dir:'38 PDF 슬라이드 편집기', desc:'PDF 슬라이드를 브라우저에서 직접 편집하는 웹 도구.',
+    tags:['PDF','편집기','도구'], preview:'38 PDF 슬라이드 편집기/index.html' },
+  { num:'41-2',  cat:'도구', icon:'⚡', name:'메이크 매뉴얼',
+    dir:'41-2 메이크 매뉴얼', desc:'Make(구 Integromat) 자동화 활용 매뉴얼.',
+    tags:['자동화','Make'], preview:'41-2 메이크 매뉴얼/index.html' },
+  { num:'16-2',  cat:'도구', icon:'🔥', name:'화이어 내비',
+    dir:'16-2 화이어 내비', desc:'화이어 내비게이션 도구.',
+    tags:['내비','도구'], preview:'16-2 화이어 내비/index.html' },
+];
+
+// ── 렌더링 ───────────────────────────────────
+let activeTab = '전체';
+
+function render(list) {
+  const area = document.getElementById('cardArea');
+  const empty = document.getElementById('empty');
+  document.getElementById('showCount').textContent = list.length;
+
+  if (!list.length) {
+    const isCustom = activeTab.startsWith('__kw__');
+    const kw = isCustom ? activeTab.replace('__kw__', '') : '';
+    if (isCustom && !editMode) {
+      area.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);">
+        <div style="font-size:2rem;margin-bottom:16px;">📂</div>
+        <p style="font-size:0.95rem;margin-bottom:16px;"><strong>${kw}</strong> 카테고리에 카드가 없습니다.</p>
+        <button onclick="enterEditMode(event,'${kw.replace(/'/g,"\\'")}');this.blur()"
+          style="padding:10px 24px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;">
+          + 카드 추가하기
+        </button></div>`;
+      empty.style.display = 'none';
+    } else {
+      area.innerHTML = '';
+      empty.style.display = 'block';
+    }
+    return;
+  }
+  empty.style.display = 'none';
+
+  // 카테고리별 그룹
+  const cats = [...new Set(list.map(p => p.cat))];
+  const catIcon = { 치과:'🦷', AI교육:'📚', 플랫폼:'⚙️', 선거:'🗳', 미디어:'🎙', 컨설팅:'💼', 도구:'🛠' };
+
+  area.innerHTML = cats.map(cat => {
+    const items = list.filter(p => p.cat === cat);
+    return `
+    <div class="category-label">${catIcon[cat]||''} ${cat} <span style="color:var(--text2);font-size:0.7rem;font-weight:400;margin-left:4px;">${items.length}개</span></div>
+    <div class="grid">${items.map(card).join('')}</div>`;
+  }).join('');
+}
+
+function card(p) {
+  const folderPath = ROOT + p.dir;
+  const previewHref = p.preview ? 'file:///' + ROOT.replace(/\\/g, '/') + p.preview.replace(/\\/g, '/') : '';
+  const typeClass  = p.preview ? (p.sub ? 'type-sub' : 'type-direct') : '';
+  const typeBadge  = p.preview
+    ? (p.sub
+        ? `<div class="type-badge sub">📂 서브폴더</div>`
+        : `<div class="type-badge direct">⚡ 직접연결</div>`)
+    : '';
+  const previewBtnClass = p.sub ? 'btn-action sub-preview' : 'btn-action primary';
+
+  // 편집 모드
+  const isSelected = editMode && selectedDirs.has(p.dir);
+  const selectClass = editMode ? ` selectable${isSelected ? ' selected' : ''}` : '';
+  const selectAttr  = editMode ? `onclick="toggleSelect('${p.dir.replace(/'/g,"\\'")}')"` : '';
+  const checkBox    = editMode ? `<div class="check-box">${isSelected ? '✓' : ''}</div>` : '';
+
+  const delBtn = p.isUserAdded && !editMode
+    ? `<button class="btn-del-proj" onclick="deleteUserProject('${p.dir.replace(/'/g,"\\'")}')">✕ 삭제</button>`
+    : '';
+  const userClass = p.isUserAdded ? ' user-card' : '';
+
+  return `
+  <div class="card ${typeClass}${selectClass}${userClass}" data-cat="${p.cat}" data-name="${p.name}" data-tags="${p.tags.join(' ')}" ${selectAttr}>
+    ${checkBox}${delBtn}
+    <div class="card-top">
+      <div class="card-icon">${p.icon}</div>
+      <div class="card-info">
+        <div class="card-num">#${p.num}</div>
+        ${typeBadge}
+        <div class="card-name" title="${p.name}">${p.name}</div>
+      </div>
+    </div>
+    <div class="card-desc">${p.desc}</div>
+    <div class="card-badges">${p.tags.map(t=>`<span class="badge">${t}</span>`).join('')}</div>
+    <div class="card-actions">
+      <button class="btn-action" onclick="copyPath('${folderPath.replace(/'/g,"\\'")}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        경로 복사
+      </button>
+      <button class="btn-action" onclick="openFolder('${folderPath.replace(/'/g,"\\'")}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        폴더 열기
+      </button>
+      ${previewHref ? `<a class="${previewBtnClass}" href="${previewHref}" target="_blank">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        미리보기
+      </a>` : ''}
+    </div>
+  </div>`;
+}
+
+// 탭 키 추출 (내장: 'AI교육', 커스텀: '__kw__라디오카페' → '라디오카페')
+function tabKey(tab) {
+  return tab.startsWith('__kw__') ? tab.replace('__kw__', '') : tab;
+}
+function isBuiltIn(tab) {
+  return !tab.startsWith('__kw__') && tab !== '전체';
+}
+
+function filter() {
+  // 편집 모드: 전체 카드 표시
+  if (editMode) { render(getAllProjects()); return; }
+
+  const q = document.getElementById('search').value.toLowerCase();
+  let list = getAllProjects();
+
+  if (activeTab !== '전체') {
+    const key = tabKey(activeTab);
+    const assigned = customTabCards[key];
+
+    if (assigned && assigned.length > 0) {
+      // 커스텀 지정 카드 우선 + extraCats 포함 (중복 표시)
+      list = list.filter(p => assigned.includes(p.dir) || (p.extraCats||[]).includes(key));
+    } else if (isBuiltIn(activeTab)) {
+      // 내장 탭 기본: cat 필터 + extraCats 포함 (중복 표시)
+      list = list.filter(p => p.cat === activeTab || (p.extraCats||[]).includes(activeTab));
+    } else {
+      // 커스텀 탭인데 카드 없음
+      list = [];
+    }
+  }
+
+  if (q) list = list.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.desc.toLowerCase().includes(q) ||
+    p.tags.join(' ').toLowerCase().includes(q) ||
+    p.dir.toLowerCase().includes(q)
+  );
+  render(list);
+}
+
+function setTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = el.dataset.cat;
+  document.getElementById('search').value = '';
+  filter();
+}
+
+// ── 커스텀 탭 & 편집 모드 ────────────────────────────
+let customTabs     = JSON.parse(localStorage.getItem('customTabs')     || '[]');
+let customTabCards = JSON.parse(localStorage.getItem('customTabCards') || '{}');
+let editMode       = false;
+let editingKw      = '';
+let selectedDirs   = new Set();
+
+function renderCustomTabs() {
+  const wrap = document.getElementById('customTabs');
+  wrap.innerHTML = customTabs.map(kw => {
+    const count = (customTabCards[kw] || []).length;
+    return `
+    <button class="tab custom" data-cat="__kw__${kw}" onclick="setTab(this)">
+      🔖 ${kw}${count ? ` <span style="opacity:.65;font-weight:400">(${count})</span>` : ''}
+      <span class="edit-tab" onclick="enterEditMode(event,'${kw.replace(/'/g,"\\'")}')">✏️</span>
+      <span class="del-tab" onclick="deleteTab(event,'${kw.replace(/'/g,"\\'")}')">✕</span>
+    </button>`;
+  }).join('');
+}
+
+function enterEditMode(e, key) {
+  e.stopPropagation();
+  editMode  = true;
+  editingKw = key;
+
+  // 저장된 커스텀 지정이 있으면 그걸 로드, 없으면 기본값으로 pre-select
+  const existing = customTabCards[key];
+  if (existing && existing.length > 0) {
+    selectedDirs = new Set(existing);
+  } else if (isBuiltIn('__dummy__') || ['치과','AI교육','플랫폼','선거','미디어','컨설팅','도구'].includes(key)) {
+    // 내장 탭: 해당 cat의 카드를 기본으로 선택
+    selectedDirs = new Set(PROJECTS.filter(p => p.cat === key).map(p => p.dir));
+  } else {
+    selectedDirs = new Set();
+  }
+
+  // 해당 탭을 active로
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const builtInTab = document.querySelector(`.tab[data-cat="${key}"]`);
+  const customTabEl = document.querySelector(`.tab[data-cat="__kw__${key}"]`);
+  if (builtInTab) { builtInTab.classList.add('active'); activeTab = key; }
+  else if (customTabEl) { customTabEl.classList.add('active'); activeTab = '__kw__' + key; }
+
+  document.getElementById('editTabLabel').textContent = key;
+  document.getElementById('editSelCount').textContent  = selectedDirs.size;
+  document.getElementById('editBar').classList.add('show');
+  document.getElementById('cardArea').classList.add('edit-mode');
+
+  // 내장 탭은 "기본값 복원" 버튼 표시
+  const isBuiltInTab = ['치과','AI교육','플랫폼','선거','미디어','컨설팅','도구'].includes(key);
+  document.getElementById('resetBtn').style.display = isBuiltInTab ? '' : 'none';
+
+  filter();
+}
+
+function resetEdit() {
+  // 커스텀 지정 삭제 → 기본 cat 필터로 복원
+  delete customTabCards[editingKw];
+  localStorage.setItem('customTabCards', JSON.stringify(customTabCards));
+  exitEditMode();
+  renderCustomTabs();
+  showToast('🔄 기본값으로 복원되었습니다');
+}
+
+function toggleSelect(dir) {
+  if (selectedDirs.has(dir)) selectedDirs.delete(dir);
+  else selectedDirs.add(dir);
+  document.getElementById('editSelCount').textContent = selectedDirs.size;
+  // 해당 카드 UI만 갱신
+  document.querySelectorAll('.card.selectable').forEach(el => {
+    const d = el.getAttribute('data-name');
+    // dir을 data 속성으로 추가했으므로 찾아서 갱신
+  });
+  filter(); // 전체 재렌더 (편집모드에서는 빠름)
+}
+
+function saveEdit() {
+  customTabCards[editingKw] = [...selectedDirs];
+  localStorage.setItem('customTabCards', JSON.stringify(customTabCards));
+  exitEditMode();
+  renderCustomTabs();
+  showToast('✅ 저장되었습니다');
+}
+
+function cancelEdit() { exitEditMode(); }
+
+function exitEditMode() {
+  editMode = false;
+  editingKw = '';
+  selectedDirs = new Set();
+  document.getElementById('editBar').classList.remove('show');
+  document.getElementById('cardArea').classList.remove('edit-mode');
+  filter();
+}
+
+function showTabInput() {
+  document.getElementById('tabAddBtn').style.display = 'none';
+  const w = document.getElementById('tabInputWrap');
+  w.classList.add('show');
+  document.getElementById('tabInput').value = '';
+  document.getElementById('tabInput').focus();
+}
+
+function confirmTab() {
+  const val = document.getElementById('tabInput').value.trim();
+  if (val && !customTabs.includes(val)) {
+    customTabs.push(val);
+    localStorage.setItem('customTabs', JSON.stringify(customTabs));
+    renderCustomTabs();
+  }
+  cancelTab();
+}
+
+function cancelTab() {
+  document.getElementById('tabInputWrap').classList.remove('show');
+  document.getElementById('tabAddBtn').style.display = '';
+}
+
+function deleteTab(e, kw) {
+  e.stopPropagation();
+  customTabs = customTabs.filter(t => t !== kw);
+  localStorage.setItem('customTabs', JSON.stringify(customTabs));
+  if (activeTab === '__kw__' + kw) { activeTab = '전체'; document.querySelector('.tab[data-cat="전체"]').classList.add('active'); filter(); }
+  renderCustomTabs();
+}
+
+renderCustomTabs();
+
+function copyPath(path) {
+  navigator.clipboard.writeText(path).then(() => showToast('📋 경로가 클립보드에 복사되었습니다'));
+}
+
+// 서버 사용 가능 여부 (비동기 확인)
+let serverAvailable = false;
+fetch('http://localhost:9999/open?path=__check__', { signal: AbortSignal.timeout(800) })
+  .then(() => { serverAvailable = true; })
+  .catch(() => { serverAvailable = false; });
+
+function openFolder(path) {
+  if (serverAvailable) {
+    fetch('http://localhost:9999/open?path=' + encodeURIComponent(path))
+      .catch(() => fallbackCopy(path));
+  } else {
+    fallbackCopy(path);
+  }
+}
+
+function fallbackCopy(path) {
+  navigator.clipboard.writeText(path).then(() => showToast('📋 경로 복사됨 (서버 없이는 직접 붙여넣기)'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Toolbar sticky top (헤더 높이에 맞춤) ──────────────
+function fixToolbarTop() {
+  const h = document.querySelector('.header').offsetHeight;
+  document.querySelector('.toolbar').style.top = h + 'px';
+}
+fixToolbarTop();
+window.addEventListener('resize', fixToolbarTop);
+
+// ── 검색 드롭다운 ──────────────────────────────────────
+const PINNED = [
+  { label:'🍺 케르비시아',  kw:'케르비시아' },
+  { label:'📻 라디오카페',  kw:'라디오카페' },
+];
+
+function toggleDd(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('searchDd');
+  if (dd.classList.contains('show')) { dd.classList.remove('show'); return; }
+
+  // 즐겨찾기 섹션
+  const pinnedHtml = `<div class="dd-section">
+    <div class="dd-section-title">⭐ 즐겨찾기</div>
+    ${PINNED.map(p => `<div class="dd-item pinned" onclick="selectKw('${p.kw}')">
+      <span class="dd-num">🔖</span>${p.label}
+    </div>`).join('')}
+  </div>`;
+
+  // 커스텀 탭 섹션 (사용자 추가 탭)
+  const customTabsHtml = customTabs.length ? `<div class="dd-section">
+    <div class="dd-section-title">🔖 내 카테고리</div>
+    ${customTabs.map(kw => `<div class="dd-item pinned" onclick="selectCustomTab('${kw.replace(/'/g,"\\'")}')">
+      <span class="dd-num">🗂</span>${kw}
+    </div>`).join('')}
+  </div>` : '';
+
+  // 카테고리별 그룹핑
+  const allProjs = getAllProjects();
+  const cats = [...new Set(allProjs.map(p => p.cat))];
+  const catIcon = { 치과:'🦷', AI교육:'📚', 플랫폼:'⚙️', 선거:'🗳', 미디어:'🎙', 컨설팅:'💼', 도구:'🛠' };
+  const catsHtml = cats.map(cat => {
+    const items = allProjs.filter(p => p.cat === cat);
+    return `<div class="dd-section">
+      <div class="dd-section-title">${catIcon[cat]||''} ${cat}</div>
+      ${items.map(p => `<div class="dd-item" onclick="selectKw('${p.name.replace(/'/g,"\\'")}')">
+        <span class="dd-num">#${p.num}</span>${p.name}
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  dd.innerHTML = pinnedHtml + customTabsHtml + catsHtml;
+  dd.classList.add('show');
+}
+
+function selectCustomTab(kw) {
+  // 해당 커스텀 탭을 활성화
+  const tabEl = document.querySelector(`.tab[data-cat="__kw__${kw}"]`);
+  if (tabEl) { setTab(tabEl); }
+  else { document.getElementById('search').value = kw; filter(); }
+  document.getElementById('searchDd').classList.remove('show');
+}
+
+function selectKw(name) {
+  document.getElementById('search').value = name;
+  filter();
+  document.getElementById('searchDd').classList.remove('show');
+}
+
+function closeDd() {
+  document.getElementById('searchDd').classList.remove('show');
+}
+
+document.addEventListener('click', closeDd);
+
+// ── 새 프로젝트 추가 모달 ────────────────────────────────────────
+const CAT_LIST = [
+  { key:'치과',   icon:'🦷' },
+  { key:'AI교육', icon:'📚' },
+  { key:'플랫폼', icon:'⚙️' },
+  { key:'선거',   icon:'🗳' },
+  { key:'미디어', icon:'🎙' },
+  { key:'컨설팅', icon:'💼' },
+  { key:'도구',   icon:'🛠' },
+];
+
+function openAddModal() {
+  // 추가 카테고리 체크박스 렌더
+  const ec = document.getElementById('mExtraCats');
+  ec.innerHTML = CAT_LIST.map(c =>
+    `<label class="extra-cat-label" id="ec_${c.key}">
+       <input type="checkbox" value="${c.key}" onchange="syncPrimaryCheck()"> ${c.icon} ${c.key}
+     </label>`
+  ).join('');
+  syncPrimaryCheck();
+  document.getElementById('addModal').classList.add('show');
+  document.getElementById('mPath').focus();
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('show');
+  ['mPath','mName','mNum','mDesc','mTags','mPreview'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const ic = document.getElementById('mIcon');
+  if (ic) ic.value = '📁';
+  document.querySelectorAll('#mExtraCats input').forEach(cb => cb.checked = false);
+}
+
+function syncPrimaryCheck() {
+  const primary = document.getElementById('mCat').value;
+  document.querySelectorAll('#mExtraCats input').forEach(cb => {
+    const lbl = cb.closest('.extra-cat-label');
+    if (cb.value === primary) {
+      cb.checked = false; cb.disabled = true;
+      lbl.style.opacity = '0.4'; lbl.style.cursor = 'not-allowed';
+    } else {
+      cb.disabled = false;
+      lbl.style.opacity = ''; lbl.style.cursor = '';
+    }
+    lbl.classList.toggle('checked', cb.checked);
+  });
+}
+
+function autoFillFromPath(val) {
+  let folder = val.trim();
+  // ROOT 제거
+  if (folder.startsWith(ROOT)) folder = folder.slice(ROOT.length);
+  const prefix = 'C:\\01 Claude-Code\\';
+  if (folder.startsWith(prefix)) folder = folder.slice(prefix.length);
+  folder = folder.replace(/[\\\/]+$/, '');
+  if (!folder) return;
+  // 번호 + 이름 분리: "52 새프로젝트" → num=52, name=새프로젝트
+  const m = folder.match(/^([\d\-\.]+)\s+(.*)/);
+  if (m) {
+    document.getElementById('mNum').value  = m[1];
+    document.getElementById('mName').value = m[2];
+  } else {
+    document.getElementById('mName').value = folder;
+  }
+  // 기본 미리보기 placeholder
+  document.getElementById('mPreview').placeholder = folder + '/index.html';
+}
+
+function saveNewProject() {
+  let pathVal = document.getElementById('mPath').value.trim();
+  let dir = pathVal;
+  if (dir.startsWith(ROOT)) dir = dir.slice(ROOT.length);
+  const prefix = 'C:\\01 Claude-Code\\';
+  if (dir.startsWith(prefix)) dir = dir.slice(prefix.length);
+  dir = dir.replace(/[\\\/]+$/, '');
+
+  const name = document.getElementById('mName').value.trim();
+  if (!dir || !name) { showToast('⚠️ 경로와 이름을 입력하세요'); return; }
+
+  const primaryCat = document.getElementById('mCat').value;
+  const extraCats  = [...document.querySelectorAll('#mExtraCats input:checked')].map(c => c.value);
+  const tagsRaw    = document.getElementById('mTags').value.trim();
+  const tags       = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  const previewVal = document.getElementById('mPreview').value.trim();
+
+  // 서브폴더 여부 자동 감지 (경로에 / 포함되면 sub:true)
+  const isSub = previewVal.includes('/') && !previewVal.startsWith(dir + '/index.html');
+
+  const newProj = {
+    num:        document.getElementById('mNum').value.trim() || '?',
+    cat:        primaryCat,
+    extraCats:  extraCats,
+    icon:       document.getElementById('mIcon').value.trim() || '📁',
+    name:       name,
+    dir:        dir,
+    desc:       document.getElementById('mDesc').value.trim() || '',
+    tags:       tags,
+    preview:    previewVal || '',
+    sub:        isSub,
+    isUserAdded: true,
+  };
+
+  // 중복 dir 제거 후 추가
+  userProjects = userProjects.filter(p => p.dir !== newProj.dir);
+  userProjects.push(newProj);
+  localStorage.setItem('userProjects', JSON.stringify(userProjects));
+
+  closeAddModal();
+  document.getElementById('totalCount').textContent = getAllProjects().length;
+  renderCustomTabs(); // 드롭다운 갱신용
+  filter();
+  showToast('✅ 프로젝트가 추가되었습니다');
+}
+
+function deleteUserProject(dir) {
+  if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
+  userProjects = userProjects.filter(p => p.dir !== dir);
+  localStorage.setItem('userProjects', JSON.stringify(userProjects));
+  document.getElementById('totalCount').textContent = getAllProjects().length;
+  filter();
+  showToast('🗑 프로젝트가 삭제되었습니다');
+}
+
+// 초기 렌더
+document.getElementById('totalCount').textContent = getAllProjects().length;
+filter();
+</script>
+</body>
+</html>
