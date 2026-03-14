@@ -10,8 +10,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
 *{font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;}
 body{background:#0F0A2E;min-height:100vh;color:white;}
-.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
-nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
+.gradient-bg{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);}
+nav{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
 #game-wrap{position:relative;display:block;width:min(420px,96vw);margin:0 auto;}
 #game-canvas{display:block;border-radius:16px;box-shadow:0 0 40px rgba(99,91,255,.5),0 0 80px rgba(99,91,255,.2);width:100%;height:auto;}
 .hud-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:16px;backdrop-filter:blur(8px);}
@@ -1216,12 +1216,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%)" class="mt-12 py-8 text-white">
+<footer style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="mt-12 py-8 text-white">
   <div class="max-w-6xl mx-auto px-4">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="bg-white rounded-2xl px-3 py-1.5 shadow-sm">
-        <img src="logo.png" alt="질문수학" class="h-8 object-contain">
-      </div>
+      <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
       <div class="flex gap-4 text-sm text-white/80">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>

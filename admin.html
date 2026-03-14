@@ -10,7 +10,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 *{font-family:'Noto Sans KR',sans-serif;}
 body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
-.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.gradient-bg{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);}
 .card-hover{transition:all .3s cubic-bezier(.4,0,.2,1);border:2px solid rgba(99,91,255,.2);background:white;}
 .card-hover:hover{transform:translateY(-5px);box-shadow:0 24px 48px rgba(79,70,229,.2),0 0 0 1px rgba(79,70,229,.12);border-color:rgba(79,70,229,.3);}
 .progress-bar{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .8s ease;}
@@ -23,13 +23,13 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
 .step-done{background:linear-gradient(135deg,#059669,#10B981);color:white;}
 .question-card{border-left:4px solid #6366F1;background:white;}
 .type-badge{font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:600;}
-.tab-active{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);color:white;box-shadow:0 4px 12px rgba(79,70,229,.35);}
+.tab-active{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);color:white;box-shadow:0 4px 12px rgba(79,70,229,.35);}
 </style>
 </head>
 <body class="text-gray-900">
 
 <!-- NAV -->
-<nav class="sticky top-0 z-50" style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);">
+<nav class="sticky top-0 z-50" style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
     <a href="index.html" class="flex items-center gap-3">
       <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
@@ -447,12 +447,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="mt-12 py-8 text-white">
+<footer style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="mt-12 py-8 text-white">
   <div class="max-w-6xl mx-auto px-4">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="bg-white rounded-2xl px-3 py-1.5 shadow-sm">
-        <img src="logo.png" alt="질문수학" class="h-8 object-contain">
-      </div>
+      <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
       <div class="flex gap-4 text-sm text-white/80">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>

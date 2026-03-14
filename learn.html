@@ -10,7 +10,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 *{font-family:'Noto Sans KR',sans-serif;}
 body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
-.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.gradient-bg{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);}
 .fade-in{animation:fadeIn .5s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
@@ -57,7 +57,7 @@ nav{box-shadow:0 2px 20px rgba(79,70,229,.1)!important;border-bottom:1px solid r
 .xp-fill{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .8s ease;}
 
 /* Daily card */
-.daily-card{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);position:relative;overflow:hidden;}
+.daily-card{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);position:relative;overflow:hidden;}
 .daily-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:rgba(255,255,255,.07);border-radius:50%;}
 .daily-card::after{content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;background:rgba(255,255,255,.05);border-radius:50%;}
 
@@ -799,12 +799,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%)" class="mt-12 py-8 text-white">
+<footer style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="mt-12 py-8 text-white">
   <div class="max-w-6xl mx-auto px-4">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="bg-white rounded-2xl px-3 py-1.5 shadow-sm">
-        <img src="logo.png" alt="질문수학" class="h-8 object-contain">
-      </div>
+      <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
       <div class="flex gap-4 text-sm text-white/80">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>

@@ -3,7 +3,11 @@
 *.pptx
 *.docx
 *.jpg
-*.png
 *.xlsx
 경쟁사 자료/
 큐매쓰 레벨 테스트 자료/
+
+# 한글 이름 원본 이미지 제외 (logo.png는 포함)
+로고-*.png
+ChatGPT*.png
+큐지매쓰*.png
