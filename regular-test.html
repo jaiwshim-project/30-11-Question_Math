@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정기테스트 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);}
+.fade-in{animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
+.card-hover{transition:all .3s cubic-bezier(.4,0,.2,1);}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(79,70,229,.2);}
+
+/* 상태 배지 */
+.badge-done    { background:#d1fae5; color:#065f46; border:1.5px solid #6ee7b7; }
+.badge-open    { background:#fef3c7; color:#92400e; border:1.5px solid #fcd34d; }
+.badge-locked  { background:#f3f4f6; color:#6b7280; border:1.5px solid #d1d5db; }
+.badge-missed  { background:#fee2e2; color:#991b1b; border:1.5px solid #fca5a5; }
+
+/* 등급 색상 */
+.grade-Ap { color:#7c3aed; }
+.grade-A  { color:#2563eb; }
+.grade-Bp { color:#059669; }
+.grade-B  { color:#16a34a; }
+.grade-C  { color:#d97706; }
+.grade-D  { color:#dc2626; }
+
+/* 테스트 화면 */
+.option-btn { transition:all .2s; border:2px solid #e5e7eb; background:white; border-radius:12px; }
+.option-btn:hover { border-color:#6366f1; background:#eef2ff; }
+.option-btn.selected { border-color:#6366f1; background:#eef2ff; }
+.option-btn.correct  { border-color:#10b981; background:#ecfdf5; }
+.option-btn.wrong    { border-color:#ef4444; background:#fef2f2; }
+.progress-bar { background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899); }
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-2">
+      <img src="logo.png" alt="질문수학" class="h-11 object-contain rounded-xl">
+      <div class="hidden sm:block text-xs text-yellow-400 font-bold leading-tight">세계 최초<br>질문으로 배우는 수학</div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <div class="relative group">
+        <a href="index.html" class="text-white/90 hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-80">▾</span></a>
+        <div class="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
+          <div class="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px]">
+            <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+          </div>
+        </div>
+      </div>
+      <a href="learn.html"        class="text-white/90 hover:text-white transition">학습하기</a>
+      <a href="game.html"         class="text-white/90 hover:text-white transition">게임</a>
+      <a href="ai.html"           class="text-white/90 hover:text-white transition">AI 튜터</a>
+      <a href="test.html"         class="text-white/90 hover:text-white transition">레벨 테스트</a>
+      <a href="regular-test.html" class="text-white font-black border-b-2 border-white pb-0.5">정기테스트</a>
+      <a href="dashboard.html"    class="text-white/90 hover:text-white transition">대시보드 샘플</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/90 hover:text-white ml-1">로그아웃</button>
+      </div>
+      <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"        class="block py-2 text-white/90">홈</a>
+    <a href="story.html"        class="block py-2 text-white/70 pl-4">✨ 탄생스토리</a>
+    <a href="learn.html"        class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"         class="block py-2 text-white/90">게임</a>
+    <a href="ai.html"           class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"         class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="regular-test.html" class="block py-2 text-white font-bold">정기테스트</a>
+    <a href="dashboard.html"    class="block py-2 text-white/90">대시보드 샘플</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
+
+  <!-- 페이지 헤더 -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-1.5 h-8 rounded-full" style="background:linear-gradient(135deg,#4338CA,#DB2777)"></div>
+      <h1 class="text-2xl font-black text-gray-900">📅 정기테스트</h1>
+    </div>
+    <p class="text-gray-600 text-sm pl-5">매달 말일에 실시하는 의무 정기 평가 · 결과는 개인 대시보드에 자동 기록됩니다</p>
+  </div>
+
+  <!-- 안내 카드 -->
+  <div class="grid sm:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white rounded-2xl p-5 border-2 border-indigo-200 border-t-4 border-t-indigo-500 shadow-sm">
+      <div class="text-2xl mb-2">📌</div>
+      <div class="font-black text-gray-900 text-sm mb-1">응시 주기</div>
+      <p class="text-xs text-gray-600 leading-relaxed">매달 마지막 날 자동으로 응시 가능 상태가 됩니다. 말일 하루 동안만 응시할 수 있으며 미응시 시 자동으로 결시 처리됩니다.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border-2 border-purple-200 border-t-4 border-t-purple-500 shadow-sm">
+      <div class="text-2xl mb-2">📝</div>
+      <div class="font-black text-gray-900 text-sm mb-1">문제 구성</div>
+      <p class="text-xs text-gray-600 leading-relaxed">해당 월의 학습 범위를 기반으로 한 객관식·단답형 문제로 구성됩니다. 문제 수와 유형은 학년별로 다르게 출제됩니다.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border-2 border-green-200 border-t-4 border-t-green-500 shadow-sm">
+      <div class="text-2xl mb-2">📊</div>
+      <div class="font-black text-gray-900 text-sm mb-1">결과 관리</div>
+      <p class="text-xs text-gray-600 leading-relaxed">응시 결과는 점수·등급·오답 분석과 함께 개인 대시보드에 누적 기록됩니다. 월별 성장 추이를 그래프로 확인할 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- 이번 달 응시 현황 -->
+  <div class="bg-white rounded-2xl p-6 border-2 border-indigo-200 border-t-4 border-t-amber-400 shadow-sm mb-8" id="current-test-card">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-lg">🗓️</span>
+          <h2 class="font-black text-gray-900" id="current-month-title">2025년 3월 정기테스트</h2>
+        </div>
+        <p class="text-xs text-gray-600" id="current-test-period">응시 기간: 2025년 3월 31일 (하루)</p>
+      </div>
+      <span id="current-status-badge" class="badge-done text-xs font-black px-3 py-1.5 rounded-full">✅ 응시 완료</span>
+    </div>
+
+    <!-- 완료 상태 -->
+    <div id="state-done" class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-5">
+      <div class="text-5xl">🏆</div>
+      <div class="flex-1 text-center sm:text-left">
+        <div class="text-sm text-gray-600 mb-1">이번 달 최종 결과</div>
+        <div class="flex items-baseline gap-2 justify-center sm:justify-start">
+          <span class="text-4xl font-black text-indigo-700" id="done-score">68</span>
+          <span class="text-lg text-gray-500">점</span>
+          <span class="text-2xl font-black grade-Bp ml-2" id="done-grade">B+</span>
+        </div>
+        <p class="text-xs text-gray-600 mt-1" id="done-desc">지난 달(B) 대비 한 단계 향상되었습니다 🎉</p>
+      </div>
+      <a href="dashboard.html" class="gradient-bg text-white text-sm font-bold px-5 py-2.5 rounded-2xl shadow-lg hover:opacity-90 transition">대시보드에서 보기</a>
+    </div>
+
+    <!-- 응시 가능 상태 (말일) -->
+    <div id="state-open" class="hidden bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-5 text-center">
+      <div class="text-4xl mb-3">📋</div>
+      <p class="font-black text-gray-900 mb-1">오늘이 정기테스트 응시일입니다!</p>
+      <p class="text-sm text-gray-600 mb-4">자정 이전에 응시를 완료해야 합니다. 미응시 시 결시 처리됩니다.</p>
+      <button onclick="startTest()" class="gradient-bg text-white font-black px-8 py-3 rounded-2xl shadow-lg hover:opacity-90 transition text-base">지금 응시하기 →</button>
+    </div>
+
+    <!-- 대기 중 상태 (말일 아님) -->
+    <div id="state-waiting" class="hidden bg-gradient-to-br from-gray-50 to-indigo-50 border-2 border-gray-200 rounded-2xl p-5 text-center">
+      <div class="text-4xl mb-3">⏳</div>
+      <p class="font-black text-gray-900 mb-1">다음 정기테스트 응시일까지 <span id="days-left" class="text-indigo-600">17일</span> 남았습니다</p>
+      <p class="text-sm text-gray-600">정기테스트는 매달 말일에만 응시할 수 있습니다.</p>
+    </div>
+
+    <!-- 결시 상태 -->
+    <div id="state-missed" class="hidden bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-2xl p-5 text-center">
+      <div class="text-4xl mb-3">😢</div>
+      <p class="font-black text-gray-900 mb-1">이번 달 정기테스트를 결시하였습니다</p>
+      <p class="text-sm text-gray-600">다음 달 말일에 응시할 수 있습니다. 꾸준한 참여가 중요합니다!</p>
+    </div>
+  </div>
+
+  <!-- 테스트 화면 (숨김) -->
+  <div id="test-screen" class="hidden bg-white rounded-2xl border-2 border-indigo-200 shadow-sm mb-8 overflow-hidden">
+    <div style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="px-6 py-4">
+      <div class="flex items-center justify-between">
+        <span class="text-white font-black text-sm" id="test-header-title">2025년 3월 정기테스트</span>
+        <div class="flex items-center gap-3">
+          <span class="text-white/80 text-sm" id="test-q-counter">문항 1 / 10</span>
+          <div class="w-24 h-2 bg-white/20 rounded-full overflow-hidden">
+            <div id="test-progress-bar" class="h-full progress-bar rounded-full transition-all" style="width:10%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-6">
+      <p class="text-xs text-indigo-600 font-bold mb-2" id="test-q-tag">[객관식]</p>
+      <p class="text-base font-black text-gray-900 mb-5 leading-relaxed" id="test-q-text">문제가 여기에 표시됩니다.</p>
+      <div id="test-options" class="space-y-3 mb-6"></div>
+      <div id="test-feedback" class="hidden rounded-2xl p-4 mb-4 text-sm font-medium"></div>
+      <div class="flex justify-between items-center">
+        <span class="text-xs text-gray-600" id="test-answered">답변 대기 중</span>
+        <button id="test-next-btn" onclick="nextQuestion()" class="hidden gradient-bg text-white font-bold px-6 py-2.5 rounded-2xl hover:opacity-90 transition">다음 문항 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결과 화면 (숨김) -->
+  <div id="result-screen" class="hidden bg-white rounded-2xl border-2 border-indigo-200 shadow-sm mb-8 p-8 text-center">
+    <div class="text-5xl mb-4">🎉</div>
+    <h2 class="text-2xl font-black text-gray-900 mb-1">정기테스트 완료!</h2>
+    <p class="text-gray-600 text-sm mb-6" id="result-month-label">2025년 3월 정기테스트</p>
+    <div class="flex items-center justify-center gap-6 mb-6">
+      <div class="text-center">
+        <div class="text-4xl font-black text-indigo-700" id="result-score">—</div>
+        <div class="text-xs text-gray-600 mt-1">점수</div>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl font-black" id="result-grade">—</div>
+        <div class="text-xs text-gray-600 mt-1">등급</div>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl font-black text-green-600" id="result-correct">—</div>
+        <div class="text-xs text-gray-600 mt-1">정답 수</div>
+      </div>
+    </div>
+    <div id="result-wrong-list" class="bg-red-50 border border-red-200 rounded-2xl p-4 text-left mb-6 text-sm"></div>
+    <a href="dashboard.html" class="inline-block gradient-bg text-white font-black px-8 py-3 rounded-2xl shadow-lg hover:opacity-90 transition">대시보드에서 기록 확인 →</a>
+  </div>
+
+  <!-- 정기테스트 이력 -->
+  <div class="bg-white rounded-2xl p-6 border-2 border-indigo-200 border-t-4 border-t-purple-500 shadow-sm">
+    <div class="flex items-center gap-2 mb-5">
+      <span class="text-lg">📈</span>
+      <h2 class="font-black text-gray-900">정기테스트 이력</h2>
+    </div>
+
+    <!-- 성적 추이 요약 -->
+    <div class="grid grid-cols-3 gap-3 mb-5">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-center">
+        <div class="text-xs text-gray-600 mb-1">총 응시 횟수</div>
+        <div class="text-2xl font-black text-indigo-700">3회</div>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+        <div class="text-xs text-gray-600 mb-1">최고 등급</div>
+        <div class="text-2xl font-black grade-Bp">B+</div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+        <div class="text-xs text-gray-600 mb-1">평균 점수</div>
+        <div class="text-2xl font-black text-amber-700">61점</div>
+      </div>
+    </div>
+
+    <!-- 이력 목록 -->
+    <div class="space-y-3" id="history-list"></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-col items-center sm:items-start gap-1">
+        <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
+        <div class="text-yellow-400 text-xs font-bold">세계 최초 질문으로 배우는 수학</div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/95">
+        <a href="index.html"        class="hover:text-white transition">홈</a>
+        <a href="learn.html"        class="hover:text-white transition">학습하기</a>
+        <a href="game.html"         class="hover:text-white transition">게임</a>
+        <a href="ai.html"           class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html"    class="hover:text-white transition">대시보드 샘플</a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition text-white/60 text-xs">관리자 대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2019 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="shared.js"></script>
+<script>
+
+/* ── 샘플 이력 데이터 (가입 2025-01-06, 매달 말일 응시) ── */
+const HISTORY = [
+  { month:'2025-01', label:'2025년 1월 (1/31)', score:52, grade:'C',  correct:8,  total:15, status:'done',
+    wrong:['일차방정식의 풀이','등식의 성질 적용'] },
+  { month:'2025-02', label:'2025년 2월 (2/28)', score:63, grade:'B',  correct:10, total:15, status:'done',
+    wrong:['일차함수의 기울기','y절편 구하기'] },
+];
+
+/* ── 현재 상태 결정 (샘플: 3월 말일 대기 중) ── */
+const CURRENT_STATE = 'waiting'; // 'done' | 'open' | 'waiting' | 'missed'
+const CURRENT_DATA  = HISTORY[HISTORY.length - 1];
+
+/* ── 문제 (틀만 — 나중에 교체) ── */
+const QUESTIONS = [
+  { type:'객관식', q:'[문제 준비 중] 일차방정식 2x + 3 = 7의 해는?',
+    opts:['x = 1','x = 2','x = 3','x = 4'], ans:1 },
+  { type:'객관식', q:'[문제 준비 중] 다음 중 일차함수인 것은?',
+    opts:['y = x²','y = 2x + 1','y = 1/x','y = x³'], ans:1 },
+  { type:'객관식', q:'[문제 준비 중] 두 삼각형이 닮음이 되는 조건이 아닌 것은?',
+    opts:['AA 닮음','SAS 닮음','SSS 닮음','ASA 합동'], ans:3 },
+];
+
+let testQuestions = [];
+let currentQ = 0;
+let answers   = [];
+
+/* ── 초기화 ── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderCurrentStatus();
+  renderHistory();
+});
+
+function renderCurrentStatus() {
+  // 모든 상태 숨김
+  ['state-done','state-open','state-waiting','state-missed'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+
+  const badge = document.getElementById('current-status-badge');
+
+  if (CURRENT_STATE === 'done') {
+    document.getElementById('state-done').classList.remove('hidden');
+    document.getElementById('done-score').textContent = CURRENT_DATA.score;
+    document.getElementById('done-grade').textContent = CURRENT_DATA.grade;
+    document.getElementById('done-grade').className   = 'text-2xl font-black grade-' + CURRENT_DATA.grade.replace('+','p');
+    badge.textContent  = '✅ 응시 완료';
+    badge.className    = 'badge-done text-xs font-black px-3 py-1.5 rounded-full';
+
+  } else if (CURRENT_STATE === 'open') {
+    document.getElementById('state-open').classList.remove('hidden');
+    badge.textContent = '🔔 오늘 응시 가능';
+    badge.className   = 'badge-open text-xs font-black px-3 py-1.5 rounded-full';
+
+  } else if (CURRENT_STATE === 'waiting') {
+    document.getElementById('state-waiting').classList.remove('hidden');
+    badge.textContent = '⏳ 대기 중';
+    badge.className   = 'badge-locked text-xs font-black px-3 py-1.5 rounded-full';
+
+  } else if (CURRENT_STATE === 'missed') {
+    document.getElementById('state-missed').classList.remove('hidden');
+    badge.textContent = '❌ 결시';
+    badge.className   = 'badge-missed text-xs font-black px-3 py-1.5 rounded-full';
+  }
+}
+
+/* ── 이력 렌더링 ── */
+function renderHistory() {
+  const GRADE_COLOR = { 'A+':'#7c3aed','A':'#2563eb','B+':'#059669','B':'#16a34a','C':'#d97706','D':'#dc2626' };
+  const STATUS_MAP  = { done:'✅ 완료', missed:'❌ 결시', waiting:'⏳ 대기' };
+
+  const el = document.getElementById('history-list');
+  el.innerHTML = [...HISTORY].reverse().map(h => `
+    <div class="flex items-center gap-4 p-4 rounded-2xl border-2 border-indigo-100 bg-gradient-to-r from-indigo-50 to-white">
+      <div class="text-2xl font-black" style="color:${GRADE_COLOR[h.grade] || '#6b7280'}">${h.grade}</div>
+      <div class="flex-1 min-w-0">
+        <div class="font-black text-gray-900 text-sm">${h.label} 정기테스트</div>
+        <div class="text-xs text-gray-600 mt-0.5">
+          ${h.score}점 · 정답 ${h.correct}/${h.total}문항
+          ${h.wrong?.length ? '· 오답: ' + h.wrong.join(', ') : ''}
+        </div>
+      </div>
+      <div class="text-xs font-bold px-2.5 py-1 rounded-full ${h.status==='done' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">${STATUS_MAP[h.status]||h.status}</div>
+    </div>
+  `).join('');
+}
+
+/* ── 테스트 시작 ── */
+function startTest() {
+  testQuestions = QUESTIONS;
+  currentQ = 0;
+  answers  = [];
+  document.getElementById('current-test-card').classList.add('hidden');
+  document.getElementById('test-screen').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = testQuestions[currentQ];
+  const total = testQuestions.length;
+
+  document.getElementById('test-q-counter').textContent  = '문항 ' + (currentQ+1) + ' / ' + total;
+  document.getElementById('test-progress-bar').style.width = ((currentQ+1)/total*100) + '%';
+  document.getElementById('test-q-tag').textContent  = '[' + q.type + ']';
+  document.getElementById('test-q-text').textContent = q.q;
+  document.getElementById('test-feedback').classList.add('hidden');
+  document.getElementById('test-next-btn').classList.add('hidden');
+  document.getElementById('test-answered').textContent = '답변을 선택하세요';
+
+  document.getElementById('test-options').innerHTML = q.opts.map((opt, i) => `
+    <button onclick="selectAnswer(${i})" id="opt-${i}" class="option-btn w-full text-left px-4 py-3 font-medium text-sm">
+      <span class="font-black text-indigo-500 mr-2">${['①','②','③','④'][i]}</span>${opt}
+    </button>
+  `).join('');
+}
+
+function selectAnswer(idx) {
+  const q = testQuestions[currentQ];
+  document.querySelectorAll('[id^="opt-"]').forEach(b => b.disabled = true);
+  document.getElementById('opt-' + idx).classList.add(idx === q.ans ? 'correct' : 'wrong');
+  if (idx !== q.ans) document.getElementById('opt-' + q.ans).classList.add('correct');
+
+  const fb = document.getElementById('test-feedback');
+  fb.classList.remove('hidden');
+  if (idx === q.ans) {
+    fb.className = 'rounded-2xl p-4 mb-4 text-sm font-medium bg-green-50 border border-green-200 text-green-800';
+    fb.textContent = '✅ 정답입니다!';
+  } else {
+    fb.className = 'rounded-2xl p-4 mb-4 text-sm font-medium bg-red-50 border border-red-200 text-red-800';
+    fb.textContent = '❌ 오답입니다. 정답은 ' + ['①','②','③','④'][q.ans] + '번입니다.';
+  }
+
+  answers.push({ q: q.q, selected: idx, correct: q.ans, ok: idx === q.ans });
+  document.getElementById('test-answered').textContent = idx === q.ans ? '✅ 정답' : '❌ 오답';
+
+  const nextBtn = document.getElementById('test-next-btn');
+  nextBtn.classList.remove('hidden');
+  nextBtn.textContent = currentQ < testQuestions.length - 1 ? '다음 문항 →' : '결과 보기 →';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < testQuestions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('test-screen').classList.add('hidden');
+  const rs = document.getElementById('result-screen');
+  rs.classList.remove('hidden');
+
+  const total   = testQuestions.length;
+  const correct = answers.filter(a => a.ok).length;
+  const score   = Math.round(correct / total * 100);
+  const grade   = score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B+' : score >= 60 ? 'B' : score >= 50 ? 'C' : 'D';
+  const GRADE_COLOR = { 'A+':'#7c3aed','A':'#2563eb','B+':'#059669','B':'#16a34a','C':'#d97706','D':'#dc2626' };
+  const wrong = answers.filter(a => !a.ok);
+
+  document.getElementById('result-score').textContent   = score;
+  document.getElementById('result-grade').textContent   = grade;
+  document.getElementById('result-grade').style.color   = GRADE_COLOR[grade];
+  document.getElementById('result-correct').textContent = correct + '/' + total;
+
+  const wrongEl = document.getElementById('result-wrong-list');
+  if (wrong.length) {
+    wrongEl.innerHTML = '<p class="font-black text-red-700 text-sm mb-2">오답 목록</p>' +
+      wrong.map(w => `<div class="text-xs text-gray-700 py-1 border-b border-red-100 last:border-0">✗ ${w.q}</div>`).join('');
+  } else {
+    wrongEl.innerHTML = '<p class="text-green-700 font-bold text-sm text-center">🎉 모든 문제를 맞혔습니다!</p>';
+  }
+
+  // localStorage 저장
+  const record = { month: new Date().toISOString().slice(0,7), score, grade, correct, total, date: new Date().toISOString().slice(0,10) };
+  const saved = JSON.parse(localStorage.getItem('qmath_regular_tests') || '[]');
+  saved.push(record);
+  localStorage.setItem('qmath_regular_tests', JSON.stringify(saved));
+}
+
+</script>
+</body>
+</html>

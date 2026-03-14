@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>짝 맞추기 — 질문수학</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
 <script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -49,24 +50,27 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     </a>
     <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
       <div class="relative group">
-        <a href="index.html" class="hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-60">▾</span></a>
-        <div class="absolute top-full left-0 hidden group-hover:block bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px] z-50 mt-1">
-          <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+        <a href="index.html" class="hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-80">▾</span></a>
+        <div class="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
+          <div class="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px]">
+            <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+          </div>
         </div>
       </div>
       <a href="learn.html"     class="hover:text-white transition">학습하기</a>
       <a href="game.html"      class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
       <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
       <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
-      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
-      <a href="admin.html"     class="hover:text-white transition">관리</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition text-white/60 text-xs">관리자 대시보드</a>
     </div>
     <div class="flex items-center gap-3">
       <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
         <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
         <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+        <button onclick="doLogout()" class="text-xs text-white/90 hover:text-white ml-1">로그아웃</button>
       </div>
       <button class="md:hidden" onclick="toggleMobileMenu()">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -79,8 +83,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     <a href="game.html"      class="block py-2 text-white/90">게임</a>
     <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
     <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
-    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
-    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드 샘플</a>
   </div>
 </nav>
 
@@ -99,7 +102,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     <div class="flex-1">
       <div class="flex justify-between text-xs font-medium text-gray-600 mb-1.5">
         <span>레벨 <span id="xp-level" class="gradient-bg text-white font-black px-2 py-0.5 rounded-lg text-xs">1</span></span>
-        <span id="xp-val" class="text-gray-500">0 XP</span>
+        <span id="xp-val" class="text-gray-700">0 XP</span>
       </div>
       <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
         <div id="xp-fill" class="h-full xp-fill rounded-full" style="width:0%"></div>
@@ -107,7 +110,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     </div>
     <div class="text-right pl-3 border-l border-gray-100">
       <div class="text-yellow-500 font-black text-lg">⭐ <span id="total-stars">0</span></div>
-      <div class="text-xs text-gray-500">총 별</div>
+      <div class="text-xs text-gray-700">총 별</div>
     </div>
   </div>
 
@@ -119,7 +122,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
       <div class="text-sm text-red-500 font-medium">실수: <span id="match-errors" class="font-black">0</span></div>
     </div>
     <div id="match-grid" class="grid grid-cols-3 gap-3 mb-4"></div>
-    <div class="text-center"><button onclick="stopMatch()" class="text-xs text-gray-400 hover:text-gray-600">그만하기</button></div>
+    <div class="text-center"><button onclick="stopMatch()" class="text-xs text-gray-600 hover:text-gray-600">그만하기</button></div>
   </div>
 
   <!-- Match Result -->
@@ -130,14 +133,14 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     <div class="flex justify-center gap-1 mb-3" id="mr-stars"></div>
     <div class="gradient-bg rounded-2xl p-3 mb-3 shadow-lg">
       <div class="text-3xl font-black text-white" id="mr-xp">+0 XP</div>
-      <div class="text-sm text-white/80">획득한 경험치</div>
+      <div class="text-sm text-white/95">획득한 경험치</div>
     </div>
     <div class="flex gap-3 justify-center">
       <button onclick="window.location.href='game.html'" class="px-5 py-2.5 bg-white border-2 border-indigo-200 text-gray-700 font-bold rounded-2xl hover:bg-indigo-50 transition text-sm">학년 바꾸기</button>
       <button onclick="startMatch(currentMatchGrade)" class="px-5 py-3 gradient-bg text-white font-bold rounded-2xl shadow-xl hover:shadow-xl transition text-sm">다시 하기</button>
     </div>
     <div id="match-lb" class="mt-4 text-left hidden">
-      <div class="text-xs font-bold text-gray-500 mb-2">🏆 이번 학년 TOP 5</div>
+      <div class="text-xs font-bold text-gray-700 mb-2">🏆 이번 학년 TOP 5</div>
       <div id="match-lb-list" class="space-y-1"></div>
     </div>
   </div>
@@ -148,17 +151,17 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
     <div class="grid grid-cols-3 gap-4 text-center">
       <div class="bg-indigo-50 rounded-xl p-3 border-2 border-indigo-200">
         <div class="text-lg mb-1">🃏</div>
-        <div class="text-xs text-gray-500 mb-1">플래시카드</div>
+        <div class="text-xs text-gray-700 mb-1">플래시카드</div>
         <div id="hist-flash" class="text-sm font-bold text-gray-700">기록 없음</div>
       </div>
       <div class="bg-amber-50 rounded-xl p-3 border-2 border-amber-200">
         <div class="text-lg mb-1">🧩</div>
-        <div class="text-xs text-gray-500 mb-1">짝 맞추기</div>
+        <div class="text-xs text-gray-700 mb-1">짝 맞추기</div>
         <div id="hist-match" class="text-sm font-bold text-gray-700">기록 없음</div>
       </div>
       <div class="bg-red-50 rounded-xl p-3 border-2 border-red-200">
         <div class="text-lg mb-1">🏁</div>
-        <div class="text-xs text-gray-500 mb-1">퀴즈 레이스</div>
+        <div class="text-xs text-gray-700 mb-1">퀴즈 레이스</div>
         <div id="hist-quiz" class="text-sm font-bold text-gray-700">기록 없음</div>
       </div>
     </div>
@@ -171,7 +174,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-black">로그인</h2>
-      <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      <button onclick="hideModal('loginModal')" class="text-gray-600 hover:text-gray-600 text-xl">✕</button>
     </div>
     <div class="space-y-4">
       <div><label class="block text-sm font-medium mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"></div>
@@ -202,14 +205,14 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
         <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
         <div class="text-yellow-400 text-xs font-bold">세계 최초 질문으로 배우는 수학</div>
       </div>
-      <div class="flex gap-4 text-sm text-white/80">
+      <div class="flex gap-4 text-sm text-white/95">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>
         <a href="game.html"      class="hover:text-white transition">게임</a>
         <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
-        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
       </div>
-      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+      <div class="text-white/50 text-xs">© 2019 질문수학. 초등수학을 재미있게!</div>
     </div>
   </div>
 </footer>
@@ -389,7 +392,7 @@ async function showLeaderboard(gameType, grade, wrapperId, listId) {
     const isMe = user && r.user_name === user.name;
     const val  = gameType === 'match' ? r.time_sec + '초' : r.score + '점';
     return `<div class="flex items-center gap-2 text-xs py-1 px-2 rounded-lg ${isMe ? 'bg-indigo-100 font-bold' : ''}">
-      <span class="w-5 text-center font-black ${i===0?'text-yellow-500':i===1?'text-gray-400':i===2?'text-amber-600':'text-gray-400'}">${['🥇','🥈','🥉'][i]||i+1}</span>
+      <span class="w-5 text-center font-black ${i===0?'text-yellow-500':i===1?'text-gray-600':i===2?'text-amber-600':'text-gray-600'}">${['🥇','🥈','🥉'][i]||i+1}</span>
       <span class="flex-1 text-gray-700">${r.user_name || '익명'}</span>
       <span class="text-indigo-600 font-bold">${gameType==='flash'?r.correct+'개':val}</span>
       <span class="text-yellow-500">${'⭐'.repeat(r.stars)}</span>

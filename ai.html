@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 튜터 — 질문수학</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
 <script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -42,15 +43,14 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
       <a href="game.html"      class="text-white/90 hover:text-white transition">게임</a>
       <a href="ai.html"        class="text-white font-black border-b-2 border-white pb-0.5">AI 튜터</a>
       <a href="test.html"      class="text-white/90 hover:text-white transition">레벨 테스트</a>
-      <a href="dashboard.html" class="text-white/90 hover:text-white transition">대시보드</a>
-      <a href="admin.html"     class="text-white/90 hover:text-white transition">관리</a>
+      <a href="dashboard.html" class="text-white/90 hover:text-white transition">대시보드 샘플</a>
     </div>
     <div class="flex items-center gap-3">
       <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
         <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
         <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+        <button onclick="doLogout()" class="text-xs text-white/90 hover:text-white ml-1">로그아웃</button>
       </div>
       <button class="md:hidden" onclick="toggleMobileMenu()">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -63,8 +63,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <a href="game.html"      class="block py-2 text-white/90">게임</a>
     <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
     <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
-    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
-    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드 샘플</a>
   </div>
 </nav>
 
@@ -74,7 +73,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shrink-0">🤖</div>
     <div>
       <h1 class="text-lg font-black leading-tight">AI 수학 튜터</h1>
-      <p class="text-white/80 text-xs">Gemini AI가 질문수학 방식으로 수학 개념을 안내합니다</p>
+      <p class="text-white/95 text-xs">Gemini AI가 질문수학 방식으로 수학 개념을 안내합니다</p>
     </div>
     <div class="ml-auto text-xs text-white/60 hidden sm:block">Powered by Gemini 2.0 Flash</div>
   </div>
@@ -125,7 +124,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
 
     <!-- Typing indicator (hidden) -->
     <div id="typing-indicator" class="hidden px-4 pb-2">
-      <div class="chat-ai p-3 text-sm text-gray-500 flex items-center gap-2 w-fit">
+      <div class="chat-ai p-3 text-sm text-gray-700 flex items-center gap-2 w-fit">
         <span class="loader"></span> 생각하는 중...
       </div>
     </div>
@@ -142,8 +141,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
         </button>
       </div>
       <div class="flex justify-between items-center mt-1.5">
-        <button onclick="clearChat()" class="text-xs text-gray-500 hover:text-gray-700 font-medium">대화 초기화</button>
-        <span class="text-xs text-gray-400">Powered by Gemini 2.0 Flash</span>
+        <button onclick="clearChat()" class="text-xs text-gray-700 hover:text-gray-700 font-medium">대화 초기화</button>
+        <span class="text-xs text-gray-600">Powered by Gemini 2.0 Flash</span>
       </div>
     </div>
   </div>
@@ -152,7 +151,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
 <!-- Login Modal -->
 <div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
-    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-black">로그인</h2><button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button></div>
+    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-black">로그인</h2><button onclick="hideModal('loginModal')" class="text-gray-600 text-xl">✕</button></div>
     <div class="space-y-4">
       <input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
       <select id="login-role" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select>
@@ -182,14 +181,16 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
         <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
         <div class="text-yellow-400 text-xs font-bold">세계 최초 질문으로 배우는 수학</div>
       </div>
-      <div class="flex gap-4 text-sm text-white/80">
+      <div class="flex gap-4 text-sm text-white/95">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>
         <a href="game.html"      class="hover:text-white transition">게임</a>
         <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
-        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition text-white/60 text-xs">관리자 대시보드</a>
       </div>
-      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+      <div class="text-white/50 text-xs">© 2019 질문수학. 초등수학을 재미있게!</div>
     </div>
   </div>
 </footer>

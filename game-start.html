@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수학 테트리스 — 시작 | 질문수학</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
 <script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED'}}}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
@@ -34,24 +35,27 @@ nav{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-s
     </a>
     <div class="hidden md:flex items-center gap-5 text-sm font-medium text-white/90">
       <div class="relative group">
-        <a href="index.html" class="hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-60">▾</span></a>
-        <div class="absolute top-full left-0 hidden group-hover:block bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px] z-50 mt-1">
-          <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+        <a href="index.html" class="hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-80">▾</span></a>
+        <div class="absolute top-full left-0 hidden group-hover:block pt-2 z-50">
+          <div class="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px]">
+            <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+          </div>
         </div>
       </div>
       <a href="learn.html"     class="hover:text-white transition">학습하기</a>
       <a href="game.html"      class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
       <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
       <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
-      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
-      <a href="admin.html"     class="hover:text-white transition">관리</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition text-white/60 text-xs">관리자 대시보드</a>
     </div>
     <div class="flex items-center gap-3">
       <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
         <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
         <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+        <button onclick="doLogout()" class="text-xs text-white/90 hover:text-white ml-1">로그아웃</button>
       </div>
       <button class="md:hidden" onclick="toggleMobileMenu()">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -64,8 +68,7 @@ nav{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-s
     <a href="game.html"      class="block py-2 text-white/90">게임</a>
     <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
     <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
-    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
-    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드 샘플</a>
   </div>
 </nav>
 
@@ -156,7 +159,7 @@ nav{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-s
   <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-black text-gray-900">로그인</h2>
-      <button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button>
+      <button onclick="hideModal('loginModal')" class="text-gray-600 text-xl">✕</button>
     </div>
     <div class="space-y-4">
       <div><label class="block text-sm font-medium text-gray-700 mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary text-gray-900"></div>
@@ -187,14 +190,14 @@ nav{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);box-s
         <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
         <div class="text-yellow-400 text-xs font-bold">세계 최초 질문으로 배우는 수학</div>
       </div>
-      <div class="flex gap-4 text-sm text-white/80">
+      <div class="flex gap-4 text-sm text-white/95">
         <a href="index.html"     class="hover:text-white transition">홈</a>
         <a href="learn.html"     class="hover:text-white transition">학습하기</a>
         <a href="game.html"      class="hover:text-white transition">게임</a>
         <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
-        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
       </div>
-      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+      <div class="text-white/50 text-xs">© 2019 질문수학. 초등수학을 재미있게!</div>
     </div>
   </div>
 </footer>

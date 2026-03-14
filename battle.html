@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>친구 대결 — 질문수학</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
 <script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -42,15 +43,16 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
       <a href="game.html" class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
       <a href="ai.html" class="hover:text-white transition">AI 튜터</a>
       <a href="test.html" class="hover:text-white transition">레벨 테스트</a>
-      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
-      <a href="admin.html" class="hover:text-white transition">관리</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드 샘플</a>
+        <span class="text-white/20">|</span>
+        <a href="admin.html" class="hover:text-white transition text-white/60 text-xs">관리자 대시보드</a>
     </div>
     <div class="flex items-center gap-3">
       <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
         <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
         <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+        <button onclick="doLogout()" class="text-xs text-white/90 hover:text-white ml-1">로그아웃</button>
       </div>
       <button class="md:hidden" onclick="toggleMobileMenu()">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -63,8 +65,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <a href="game.html" class="block py-2 text-white/90">게임</a>
     <a href="ai.html" class="block py-2 text-white/90">AI 튜터</a>
     <a href="test.html" class="block py-2 text-white/90">레벨 테스트</a>
-    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
-    <a href="admin.html" class="block py-2 text-white/90">관리</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드 샘플</a>
   </div>
 </nav>
 
@@ -75,7 +76,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <div class="text-center mb-6">
       <div class="text-5xl mb-2">⚔️</div>
       <h1 class="text-2xl font-black text-gray-900">친구 대결</h1>
-      <p class="text-gray-500 text-sm mt-1">실시간 퀴즈 배틀! 30초 안에 더 많이 맞혀요</p>
+      <p class="text-gray-700 text-sm mt-1">실시간 퀴즈 배틀! 30초 안에 더 많이 맞혀요</p>
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 space-y-4">
@@ -110,23 +111,23 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
   <div id="screen-waiting-host" class="hidden fade-in text-center">
     <div class="text-5xl mb-3">🏠</div>
     <h2 class="text-xl font-black mb-1">방 만들기 완료!</h2>
-    <p class="text-gray-500 text-sm mb-6">친구에게 아래 코드를 알려주세요</p>
+    <p class="text-gray-700 text-sm mb-6">친구에게 아래 코드를 알려주세요</p>
     <div class="bg-white rounded-2xl p-8 shadow-sm border-2 border-indigo-200 mb-4">
       <div class="text-6xl font-black tracking-[.3em] text-primary mb-2" id="room-code">----</div>
-      <p class="text-sm text-gray-400">친구가 이 코드로 참가하면 자동으로 시작됩니다</p>
+      <p class="text-sm text-gray-600">친구가 이 코드로 참가하면 자동으로 시작됩니다</p>
     </div>
-    <div class="flex items-center justify-center gap-2 text-gray-500 text-sm">
+    <div class="flex items-center justify-center gap-2 text-gray-700 text-sm">
       <div class="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
       친구 기다리는 중...
     </div>
-    <button onclick="cancelBattle()" class="mt-4 text-xs text-gray-400 hover:text-gray-600">취소</button>
+    <button onclick="cancelBattle()" class="mt-4 text-xs text-gray-600 hover:text-gray-600">취소</button>
   </div>
 
   <!-- ── WAITING GUEST ──────────────────────────────── -->
   <div id="screen-waiting-guest" class="hidden fade-in text-center">
     <div class="text-5xl mb-3">🔑</div>
     <h2 class="text-xl font-black mb-1">코드 입력</h2>
-    <p class="text-gray-500 text-sm mb-6">친구에게 받은 4자리 코드를 입력하세요</p>
+    <p class="text-gray-700 text-sm mb-6">친구에게 받은 4자리 코드를 입력하세요</p>
     <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-amber-200">
       <input id="join-code" type="text" maxlength="4" placeholder="0000"
         class="w-full text-center text-4xl font-black tracking-widest border-2 border-amber-300 rounded-xl px-4 py-4 focus:outline-none focus:border-amber-500 mb-4">
@@ -134,14 +135,14 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
         🚀 참가하기
       </button>
     </div>
-    <button onclick="showScreen('screen-lobby')" class="mt-4 text-xs text-gray-400 hover:text-gray-600">← 돌아가기</button>
+    <button onclick="showScreen('screen-lobby')" class="mt-4 text-xs text-gray-600 hover:text-gray-600">← 돌아가기</button>
   </div>
 
   <!-- ── COUNTDOWN ──────────────────────────────────── -->
   <div id="screen-countdown" class="hidden fade-in text-center py-16">
-    <p class="text-gray-500 text-sm mb-4">vs <span id="cd-opponent" class="font-bold text-gray-700"></span></p>
+    <p class="text-gray-700 text-sm mb-4">vs <span id="cd-opponent" class="font-bold text-gray-700"></span></p>
     <div class="text-9xl font-black text-primary countdown-num" id="countdown-num">3</div>
-    <p class="text-gray-400 mt-4">준비하세요!</p>
+    <p class="text-gray-600 mt-4">준비하세요!</p>
   </div>
 
   <!-- ── PLAYING ────────────────────────────────────── -->
@@ -176,7 +177,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <div class="bg-white rounded-2xl p-4 border-2 border-red-200 shadow-sm mb-3">
       <div class="flex items-center gap-2 mb-2">
         <span id="battle-q-num" class="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">Q1</span>
-        <span id="battle-concept" class="text-xs text-gray-500"></span>
+        <span id="battle-concept" class="text-xs text-gray-700"></span>
       </div>
       <p class="font-bold text-gray-900 leading-relaxed text-sm" id="battle-question"></p>
     </div>
@@ -190,19 +191,19 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
   <div id="screen-result" class="hidden fade-in text-center">
     <div class="text-6xl mb-3" id="result-emoji">🏆</div>
     <h2 class="text-2xl font-black mb-1" id="result-title">승리!</h2>
-    <p class="text-gray-500 text-sm mb-5" id="result-desc"></p>
+    <p class="text-gray-700 text-sm mb-5" id="result-desc"></p>
 
     <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 mb-4">
       <div class="grid grid-cols-2 gap-4">
         <div id="result-p1" class="rounded-xl p-4 border-2">
           <div class="text-sm font-bold mb-1" id="result-p1-name">나</div>
           <div class="text-3xl font-black" id="result-p1-score">0</div>
-          <div class="text-xs text-gray-500">점수</div>
+          <div class="text-xs text-gray-700">점수</div>
         </div>
         <div id="result-p2" class="rounded-xl p-4 border-2">
           <div class="text-sm font-bold mb-1" id="result-p2-name">상대</div>
           <div class="text-3xl font-black" id="result-p2-score">0</div>
-          <div class="text-xs text-gray-500">점수</div>
+          <div class="text-xs text-gray-700">점수</div>
         </div>
       </div>
     </div>
@@ -220,7 +221,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
   <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-black">로그인</h2>
-      <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      <button onclick="hideModal('loginModal')" class="text-gray-600 hover:text-gray-600 text-xl">✕</button>
     </div>
     <div class="space-y-4">
       <div><label class="block text-sm font-medium mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"></div>

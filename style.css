@@ -1,0 +1,110 @@
+/* =============================================
+   질문수학 — Premium Design System
+   ============================================= */
+
+/* ── Body ── */
+body {
+  background-color: #E6E4FF !important;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 0% 0%,   rgba(79,70,229,.18) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(124,58,237,.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 100%,  rgba(236,72,153,.07) 0%, transparent 65%) !important;
+  min-height: 100vh;
+}
+
+/* ── Nav Shadow ── */
+nav {
+  box-shadow: 0 4px 28px rgba(79,70,229,.50) !important;
+}
+
+/* ── White Cards — subtle warm-lavender gradient ── */
+.bg-white.rounded-2xl,
+.bg-white.rounded-xl {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f7ff 100%) !important;
+  box-shadow: 0 4px 24px rgba(79,70,229,.11), 0 1px 6px rgba(79,70,229,.07) !important;
+}
+
+/* ── Colored tint cards ── */
+.bg-indigo-50  { background: linear-gradient(135deg, #eef2ff, #dde3ff) !important; }
+.bg-purple-50  { background: linear-gradient(135deg, #faf5ff, #f0e6ff) !important; }
+.bg-pink-50    { background: linear-gradient(135deg, #fdf2f8, #fce4f3) !important; }
+.bg-amber-50   { background: linear-gradient(135deg, #fffbeb, #fef3c0) !important; }
+.bg-yellow-50  { background: linear-gradient(135deg, #fefce8, #fef9c3) !important; }
+.bg-green-50   { background: linear-gradient(135deg, #f0fdf4, #d9fce6) !important; }
+.bg-emerald-50 { background: linear-gradient(135deg, #ecfdf5, #d1fae5) !important; }
+.bg-blue-50    { background: linear-gradient(135deg, #eff6ff, #dbeafe) !important; }
+.bg-red-50     { background: linear-gradient(135deg, #fff1f2, #ffe4e6) !important; }
+.bg-sky-50     { background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important; }
+
+/* ── Card border upgrades ── */
+.border-indigo-100 { border-color: #a5b4fc !important; }
+.border-indigo-200 { border-color: #818cf8 !important; }
+.border-purple-100 { border-color: #d8b4fe !important; }
+.border-purple-200 { border-color: #c084fc !important; }
+.border-pink-100   { border-color: #f9a8d4 !important; }
+.border-pink-200   { border-color: #f472b6 !important; }
+.border-amber-100  { border-color: #fcd34d !important; }
+.border-amber-200  { border-color: #fbbf24 !important; }
+.border-green-100  { border-color: #86efac !important; }
+.border-green-200  { border-color: #4ade80 !important; }
+.border-blue-100   { border-color: #93c5fd !important; }
+.border-blue-200   { border-color: #60a5fa !important; }
+.border-red-100    { border-color: #fca5a5 !important; }
+.border-sky-100    { border-color: #7dd3fc !important; }
+.border-sky-200    { border-color: #38bdf8 !important; }
+.border-gray-100   { border-color: #d1d5db !important; }
+.border-gray-200   { border-color: #9ca3af !important; }
+
+/* ── Shadow upgrades ── */
+.shadow-sm {
+  box-shadow: 0 2px 14px rgba(79,70,229,.10), 0 1px 4px rgba(79,70,229,.07) !important;
+}
+.shadow-lg {
+  box-shadow: 0 12px 36px rgba(79,70,229,.20), 0 4px 12px rgba(79,70,229,.10) !important;
+}
+.shadow-xl {
+  box-shadow: 0 20px 48px rgba(79,70,229,.22), 0 6px 16px rgba(79,70,229,.12) !important;
+}
+
+/* ── Card hover glow ── */
+.card-hover:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 24px 48px rgba(79,70,229,.25), 0 0 0 2px rgba(99,102,241,.28) !important;
+}
+
+/* ── Primary buttons ── */
+button.bg-primary,
+a.bg-primary,
+[class*="bg-indigo-600"],
+[class*="bg-indigo-500"] {
+  box-shadow: 0 4px 16px rgba(79,70,229,.40) !important;
+}
+button.bg-primary:hover,
+a.bg-primary:hover {
+  box-shadow: 0 8px 24px rgba(79,70,229,.55) !important;
+}
+
+/* ── White/outline buttons ── */
+button.bg-white:not([class*="text-gray"]),
+a.bg-white:not([class*="text-gray"]) {
+  box-shadow: 0 3px 12px rgba(79,70,229,.18) !important;
+}
+
+/* ── XP / progress bars ── */
+.progress-bar,
+.xp-fill,
+[class*="progress"] {
+  background: linear-gradient(90deg, #4F46E5, #7C3AED, #EC4899) !important;
+}
+
+/* ── Section dividers ── */
+.border-indigo-50 { border-color: #c7d2fe !important; }
+.border-indigo-100 { border-color: #a5b4fc !important; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #e8e6ff; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#4F46E5, #7C3AED);
+  border-radius: 4px;
+}
