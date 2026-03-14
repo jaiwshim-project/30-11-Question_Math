@@ -1160,7 +1160,7 @@ function renderNavUser() {
   }
 }
 
-function doLogin() {
+async function doLogin() {
   const name   = (document.getElementById('login-name')?.value || '').trim() || '학생';
   const role   = document.getElementById('login-role')?.value || 'student';
   const gender = document.getElementById('login-gender')?.value || 'boy';
@@ -1168,8 +1168,13 @@ function doLogin() {
   hideModal('loginModal');
   renderNavUser();
   applyGenderTheme(gender);
+  // Supabase 프로필 저장 (백그라운드)
+  if (typeof dbSaveProfile === 'function') {
+    const supabaseId = await dbSaveProfile(name, role, gender);
+    if (supabaseId) saveUser({ name, role, gender, supabaseId });
+  }
 }
-function doSignup() {
+async function doSignup() {
   const name   = (document.getElementById('signup-name')?.value || '').trim() || '학생';
   const grade  = document.getElementById('signup-grade')?.value || '4학년';
   const role   = document.getElementById('signup-role')?.value || 'student';
@@ -1178,6 +1183,11 @@ function doSignup() {
   hideModal('signupModal');
   renderNavUser();
   applyGenderTheme(gender);
+  // Supabase 프로필 저장 (백그라운드)
+  if (typeof dbSaveProfile === 'function') {
+    const supabaseId = await dbSaveProfile(name, role, gender);
+    if (supabaseId) saveUser({ name, grade, role, gender, supabaseId });
+  }
   window.location.href = 'test.html';
 }
 function doLogout() { removeUser(); renderNavUser(); document.body.removeAttribute('data-gender'); }

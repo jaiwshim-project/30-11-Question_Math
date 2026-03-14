@@ -235,6 +235,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script src="shared.js"></script>
 <script>
 // ═══ STATE ════════════════════════════════════════════
@@ -357,6 +359,7 @@ function endFlash() {
   arr.push({ grade:currentFlashGrade, know:fcKnow, total:fcCards.length, stars, xp, date:Date.now() });
   localStorage.setItem('qmath_flashcard_scores', JSON.stringify(arr));
   updateHistory();
+  dbSaveScore({ gameType:'flash', grade:currentFlashGrade, stars, xp, correct:fcKnow });
 
   hide('flash-play'); show('flash-result');
   document.getElementById('fr-emoji').textContent = pct>=.9?'🏆':pct>=.6?'🎉':'😊';

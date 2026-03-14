@@ -208,6 +208,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script src="shared.js"></script>
 <script>
 // ═══ STATE ════════════════════════════════════════════
@@ -353,6 +355,7 @@ function endMatch() {
   arr.push({ grade:currentMatchGrade, time:elapsed, errors:matchErrors, stars, xp, date:Date.now() });
   localStorage.setItem('qmath_match_scores', JSON.stringify(arr));
   updateHistory();
+  dbSaveScore({ gameType:'match', grade:currentMatchGrade, stars, xp, timeSec:elapsed, errors:matchErrors });
 
   hide('match-play'); show('match-result');
   document.getElementById('mr-emoji').textContent  = stars===3?'🏆':stars===2?'🎉':'😊';

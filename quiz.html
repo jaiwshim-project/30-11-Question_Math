@@ -251,6 +251,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script src="shared.js"></script>
 <script>
 // ═══ STATE ════════════════════════════════════════════
@@ -430,6 +432,7 @@ function endQuiz() {
   arr.push({ grade:currentQuizGrade, score:quizScore, correct:quizCorrect, stars, xp, date:Date.now() });
   localStorage.setItem('qmath_quiz_scores', JSON.stringify(arr));
   updateHistory();
+  dbSaveScore({ gameType:'quiz', grade:currentQuizGrade, stars, xp, score:quizScore, correct:quizCorrect });
 
   hide('quiz-play'); show('quiz-result');
   document.getElementById('qr-emoji').textContent    = stars===3?'🏆':stars===2?'🎉':'😊';
