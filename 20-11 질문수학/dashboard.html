@@ -77,7 +77,7 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
 <div class="max-w-6xl mx-auto px-4 py-8 fade-in">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
     <div>
       <div class="flex items-center gap-3 mb-1">
         <div class="w-1.5 h-8 rounded-full" style="background:linear-gradient(135deg,#4338CA,#DB2777)"></div>
@@ -95,22 +95,45 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     </div>
   </div>
 
+  <!-- User Profile Card -->
+  <div id="user-profile-card" class="hidden bg-white rounded-2xl p-5 mb-6 shadow-sm border-2 border-indigo-200 border-t-4 border-t-indigo-500">
+    <div class="flex items-center gap-4">
+      <div id="profile-avatar" class="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shrink-0" style="background:linear-gradient(135deg,#EEF2FF,#DDD6FE)">📚</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="profile-name" class="text-xl font-black text-gray-900">학생</span>
+          <span id="profile-badge" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">학생</span>
+        </div>
+        <div id="profile-role-desc" class="text-sm text-gray-500 mt-0.5">수학 탐험가</div>
+        <div class="flex items-center gap-4 mt-2 flex-wrap">
+          <div class="flex items-center gap-1 text-sm"><span class="text-orange-500">🔥</span><span id="profile-streak" class="font-bold text-gray-800">0일</span><span class="text-gray-500 ml-0.5">연속</span></div>
+          <div class="flex items-center gap-1 text-sm"><span>⭐</span><span id="profile-stars" class="font-bold text-gray-800">0</span><span class="text-gray-500 ml-0.5">별</span></div>
+          <div class="flex items-center gap-1 text-sm"><span>📚</span><span id="profile-concepts" class="font-bold text-gray-800">0</span><span class="text-gray-500 ml-0.5">개념 완료</span></div>
+        </div>
+      </div>
+      <div class="text-right shrink-0 hidden sm:block">
+        <div id="profile-level" class="text-3xl font-black text-indigo-600">Lv.1</div>
+        <div class="text-xs text-gray-500">내 레벨</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Summary Cards (그라디언트 4색) -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-5 shadow-lg">
       <div class="text-xs text-white/80 font-medium mb-1">완료한 개념</div>
-      <div class="text-3xl font-black" id="stat-concepts">12</div>
-      <div class="text-xs text-white/70 mt-1">↑ 3개 (이번 주)</div>
+      <div class="text-3xl font-black" id="stat-concepts">0</div>
+      <div class="text-xs text-white/70 mt-1" id="stat-concepts-sub">학습을 시작하세요</div>
     </div>
     <div class="bg-gradient-to-br from-pink-400 to-rose-500 text-white rounded-2xl p-5 shadow-lg">
-      <div class="text-xs text-white/80 font-medium mb-1">총 학습 시간</div>
-      <div class="text-3xl font-black" id="stat-time">4.5h</div>
-      <div class="text-xs text-white/70 mt-1">↑ 1.2h (이번 주)</div>
+      <div class="text-xs text-white/80 font-medium mb-1">누적 XP</div>
+      <div class="text-3xl font-black" id="stat-time">0</div>
+      <div class="text-xs text-white/70 mt-1" id="stat-time-sub">XP 점수</div>
     </div>
     <div class="bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl p-5 shadow-lg">
       <div class="text-xs text-white/80 font-medium mb-1">연속 학습일</div>
-      <div class="text-3xl font-black" id="stat-streak">7일</div>
-      <div class="text-xs text-white/70 mt-1">🔥 계속하세요!</div>
+      <div class="text-3xl font-black" id="stat-streak">0일</div>
+      <div class="text-xs text-white/70 mt-1" id="stat-streak-sub">오늘도 학습하세요!</div>
     </div>
     <div class="bg-gradient-to-br from-green-400 to-emerald-500 text-white rounded-2xl p-5 shadow-lg">
       <div class="text-xs text-white/80 font-medium mb-1">최근 레벨</div>
@@ -186,27 +209,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
         <span class="text-lg">📚</span>
         <h3 class="font-bold">최근 학습 활동</h3>
       </div>
-      <div class="space-y-3" id="recent-activity">
-        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
-          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-sm shrink-0">✓</div>
-          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">삼각형의 정의</div><div class="text-xs text-gray-500">오늘 · 6단계 완료</div></div>
-          <div class="text-xs text-green-500 font-medium shrink-0">100%</div>
-        </div>
-        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
-          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm shrink-0">📖</div>
-          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">분수와 소수</div><div class="text-xs text-gray-500">어제 · 4단계 진행 중</div></div>
-          <div class="text-xs text-blue-500 font-medium shrink-0">67%</div>
-        </div>
-        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
-          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-sm shrink-0">💬</div>
-          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">AI 튜터 대화</div><div class="text-xs text-gray-500">어제 · 직선과 선분</div></div>
-          <div class="text-xs text-purple-500 font-medium shrink-0">완료</div>
-        </div>
-        <div class="flex items-center gap-3 py-2">
-          <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-sm shrink-0">📊</div>
-          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">레벨 테스트</div><div class="text-xs text-gray-500">3일 전 · B+ 달성</div></div>
-          <div class="text-xs text-amber-500 font-medium shrink-0">B+</div>
-        </div>
+      <div class="space-y-1" id="recent-activity">
+        <p class="text-sm text-gray-400 text-center py-4">불러오는 중...</p>
       </div>
     </div>
 
@@ -216,23 +220,8 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
         <span class="text-lg">🎯</span>
         <h3 class="font-bold">학습 목표 진도</h3>
       </div>
-      <div class="space-y-4">
-        <div>
-          <div class="flex justify-between text-sm mb-1"><span class="font-medium">도형 단원</span><span class="text-primary font-medium">8/10</span></div>
-          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:80%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1"><span class="font-medium">수와 연산</span><span class="text-primary font-medium">5/12</span></div>
-          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:42%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1"><span class="font-medium">측정 단원</span><span class="text-primary font-medium">3/8</span></div>
-          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:37%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1"><span class="font-medium">통계와 그래프</span><span class="text-primary font-medium">2/6</span></div>
-          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:33%"></div></div>
-        </div>
+      <div class="space-y-4" id="goals-content">
+        <p class="text-sm text-gray-400 text-center py-4">불러오는 중...</p>
       </div>
       <a href="learn.html" class="block mt-5 gradient-bg text-white font-medium py-3 rounded-2xl shadow-lg hover:shadow-xl transition text-sm text-center">학습 계속하기 →</a>
     </div>
@@ -274,21 +263,80 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
 <script src="shared.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  initGreeting();
+  initUserProfile();
+  loadSummaryStats();
   loadTestHistory();
   initCharts();
   loadGameStats();
+  loadRecentActivity();
+  loadGoals();
 });
 
-function initGreeting() {
-  const user = loadUser();
-  if(user) document.getElementById('dash-greeting').textContent = user.name + '님의 학습 현황';
+// ── 헬퍼 ──────────────────────────────────────────────────
+function getStreak() {
+  try {
+    const raw = localStorage.getItem('qmath_streak');
+    if (!raw) return 0;
+    const s = JSON.parse(raw);
+    if (typeof s === 'object' && s !== null && s.count !== undefined) return parseInt(s.count) || 0;
+    return parseInt(s) || 0;
+  } catch(e) { return 0; }
 }
 
+function getCompletedIds() {
+  const completed = JSON.parse(localStorage.getItem('qmath_completed_lessons') || '[]');
+  if (completed.length) return completed;
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  return Object.keys(stars).filter(k => parseInt(stars[k]) > 0).map(Number);
+}
+
+// ── 사용자 프로필 카드 ────────────────────────────────────
+function initUserProfile() {
+  const user = loadUser();
+  const xp = parseInt(localStorage.getItem('qmath_xp') || '0');
+  const level = Math.floor(xp / 500) + 1;
+  const streak = getStreak();
+  const completedIds = getCompletedIds();
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  const totalStars = Object.values(stars).reduce((a,b) => a + (parseInt(b)||0), 0);
+
+  if (user) {
+    document.getElementById('dash-greeting').textContent = user.name + '님의 학습 현황';
+    const theme = (typeof GENDER_THEME !== 'undefined' && GENDER_THEME[user.gender]) || { avatarIcon:'📚', greetMsg:'수학 탐험가' };
+    document.getElementById('profile-avatar').textContent = theme.avatarIcon;
+    document.getElementById('profile-name').textContent = user.name;
+    document.getElementById('profile-badge').textContent = user.role === 'teacher' ? '교사' : '학생';
+    document.getElementById('profile-role-desc').textContent = theme.greetMsg + (user.grade ? ' · ' + user.grade : '');
+  } else {
+    document.getElementById('dash-greeting').textContent = '학습 현황을 한눈에 확인하세요';
+  }
+  document.getElementById('profile-streak').textContent = streak + '일';
+  document.getElementById('profile-stars').textContent = totalStars;
+  document.getElementById('profile-concepts').textContent = completedIds.length;
+  document.getElementById('profile-level').textContent = 'Lv.' + level;
+  document.getElementById('user-profile-card').classList.remove('hidden');
+}
+
+// ── 요약 통계 ─────────────────────────────────────────────
+function loadSummaryStats() {
+  const completedIds = getCompletedIds();
+  document.getElementById('stat-concepts').textContent = completedIds.length;
+  document.getElementById('stat-concepts-sub').textContent = completedIds.length > 0 ? '총 ' + completedIds.length + '개 완료' : '학습을 시작하세요';
+
+  const xp = parseInt(localStorage.getItem('qmath_xp') || '0');
+  document.getElementById('stat-time').textContent = xp;
+  document.getElementById('stat-time-sub').textContent = 'Lv.' + (Math.floor(xp/500)+1) + ' · ' + (xp%500) + '/500 XP';
+
+  const streak = getStreak();
+  document.getElementById('stat-streak').textContent = streak + '일';
+  document.getElementById('stat-streak-sub').textContent = streak >= 7 ? '🔥 대단해요!' : streak >= 3 ? '🔥 계속하세요!' : '오늘도 학습해요!';
+}
+
+// ── 테스트 이력 ───────────────────────────────────────────
 function loadTestHistory() {
-  const results = JSON.parse(localStorage.getItem('qmath_test_results')||'[]');
+  const results = JSON.parse(localStorage.getItem('qmath_test_results') || '[]');
   const el = document.getElementById('test-history');
-  if(!results.length) {
+  if (!results.length) {
     el.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">아직 테스트 기록이 없습니다.</p>';
     return;
   }
@@ -302,52 +350,114 @@ function loadTestHistory() {
       </div>
     </div>
   `).join('');
-  // Update stat-level
-  const latest = results[results.length-1];
-  if(latest) document.getElementById('stat-level').textContent = latest.level;
+  const latest = results[results.length - 1];
+  if (latest) document.getElementById('stat-level').textContent = latest.level;
 }
+
+// ── 차트 ──────────────────────────────────────────────────
+let weeklyChartInst, subjectChartInst;
 
 function initCharts() {
-  // Weekly
-  new Chart(document.getElementById('weeklyChart'), {
-    type:'bar',
-    data:{
-      labels:['월','화','수','목','금','토','일'],
-      datasets:[{
-        label:'학습 시간(분)',
-        data:[45,30,60,20,50,80,35],
-        backgroundColor:'rgba(79,70,229,0.7)',
-        borderRadius:6
-      }]
-    },
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f3f4f6'}}}}
+  // 최근 7일 활동 점수 추정
+  const dayActivity = new Array(7).fill(0);
+  const now = Date.now();
+  const dayMs = 86400000;
+
+  // 타임스탬프 있는 항목 반영
+  function addByDate(arr, weight) {
+    arr.forEach(item => {
+      if (item && item.ts) {
+        const d = Math.floor((now - item.ts) / dayMs);
+        if (d >= 0 && d < 7) dayActivity[6 - d] += weight;
+      }
+    });
+  }
+  // 타임스탬프 없으면 최근 N개를 역순 분산
+  function addByRecency(arr, weight) {
+    arr.slice(-14).forEach((item, i, a) => {
+      const d = Math.min(6, Math.floor((a.length - 1 - i) / 2));
+      dayActivity[6 - d] += weight;
+    });
+  }
+
+  const quizScores  = JSON.parse(localStorage.getItem('qmath_quiz_scores')  || '[]');
+  const fcScores    = JSON.parse(localStorage.getItem('qmath_flashcard_scores') || '[]');
+  const matchScores = JSON.parse(localStorage.getItem('qmath_match_scores') || '[]');
+  const tetScores   = JSON.parse(localStorage.getItem('qmath_tetris_scores') || '[]');
+  const testResults = JSON.parse(localStorage.getItem('qmath_test_results')  || '[]');
+
+  const hasTs = arr => Array.isArray(arr) && arr.some(x => x && x.ts);
+  if (hasTs(quizScores))  addByDate(quizScores, 15);  else addByRecency(quizScores, 15);
+  if (hasTs(fcScores))    addByDate(fcScores, 10);    else addByRecency(fcScores, 10);
+  if (hasTs(matchScores)) addByDate(matchScores, 10); else addByRecency(matchScores, 10);
+  if (hasTs(tetScores))   addByDate(tetScores, 12);   else addByRecency(tetScores, 12);
+
+  testResults.forEach(r => {
+    if (r.date) {
+      const d = Math.floor((now - new Date(r.date).getTime()) / dayMs);
+      if (d >= 0 && d < 7) dayActivity[6 - d] += 20;
+    }
   });
-  // Subject Radar
-  new Chart(document.getElementById('subjectChart'), {
-    type:'radar',
-    data:{
-      labels:['도형','수와 연산','측정','통계','규칙성'],
-      datasets:[{
-        label:'이해도',
-        data:[85,70,60,75,65],
-        backgroundColor:'rgba(124,58,237,.15)',
-        borderColor:'rgba(124,58,237,.8)',
-        pointBackgroundColor:'rgba(124,58,237,1)',
-        pointRadius:4
+
+  // 데이터 없으면 XP 기반 오늘값 추정
+  if (dayActivity.every(v => v === 0)) {
+    const xp = parseInt(localStorage.getItem('qmath_xp') || '0');
+    if (xp > 0) { dayActivity[6] = Math.min(xp * 0.4, 80); dayActivity[5] = Math.min(xp * 0.2, 40); }
+  }
+
+  // 오늘 기준 요일 레이블
+  const dayNames = ['일','월','화','수','목','금','토'];
+  const todayIdx = new Date().getDay();
+  const labels = Array.from({length:7}, (_,i) => dayNames[(todayIdx - 6 + i + 7) % 7]);
+
+  if (weeklyChartInst) weeklyChartInst.destroy();
+  weeklyChartInst = new Chart(document.getElementById('weeklyChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: '활동 점수',
+        data: dayActivity,
+        backgroundColor: dayActivity.map((_,i) => i === 6 ? 'rgba(79,70,229,0.9)' : 'rgba(79,70,229,0.5)'),
+        borderRadius: 6
       }]
     },
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#f3f4f6'}}}}
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,grid:{color:'#f3f4f6'}}} }
+  });
+
+  // 영역별 실제 별점 → 이해도 (0~100)
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  const topics = ['수와 연산', '도형', '측정', '규칙성', '자료와 가능성'];
+  const topicScores = topics.map(topic => {
+    const list = (typeof CONCEPTS !== 'undefined' ? CONCEPTS : []).filter(c => c.topic === topic);
+    if (!list.length) return 0;
+    const total = list.reduce((s, c) => s + (parseInt(stars[c.id]) || 0), 0);
+    return Math.round(total / list.length / 3 * 100);
+  });
+  const hasStarData = topicScores.some(s => s > 0);
+
+  if (subjectChartInst) subjectChartInst.destroy();
+  subjectChartInst = new Chart(document.getElementById('subjectChart'), {
+    type: 'radar',
+    data: {
+      labels: ['수와 연산', '도형', '측정', '규칙성', '통계'],
+      datasets: [{
+        label: '이해도',
+        data: hasStarData ? topicScores : [0,0,0,0,0],
+        backgroundColor: 'rgba(124,58,237,.15)',
+        borderColor: 'rgba(124,58,237,.8)',
+        pointBackgroundColor: 'rgba(124,58,237,1)',
+        pointRadius: 4
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{r:{beginAtZero:true,max:100,grid:{color:'#f3f4f6'}}} }
   });
 }
 
-function updatePeriod() {
-  // In a real app this would filter data; here we just re-init charts
-  initCharts();
-}
+function updatePeriod() { initCharts(); }
 
-// ── 게임 통계 로드 ────────────────────────────────────────
+// ── 게임 통계 ─────────────────────────────────────────────
 function loadGameStats() {
-  // XP & 레벨
   const xp = parseInt(localStorage.getItem('qmath_xp') || '0');
   const level = Math.floor(xp / 500) + 1;
   const xpInLevel = xp % 500;
@@ -355,40 +465,107 @@ function loadGameStats() {
   document.getElementById('stat-xp-bar').style.width = (xpInLevel / 5) + '%';
   document.getElementById('stat-xp-text').textContent = xpInLevel + ' / 500 XP';
 
-  // 별점 합계
   const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
-  const totalStars = Object.values(stars).reduce((a, b) => a + b, 0);
+  const totalStars = Object.values(stars).reduce((a,b) => a + (parseInt(b)||0), 0);
   document.getElementById('stat-total-stars').textContent = totalStars;
 
-  // 퀴즈 최고점
-  const quizScores = JSON.parse(localStorage.getItem('qmath_quiz_scores') || '{}');
-  const bestQuiz = Math.max(0, ...Object.values(quizScores));
+  const quizArr = JSON.parse(localStorage.getItem('qmath_quiz_scores') || '[]');
+  const bestQuiz = quizArr.length ? Math.max(...quizArr.map(s => typeof s === 'object' ? (s.score||0) : (parseInt(s)||0))) : 0;
   document.getElementById('stat-quiz-best').textContent = bestQuiz;
 
-  // 플래시카드 세션 수
   const fcScores = JSON.parse(localStorage.getItem('qmath_flashcard_scores') || '[]');
   document.getElementById('stat-flashcard').textContent = fcScores.length;
 
-  // 뱃지
-  loadBadges(xp, level, totalStars, Object.keys(stars).length);
+  loadBadges(xp, level, totalStars, getCompletedIds().length);
 }
 
-// 뱃지 정의 및 획득 여부 체크
-function loadBadges(xp, level, totalStars, completedLessons) {
-  const BADGES = [
-    { id:'first', icon:'🌱', name:'첫 걸음', desc:'첫 개념 완료', check: completedLessons >= 1 },
-    { id:'star3', icon:'⭐', name:'별 수집가', desc:'별 10개 획득', check: totalStars >= 10 },
-    { id:'lv5',   icon:'🚀', name:'레벨 5', desc:'레벨 5 달성', check: level >= 5 },
-    { id:'xp500', icon:'💎', name:'다이아', desc:'XP 500 달성', check: xp >= 500 },
-    { id:'lv10',  icon:'👑', name:'수학 왕', desc:'레벨 10 달성', check: level >= 10 },
-    { id:'all10', icon:'🏆', name:'10개 완료', desc:'개념 10개 완료', check: completedLessons >= 10 },
-    { id:'all30', icon:'🎓', name:'30개 완료', desc:'개념 30개 완료', check: completedLessons >= 30 },
-    { id:'perfect',icon:'💯', name:'퍼펙트', desc:'별3 개 5개', check: Object.values(JSON.parse(localStorage.getItem('qmath_stars')||'{}')).filter(s=>s===3).length >= 5 },
-    { id:'streak7',icon:'🔥', name:'7일 연속', desc:'7일 연속 학습', check: (parseInt(localStorage.getItem('qmath_streak')||'0')) >= 7 },
-  ];
+// ── 최근 학습 활동 ─────────────────────────────────────────
+function loadRecentActivity() {
+  const el = document.getElementById('recent-activity');
+  const activities = [];
 
-  const grid = document.getElementById('badge-grid');
-  grid.innerHTML = BADGES.map(b => `
+  const completed = JSON.parse(localStorage.getItem('qmath_completed_lessons') || '[]');
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  const concepts = typeof CONCEPTS !== 'undefined' ? CONCEPTS : [];
+
+  completed.slice(-5).reverse().forEach(id => {
+    const c = concepts.find(x => x.id === id || x.id === parseInt(id));
+    if (c) {
+      const s = parseInt(stars[c.id]) || 0;
+      activities.push({
+        icon: s === 3 ? '✓' : '📖',
+        bg: s === 3 ? 'bg-green-100' : 'bg-blue-100',
+        name: c.title,
+        sub: c.grade + '학년 · ' + c.topic,
+        val: s > 0 ? '⭐'.repeat(s) : '완료',
+        valColor: s === 3 ? 'text-amber-500' : 'text-blue-500'
+      });
+    }
+  });
+
+  const tests = JSON.parse(localStorage.getItem('qmath_test_results') || '[]');
+  if (tests.length) {
+    const t = tests[tests.length - 1];
+    activities.push({ icon:'📊', bg:'bg-amber-100', name:'레벨 테스트', sub: t.date + ' · ' + t.grade + '학년', val: t.level, valColor:'text-amber-600 font-bold' });
+  }
+
+  if (!activities.length) {
+    el.innerHTML = '<p class="text-sm text-gray-500 text-center py-6">아직 학습 기록이 없습니다.<br><a href="learn.html" class="text-primary font-medium hover:underline">지금 시작하기 →</a></p>';
+    return;
+  }
+  el.innerHTML = activities.slice(0, 5).map((a, i, arr) => `
+    <div class="flex items-center gap-3 py-2 ${i < arr.length-1 ? 'border-b border-indigo-50' : ''}">
+      <div class="w-8 h-8 ${a.bg} rounded-lg flex items-center justify-center text-sm shrink-0">${a.icon}</div>
+      <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">${a.name}</div><div class="text-xs text-gray-500">${a.sub}</div></div>
+      <div class="text-xs ${a.valColor} shrink-0">${a.val}</div>
+    </div>
+  `).join('');
+}
+
+// ── 학습 목표 진도 ─────────────────────────────────────────
+function loadGoals() {
+  const el = document.getElementById('goals-content');
+  const completedSet = new Set(getCompletedIds().map(Number));
+  const concepts = typeof CONCEPTS !== 'undefined' ? CONCEPTS : [];
+  const topics = [
+    { name:'수와 연산', color:'indigo' },
+    { name:'도형',      color:'pink'   },
+    { name:'측정',      color:'amber'  },
+    { name:'규칙성',    color:'green'  },
+    { name:'자료와 가능성', color:'blue' }
+  ];
+  el.innerHTML = topics.map(t => {
+    const all  = concepts.filter(c => c.topic === t.name);
+    const done = all.filter(c => completedSet.has(c.id)).length;
+    const pct  = all.length ? Math.round(done / all.length * 100) : 0;
+    return `
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="font-medium">${t.name}</span>
+          <span class="text-${t.color}-600 font-medium">${done}/${all.length}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="progress-bar h-2 rounded-full" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── 뱃지 ─────────────────────────────────────────────────
+function loadBadges(xp, level, totalStars, completedLessons) {
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  const BADGES = [
+    { icon:'🌱', name:'첫 걸음',   desc:'첫 개념 완료',    check: completedLessons >= 1 },
+    { icon:'⭐', name:'별 수집가',  desc:'별 10개 획득',    check: totalStars >= 10 },
+    { icon:'🚀', name:'레벨 5',    desc:'레벨 5 달성',     check: level >= 5 },
+    { icon:'💎', name:'다이아',    desc:'XP 500 달성',     check: xp >= 500 },
+    { icon:'👑', name:'수학 왕',   desc:'레벨 10 달성',    check: level >= 10 },
+    { icon:'🏆', name:'10개 완료', desc:'개념 10개 완료',  check: completedLessons >= 10 },
+    { icon:'🎓', name:'30개 완료', desc:'개념 30개 완료',  check: completedLessons >= 30 },
+    { icon:'💯', name:'퍼펙트',    desc:'별3개 5개 이상',  check: Object.values(stars).filter(s=>parseInt(s)===3).length >= 5 },
+    { icon:'🔥', name:'7일 연속',  desc:'7일 연속 학습',   check: getStreak() >= 7 },
+  ];
+  document.getElementById('badge-grid').innerHTML = BADGES.map(b => `
     <div class="flex flex-col items-center p-3 rounded-xl border-2 ${b.check ? 'border-amber-200 bg-gradient-to-br from-yellow-50 to-amber-50' : 'border-gray-100 bg-gray-50 opacity-40'} text-center transition">
       <div class="text-3xl mb-1">${b.icon}</div>
       <div class="text-xs font-bold text-gray-800 leading-tight">${b.name}</div>
