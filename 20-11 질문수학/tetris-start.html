@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수학 테트리스 — 시작 | 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;}
+body{background:#0F0A2E;min-height:100vh;color:white;}
+nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;backdrop-filter:blur(8px);}
+.grade-btn{border-radius:12px;font-weight:900;font-size:.85rem;cursor:pointer;border:2px solid;transition:all .2s;padding:10px 0;}
+.concept-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 4px;border-radius:14px;font-weight:700;
+  cursor:pointer;border:2px solid;transition:all .2s;text-align:center;
+  min-height:68px;justify-content:center;font-size:.78rem;
+}
+.diff-btn{border-radius:14px;font-weight:900;font-size:.9rem;cursor:pointer;border:2px solid;transition:all .2s;padding:12px 0;}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+    <a href="index.html" class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div class="font-black text-white text-sm">질문수학</div>
+    </a>
+    <div class="hidden md:flex items-center gap-5 text-sm font-medium text-white/90">
+      <a href="index.html"      class="hover:text-white transition">홈</a>
+      <a href="learn.html"      class="hover:text-white transition">학습하기</a>
+      <a href="game.html"       class="hover:text-white transition">게임</a>
+      <a href="tetris-start.html" class="text-white font-black border-b-2 border-white pb-0.5">수학테트리스</a>
+      <a href="ai.html"         class="hover:text-white transition">AI 튜터</a>
+      <a href="dashboard.html"  class="hover:text-white transition">대시보드</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="user-area-loggedout">
+        <button onclick="showModal('loginModal')" class="text-xs text-white border border-white rounded-lg px-3 py-1.5 hover:bg-white hover:text-primary transition">로그인</button>
+      </div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-xs font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/60 hover:text-white">로그아웃</button>
+      </div>
+      <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/10 px-4 py-3 space-y-2 text-sm font-medium">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="tetris-start.html" class="block py-2 text-white font-black">수학테트리스</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="max-w-xl mx-auto px-4 py-8">
+
+  <!-- 타이틀 -->
+  <div class="text-center mb-8">
+    <div class="text-5xl mb-3">🧱</div>
+    <h1 class="text-4xl font-black mb-2" style="background:linear-gradient(90deg,#818CF8,#C084FC,#F472B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">수학 테트리스</h1>
+    <p class="text-white/50 text-sm">문제를 못 풀면 블록이 쌓여요!<br>꼭대기까지 쌓이면 목숨을 잃어요!</p>
+  </div>
+
+  <!-- 설정 카드 -->
+  <div class="card p-6 mb-5 flex flex-col gap-6">
+
+    <!-- ① 학년 선택 -->
+    <div>
+      <div class="text-white/50 text-xs font-bold mb-2 tracking-wider">① 학년 선택</div>
+      <div class="grid grid-cols-6 gap-1.5" id="grade-row">
+        <button onclick="selectGrade(1)" id="gbtn-1" class="grade-btn text-red-300    border-red-500">1학년</button>
+        <button onclick="selectGrade(2)" id="gbtn-2" class="grade-btn text-orange-300 border-orange-500">2학년</button>
+        <button onclick="selectGrade(3)" id="gbtn-3" class="grade-btn text-amber-300  border-amber-500">3학년</button>
+        <button onclick="selectGrade(4)" id="gbtn-4" class="grade-btn text-green-300  border-green-500">4학년</button>
+        <button onclick="selectGrade(5)" id="gbtn-5" class="grade-btn text-blue-300   border-blue-500">5학년</button>
+        <button onclick="selectGrade(6)" id="gbtn-6" class="grade-btn text-purple-300 border-purple-500">6학년</button>
+      </div>
+    </div>
+
+    <!-- ② 개념 선택 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-white/50 text-xs font-bold tracking-wider">② 개념 선택 <span id="concept-grade-label" class="text-yellow-300"></span></div>
+        <div class="text-white/30 text-xs" id="concept-sel-label"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2" id="concept-grid"></div>
+    </div>
+
+    <!-- ③ 난이도 선택 -->
+    <div>
+      <div class="text-white/50 text-xs font-bold mb-2 tracking-wider">③ 난이도 선택</div>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="selectDiff(0)" id="diff-btn-0" class="diff-btn border-green-400 text-green-300 hover:bg-green-500 hover:text-white">
+          🟢 쉬움<br><span class="font-normal opacity-60 text-xs">느리게</span>
+        </button>
+        <button onclick="selectDiff(1)" id="diff-btn-1" class="diff-btn border-yellow-400 bg-yellow-500/30 text-yellow-200">
+          🟡 보통<br><span class="font-normal opacity-60 text-xs">기본</span>
+        </button>
+        <button onclick="selectDiff(2)" id="diff-btn-2" class="diff-btn border-red-400 text-red-300 hover:bg-red-500 hover:text-white">
+          🔴 어려움<br><span class="font-normal opacity-60 text-xs">빠르게</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시작 버튼 -->
+  <button onclick="goGame()" class="w-full py-4 rounded-2xl font-black text-xl text-white shadow-2xl mb-5 hover:scale-105 active:scale-95 transition-transform"
+    style="background:linear-gradient(135deg,#4F46E5,#7C3AED,#DB2777)">
+    🚀 게임 시작!
+  </button>
+
+  <!-- 안내 아이콘 -->
+  <div class="grid grid-cols-3 gap-3 text-center mb-8">
+    <div class="card p-3">
+      <div class="text-2xl mb-1">📦</div>
+      <div class="text-white/60 text-xs">못 풀면 쌓임</div>
+    </div>
+    <div class="card p-3">
+      <div class="text-2xl mb-1">💀</div>
+      <div class="text-white/60 text-xs">목숨 3개</div>
+    </div>
+    <div class="card p-3">
+      <div class="text-2xl mb-1">🔥</div>
+      <div class="text-white/60 text-xs">콤보 보너스</div>
+    </div>
+  </div>
+
+  <!-- 최고 기록 -->
+  <div class="card p-4 flex items-center justify-between">
+    <div class="text-white/50 text-sm">🏆 최고 기록</div>
+    <div class="text-yellow-300 font-black text-xl" id="best-score-disp">0</div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black text-gray-900">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary text-gray-900"></div>
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">역할</label><select id="login-role" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm text-gray-900"><option value="student">학생</option><option value="teacher">교사</option></select></div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full text-white font-bold py-3 rounded-2xl shadow-md" style="background:linear-gradient(135deg,#4338CA,#7C3AED,#DB2877)">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const GRADE_CONCEPTS = {
+  1: [
+    { id:'add1',    name:'덧셈',      emoji:'➕', color:'#4F46E5' },
+    { id:'sub1',    name:'뺄셈',      emoji:'➖', color:'#EC4899' },
+    { id:'num1',    name:'수 비교',   emoji:'🔢', color:'#06B6D4' },
+    { id:'shape1',  name:'도형',      emoji:'🔷', color:'#8B5CF6' },
+    { id:'time1',   name:'시간',      emoji:'🕐', color:'#F59E0B' },
+  ],
+  2: [
+    { id:'add2',    name:'받아올림\n덧셈', emoji:'➕', color:'#4F46E5' },
+    { id:'sub2',    name:'받아내림\n뺄셈', emoji:'➖', color:'#EC4899' },
+    { id:'mul2',    name:'곱셈 입문', emoji:'✖️', color:'#10B981' },
+    { id:'time2',   name:'시각·시간', emoji:'🕐', color:'#F59E0B' },
+    { id:'measure2',name:'길이 재기', emoji:'📏', color:'#8B5CF6' },
+  ],
+  3: [
+    { id:'times3',  name:'구구단',    emoji:'📋', color:'#EF4444' },
+    { id:'div3',    name:'나눗셈',    emoji:'➗', color:'#F59E0B' },
+    { id:'frac3',   name:'분수 기초', emoji:'½', color:'#F97316' },
+    { id:'dec3',    name:'소수 기초', emoji:'🔢', color:'#06B6D4' },
+    { id:'time3',   name:'시간 계산', emoji:'🕐', color:'#F59E0B' },
+    { id:'graph3',  name:'표·그래프', emoji:'📊', color:'#10B981' },
+  ],
+  4: [
+    { id:'bignum4', name:'큰 수\n곱·나눗',  emoji:'🔢', color:'#4F46E5' },
+    { id:'frac4',   name:'분수\n덧·뺄셈', emoji:'½', color:'#F97316' },
+    { id:'dec4',    name:'소수\n덧·뺄셈', emoji:'🔢', color:'#06B6D4' },
+    { id:'angle4',  name:'각도',     emoji:'📐', color:'#8B5CF6' },
+    { id:'area4',   name:'넓이·둘레', emoji:'🔲', color:'#EC4899' },
+    { id:'data4',   name:'자료·\n통계',   emoji:'📊', color:'#10B981' },
+    { id:'stat4',   name:'확률·\n가능성', emoji:'🎲', color:'#A855F7' },
+  ],
+  5: [
+    { id:'lcm5',    name:'약수·배수', emoji:'🔗', color:'#4F46E5' },
+    { id:'frac5',   name:'분수 곱셈', emoji:'½', color:'#F97316' },
+    { id:'dec5',    name:'소수 곱셈', emoji:'🔢', color:'#06B6D4' },
+    { id:'avg5',    name:'평균',      emoji:'📊', color:'#10B981' },
+    { id:'pattern5',name:'규칙·대응', emoji:'🔄', color:'#8B5CF6' },
+    { id:'stat5',   name:'확률·\n통계',   emoji:'🎲', color:'#A855F7' },
+  ],
+  6: [
+    { id:'ratio6',  name:'비와 비율', emoji:'📊', color:'#EC4899' },
+    { id:'fracdiv6',name:'분수 나눗셈',emoji:'½', color:'#F97316' },
+    { id:'decdiv6', name:'소수 나눗셈',emoji:'🔢', color:'#06B6D4' },
+    { id:'prob6',   name:'경우의 수', emoji:'🎲', color:'#8B5CF6' },
+    { id:'stat6',   name:'확률·\n통계',   emoji:'📈', color:'#A855F7' },
+    { id:'prop6',   name:'비례식',   emoji:'⚖️', color:'#4F46E5' },
+    { id:'vol6',    name:'입체도형',  emoji:'📦', color:'#10B981' },
+  ],
+};
+
+let grade = 1, conceptId = 'add1', difficulty = 1;
+
+const GRADE_COLORS  = ['','red','orange','amber','green','blue','purple'];
+const GRADE_ACTIVE  = ['','bg-red-500','bg-orange-500','bg-amber-500','bg-green-500','bg-blue-500','bg-purple-500'];
+
+function selectGrade(g) {
+  grade = g;
+  for(let i=1;i<=6;i++){
+    const btn=document.getElementById('gbtn-'+i);
+    const col=GRADE_COLORS[i];
+    btn.className = i===g
+      ? `grade-btn text-white border-${col}-500 ${GRADE_ACTIVE[i]}`
+      : `grade-btn text-${col}-300 border-${col}-500`;
+  }
+  document.getElementById('concept-grade-label').textContent = `— ${g}학년`;
+  const concepts = GRADE_CONCEPTS[g];
+  const grid = document.getElementById('concept-grid');
+  grid.innerHTML = concepts.map(c=>`
+    <button onclick="selectConcept('${c.id}')" id="cbtn-${c.id}"
+      class="concept-btn"
+      style="border-color:${c.color}40;color:rgba(255,255,255,.7);background:${c.color}15;">
+      <span style="font-size:1.2rem;line-height:1">${c.emoji}</span>
+      <span style="white-space:pre-line;line-height:1.3">${c.name}</span>
+    </button>
+  `).join('');
+  selectConcept(concepts[0].id);
+}
+
+function selectConcept(id) {
+  conceptId = id;
+  const concepts = GRADE_CONCEPTS[grade] || [];
+  const sel = concepts.find(c=>c.id===id);
+  concepts.forEach(c=>{
+    const btn=document.getElementById('cbtn-'+c.id);
+    if(!btn) return;
+    if(c.id===id){
+      btn.style.background=c.color+'55';
+      btn.style.borderColor=c.color;
+      btn.style.color='white';
+      btn.style.boxShadow=`0 0 12px ${c.color}66`;
+    } else {
+      btn.style.background=c.color+'15';
+      btn.style.borderColor=c.color+'40';
+      btn.style.color='rgba(255,255,255,.7)';
+      btn.style.boxShadow='none';
+    }
+  });
+  if(sel) document.getElementById('concept-sel-label').textContent = `✓ ${sel.name.replace('\n',' ')} 선택됨`;
+}
+
+function selectDiff(d) {
+  difficulty = d;
+  const base = 'diff-btn transition';
+  const cfg = [
+    ['border-green-400 text-green-300 hover:bg-green-500 hover:text-white',
+     'border-green-400 bg-green-500 text-white'],
+    ['border-yellow-400 text-yellow-200 hover:bg-yellow-500 hover:text-white',
+     'border-yellow-400 bg-yellow-500 text-white'],
+    ['border-red-400 text-red-300 hover:bg-red-500 hover:text-white',
+     'border-red-400 bg-red-500 text-white'],
+  ];
+  [0,1,2].forEach(i=>{
+    document.getElementById('diff-btn-'+i).className = base+' '+cfg[i][i===d?1:0];
+  });
+}
+
+function goGame() {
+  localStorage.setItem('qmath_tetris_grade',    grade);
+  localStorage.setItem('qmath_tetris_concept',  conceptId);
+  localStorage.setItem('qmath_tetris_diff',     difficulty);
+  window.location.href = 'tetris.html';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const best = parseInt(localStorage.getItem('qmath_tetris_best')||'0');
+  document.getElementById('best-score-disp').textContent = best.toLocaleString();
+  selectGrade(1);
+  selectDiff(1);
+});
+</script>
+</body>
+</html>
