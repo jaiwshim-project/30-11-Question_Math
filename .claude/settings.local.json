@@ -36,7 +36,8 @@
       "Bash(wc:*)",
       "Bash(cd:*)",
       "Bash(find:*)",
-      "WebFetch(domain:metabiz101.tistory.com)"
+      "WebFetch(domain:metabiz101.tistory.com)",
+      "Bash(grep:*)"
     ]
   }
 }
