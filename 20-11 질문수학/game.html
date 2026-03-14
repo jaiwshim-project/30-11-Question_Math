@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게임 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.fade-in{animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:linear-gradient(#4F46E5,#7C3AED);border-radius:3px;}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!important;}
+
+/* Tabs */
+.tab-btn{transition:all .2s;}
+.tab-active{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 12px rgba(79,70,229,.3);}
+
+/* Flashcard 3D flip */
+.scene{width:100%;max-width:440px;height:260px;perspective:800px;margin:0 auto;}
+.card-3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s ease;cursor:pointer;}
+.card-3d.flipped{transform:rotateY(180deg);}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;}
+.card-front{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 12px 32px rgba(79,70,229,.35);}
+.card-back{background:linear-gradient(135deg,#059669,#10B981);color:white;transform:rotateY(180deg);box-shadow:0 12px 32px rgba(16,185,129,.3);}
+
+/* Match */
+.match-card{transition:all .2s;cursor:pointer;border:2px solid rgba(99,91,255,.2);background:white;}
+.match-card.selected{border-color:#4F46E5!important;background:#EEF2FF!important;transform:scale(1.04);box-shadow:0 0 0 3px rgba(79,70,229,.25);}
+.match-card.matched{border-color:#10B981!important;background:#D1FAE5!important;opacity:.6;pointer-events:none;}
+.match-card.wrong{border-color:#EF4444!important;background:#FEE2E2!important;animation:shake .35s ease;}
+
+/* Quiz */
+.quiz-opt{transition:all .2s;cursor:pointer;border:2px solid #C7D2FE;background:white;}
+.quiz-opt:hover{border-color:#4F46E5;background:#EEF2FF;}
+.quiz-opt.correct{background:linear-gradient(to right,#4ADE80,#10B981)!important;color:white!important;border:none!important;pointer-events:none;}
+.quiz-opt.wrong{background:linear-gradient(to right,#F87171,#FB7185)!important;color:white!important;border:none!important;pointer-events:none;}
+.quiz-timer-bar{background:linear-gradient(90deg,#10B981,#4F46E5,#EC4899);transition:width .1s linear;}
+
+/* Combo */
+.combo-badge{background:linear-gradient(135deg,#F59E0B,#EF4444);animation:comboPop .3s ease;}
+@keyframes comboPop{0%{transform:scale(.7)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Animations */
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.star-anim{animation:starPop .4s ease;}
+@keyframes starPop{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+/* Particle */
+.particle{position:fixed;pointer-events:none;font-size:1.4rem;animation:particleFall 2.2s ease forwards;z-index:9999;}
+@keyframes particleFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+
+/* XP */
+.xp-fill{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .7s ease;}
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50" style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div><div class="font-black text-white text-sm leading-tight">질문수학</div><div class="text-xs text-white/60">CREQUESSION Math</div></div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
+      <a href="index.html"     class="hover:text-white transition">홈</a>
+      <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+      <a href="game.html"      class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
+      <a href="tetris.html"   class="text-white/90 hover:text-white transition">수학테트리스</a>
+      <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="hover:text-white transition">관리</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm text-white font-medium px-4 py-2 border border-white rounded-lg hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+      </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html" class="block py-2 text-white">홈</a>
+    <a href="learn.html" class="block py-2 text-white">학습하기</a>
+    <a href="game.html"  class="block py-2 text-white font-black">게임</a>
+    <a href="tetris.html" class="block py-2 text-white">수학테트리스</a>
+    <a href="ai.html"    class="block py-2 text-white">AI 튜터</a>
+    <a href="test.html"  class="block py-2 text-white">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white">대시보드</a>
+    <a href="admin.html" class="block py-2 text-white">관리</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-black text-gray-900">🎮 수학 게임</h1>
+    <p class="text-gray-600 text-sm mt-1">게임으로 수학 개념을 재미있게 익혀요!</p>
+  </div>
+
+  <!-- XP Bar -->
+  <div class="bg-white rounded-2xl p-4 mb-6 border-2 border-indigo-300 shadow-sm flex items-center gap-4">
+    <div class="text-2xl">⚡</div>
+    <div class="flex-1">
+      <div class="flex justify-between text-xs font-medium text-gray-600 mb-1.5">
+        <span>레벨 <span id="xp-level" class="gradient-bg text-white font-black px-2 py-0.5 rounded-lg text-xs">1</span></span>
+        <span id="xp-val" class="text-gray-500">0 XP</span>
+      </div>
+      <div class="h-4 bg-gray-100 rounded-full overflow-hidden">
+        <div id="xp-fill" class="h-full xp-fill rounded-full" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="text-right pl-3 border-l border-gray-100">
+      <div class="text-yellow-500 font-black text-lg">⭐ <span id="total-stars">0</span></div>
+      <div class="text-xs text-gray-500">총 별</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6 flex-wrap">
+    <button onclick="switchTab('flash')" id="tab-flash" class="tab-btn tab-active flex-1 py-3 rounded-xl font-bold text-base shadow-lg min-w-[120px]">🃏 플래시카드</button>
+    <button onclick="switchTab('match')" id="tab-match" class="tab-btn flex-1 py-3 rounded-xl font-bold text-base bg-white border-2 border-indigo-200 text-gray-700 shadow-sm min-w-[120px]">🧩 짝 맞추기</button>
+    <button onclick="switchTab('quiz')"  id="tab-quiz"  class="tab-btn flex-1 py-3 rounded-xl font-bold text-base bg-white border-2 border-indigo-200 text-gray-700 shadow-sm min-w-[120px]">🏁 퀴즈 레이스</button>
+    <a href="tetris.html" class="flex-1 py-3 rounded-xl font-bold text-base bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition text-center min-w-[120px] flex items-center justify-center gap-1">🧱 수학테트리스</a>
+  </div>
+
+  <!-- ════════════════════ FLASHCARD ════════════════════ -->
+  <div id="panel-flash" class="fade-in">
+
+    <div id="flash-setup" class="bg-white rounded-2xl p-6 border-2 border-indigo-200 shadow-sm">
+      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-5">카드를 클릭하면 답이 뒤집혀요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <button onclick="startFlash(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="startFlash(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="startFlash(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="startFlash(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="startFlash(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="startFlash(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      </div>
+      <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 text-sm text-indigo-700">
+        💡 "알아요" → ⭐ 획득 | "몰라요" → 다시 복습!
+      </div>
+    </div>
+
+    <div id="flash-play" class="hidden">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-sm font-medium text-gray-600"><span id="fc-current">1</span> / <span id="fc-total">10</span></div>
+        <div class="flex gap-3 text-sm">
+          <span class="text-green-600 font-bold">✓ <span id="fc-know">0</span></span>
+          <span class="text-red-500 font-bold">✗ <span id="fc-dontknow">0</span></span>
+        </div>
+        <div class="w-28 h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div id="fc-prog" class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="text-center mb-3">
+        <span id="fc-concept-title" class="text-xs font-bold text-indigo-700 bg-indigo-50 border-2 border-indigo-200 px-3 py-1 rounded-full"></span>
+      </div>
+
+      <div class="scene mb-5">
+        <div class="card-3d" id="fc-card" onclick="flipCard()">
+          <div class="card-face card-front">
+            <div class="text-5xl mb-4" id="fc-q-icon">❓</div>
+            <div class="text-sm font-bold leading-relaxed" id="fc-question"></div>
+            <div class="text-xs mt-5 opacity-70">👆 탭하여 뒤집기</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="text-5xl mb-4">💡</div>
+            <div class="text-sm font-bold leading-relaxed" id="fc-answer"></div>
+            <div class="text-xs mt-5 opacity-70">알고 있었나요?</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="fc-buttons" class="hidden flex gap-3 justify-center mb-4">
+        <button onclick="flashAnswer(false)" class="px-8 py-3 bg-gradient-to-r from-red-400 to-rose-500 text-white font-bold rounded-2xl border-0 shadow-lg hover:shadow-xl transition text-sm">😅 몰라요</button>
+        <button onclick="flashAnswer(true)"  class="px-8 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-2xl border-0 shadow-lg hover:shadow-xl transition text-sm">😊 알아요!</button>
+      </div>
+      <div class="text-center"><button onclick="stopFlash()" class="text-xs text-gray-400 hover:text-gray-600">그만하기</button></div>
+    </div>
+
+    <div id="flash-result" class="hidden bg-white rounded-2xl p-8 border-2 border-indigo-200 shadow-sm text-center">
+      <div class="text-5xl mb-3" id="fr-emoji">🎉</div>
+      <h3 class="text-2xl font-black text-gray-900 mb-1" id="fr-title">잘했어요!</h3>
+      <p class="text-gray-600 mb-4" id="fr-desc"></p>
+      <div class="flex justify-center gap-1 mb-5" id="fr-stars"></div>
+      <div class="gradient-bg rounded-2xl p-4 mb-6 shadow-lg">
+        <div class="text-3xl font-black text-white" id="fr-xp">+0 XP</div>
+        <div class="text-sm text-white/80">획득한 경험치</div>
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button onclick="stopFlash()" class="px-5 py-2.5 bg-white border-2 border-indigo-200 text-gray-700 font-bold rounded-2xl hover:bg-indigo-50 transition text-sm">학년 바꾸기</button>
+        <button onclick="startFlash(currentFlashGrade)" class="px-5 py-3 gradient-bg text-white font-bold rounded-2xl shadow-xl hover:shadow-xl transition text-sm">다시 하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ MATCH GAME ════════════════════ -->
+  <div id="panel-match" class="hidden fade-in">
+
+    <div id="match-setup" class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-sm">
+      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-5">개념 이름 ↔ 설명을 빠르게 연결하세요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <button onclick="startMatch(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="startMatch(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="startMatch(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="startMatch(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="startMatch(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="startMatch(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      </div>
+      <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+        💡 빨리 맞힐수록 별이 더 많아요! 실수는 최소로!
+      </div>
+    </div>
+
+    <div id="match-play" class="hidden">
+      <div class="flex items-center justify-between bg-white rounded-xl px-4 py-3 border-2 border-amber-200 shadow-sm mb-4">
+        <div class="text-sm font-medium text-gray-700">⏱ <span id="match-time" class="font-black text-amber-600">0</span>초</div>
+        <div class="text-sm text-gray-600">남은 짝: <span id="match-left" class="font-black text-amber-600">6</span></div>
+        <div class="text-sm text-red-500 font-medium">실수: <span id="match-errors" class="font-black">0</span></div>
+      </div>
+      <div id="match-grid" class="grid grid-cols-3 gap-3 mb-4"></div>
+      <div class="text-center"><button onclick="stopMatch()" class="text-xs text-gray-400 hover:text-gray-600">그만하기</button></div>
+    </div>
+
+    <div id="match-result" class="hidden bg-white rounded-2xl p-8 border-2 border-amber-200 shadow-sm text-center">
+      <div class="text-5xl mb-3" id="mr-emoji">🎉</div>
+      <h3 class="text-2xl font-black text-gray-900 mb-1">짝 맞추기 완료!</h3>
+      <p class="text-gray-600 mb-4" id="mr-desc"></p>
+      <div class="flex justify-center gap-1 mb-5" id="mr-stars"></div>
+      <div class="gradient-bg rounded-2xl p-4 mb-6 shadow-lg">
+        <div class="text-3xl font-black text-white" id="mr-xp">+0 XP</div>
+        <div class="text-sm text-white/80">획득한 경험치</div>
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button onclick="stopMatch()" class="px-5 py-2.5 bg-white border-2 border-indigo-200 text-gray-700 font-bold rounded-2xl hover:bg-indigo-50 transition text-sm">학년 바꾸기</button>
+        <button onclick="startMatch(currentMatchGrade)" class="px-5 py-3 gradient-bg text-white font-bold rounded-2xl shadow-xl hover:shadow-xl transition text-sm">다시 하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ QUIZ RACE ════════════════════ -->
+  <div id="panel-quiz" class="hidden fade-in">
+
+    <div id="quiz-setup" class="bg-white rounded-2xl p-6 border-2 border-red-200 shadow-sm">
+      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-5">30초 안에 최대한 많이 맞혀요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <button onclick="startQuiz(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="startQuiz(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="startQuiz(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="startQuiz(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="startQuiz(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="startQuiz(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      </div>
+      <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-700">
+        🔥 연속 정답 시 콤보 보너스 ×2~×4! 더 많은 XP를 획득하세요.
+      </div>
+    </div>
+
+    <div id="quiz-play" class="hidden">
+      <!-- Timer bar -->
+      <div class="bg-white rounded-2xl p-4 mb-4 border-2 border-red-200 shadow-sm flex items-center gap-4">
+        <div class="flex-1">
+          <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+            <span>⏱ 남은 시간</span><span><span id="quiz-sec" class="font-black text-red-500">30</span>초</span>
+          </div>
+          <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div id="quiz-timer-bar" class="h-full quiz-timer-bar rounded-full" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="text-center px-4 border-l border-gray-100">
+          <div class="text-xl font-black text-primary" id="quiz-score">0</div>
+          <div class="text-xs text-gray-500">점수</div>
+        </div>
+        <div id="combo-badge" class="hidden combo-badge text-white text-xs font-black px-3 py-1.5 rounded-full">
+          🔥 ×<span id="combo-num">1</span>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <div class="bg-white rounded-2xl p-5 border-2 border-red-200 shadow-sm mb-4">
+        <div class="flex items-center gap-2 mb-3">
+          <span id="quiz-q-num" class="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">Q1</span>
+          <span id="quiz-concept" class="text-xs text-gray-500 font-medium"></span>
+        </div>
+        <p class="font-bold text-gray-900 leading-relaxed" id="quiz-question"></p>
+      </div>
+
+      <!-- Options -->
+      <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3"></div>
+
+      <!-- Feedback -->
+      <div id="quiz-feedback" class="hidden text-center text-sm font-bold py-2.5 rounded-2xl"></div>
+    </div>
+
+    <div id="quiz-result" class="hidden bg-white rounded-2xl p-8 border-2 border-red-200 shadow-sm text-center">
+      <div class="text-5xl mb-3" id="qr-emoji">🏁</div>
+      <h3 class="text-2xl font-black text-gray-900 mb-1">퀴즈 종료!</h3>
+      <p class="text-gray-600 mb-4" id="qr-desc"></p>
+      <div class="flex justify-center gap-1 mb-4 text-4xl" id="qr-stars"></div>
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="bg-indigo-50 rounded-xl p-3 border-2 border-indigo-200">
+          <div class="text-xl font-black text-primary" id="qr-score">0</div>
+          <div class="text-xs text-gray-500">점수</div>
+        </div>
+        <div class="bg-green-50 rounded-xl p-3 border-2 border-green-200">
+          <div class="text-xl font-black text-green-600" id="qr-correct">0</div>
+          <div class="text-xs text-gray-500">정답 수</div>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-3 border-2 border-amber-200">
+          <div class="text-xl font-black text-amber-600" id="qr-best">0</div>
+          <div class="text-xs text-gray-500">최고 점수</div>
+        </div>
+      </div>
+      <div class="gradient-bg rounded-2xl p-4 mb-6 shadow-lg">
+        <div class="text-3xl font-black text-white" id="qr-xp">+0 XP</div>
+        <div class="text-sm text-white/80">획득한 경험치</div>
+      </div>
+      <div class="flex gap-3 justify-center">
+        <button onclick="stopQuiz()" class="px-5 py-2.5 bg-white border-2 border-indigo-200 text-gray-700 font-bold rounded-2xl hover:bg-indigo-50 transition text-sm">학년 바꾸기</button>
+        <button onclick="startQuiz(currentQuizGrade)" class="px-5 py-3 gradient-bg text-white font-bold rounded-2xl shadow-xl hover:shadow-xl transition text-sm">다시 하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Records -->
+  <div class="mt-8 bg-white rounded-2xl p-5 border-2 border-indigo-200 shadow-sm">
+    <h3 class="font-black text-gray-800 mb-4">🏆 최근 기록</h3>
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div class="bg-indigo-50 rounded-xl p-3 border-2 border-indigo-200">
+        <div class="text-lg mb-1">🃏</div>
+        <div class="text-xs text-gray-500 mb-1">플래시카드</div>
+        <div id="hist-flash" class="text-sm font-bold text-gray-700">기록 없음</div>
+      </div>
+      <div class="bg-amber-50 rounded-xl p-3 border-2 border-amber-200">
+        <div class="text-lg mb-1">🧩</div>
+        <div class="text-xs text-gray-500 mb-1">짝 맞추기</div>
+        <div id="hist-match" class="text-sm font-bold text-gray-700">기록 없음</div>
+      </div>
+      <div class="bg-red-50 rounded-xl p-3 border-2 border-red-200">
+        <div class="text-lg mb-1">🏁</div>
+        <div class="text-xs text-gray-500 mb-1">퀴즈 레이스</div>
+        <div id="hist-quiz" class="text-sm font-bold text-gray-700">기록 없음</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"></div>
+      <div><label class="block text-sm font-medium mb-1">역할</label><select id="login-role" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select></div>
+      <div>
+        <label class="block text-sm font-medium mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer hover:border-sky-400 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer hover:border-pink-400 transition has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full gradient-bg text-white font-bold py-3 rounded-2xl shadow-md hover:shadow-lg transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+// ═══ STATE ════════════════════════════════════════════
+let currentFlashGrade = 1;
+let currentMatchGrade = 1;
+let currentQuizGrade  = 1;
+
+// ─── XP / Stars ───────────────────────────────────────
+function getXP()      { return parseInt(localStorage.getItem('qmath_xp') || '0'); }
+function calcLevel(x) { return Math.floor(x / 200) + 1; }
+function totalStars() {
+  const s = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  return Object.values(s).reduce((a,b)=>a+b, 0);
+}
+function addXP(amount) {
+  localStorage.setItem('qmath_xp', getXP() + amount);
+  renderXPBar();
+}
+function renderXPBar() {
+  const xp  = getXP();
+  const lvl = calcLevel(xp);
+  const pct = ((xp % 200) / 200) * 100;
+  document.getElementById('xp-level').textContent   = lvl;
+  document.getElementById('xp-val').textContent     = xp + ' XP';
+  document.getElementById('xp-fill').style.width    = pct + '%';
+  document.getElementById('total-stars').textContent = totalStars();
+}
+
+// ─── Stars HTML ───────────────────────────────────────
+function starsHTML(n) {
+  return [1,2,3].map(i =>
+    `<span class="text-3xl star-anim" style="animation-delay:${(i-1)*.15}s">${i<=n?'⭐':'☆'}</span>`
+  ).join('');
+}
+
+// ─── Particles ────────────────────────────────────────
+function launchParticles(count, emojis) {
+  const arr = Array.isArray(emojis) ? emojis : [emojis];
+  for (let i=0; i<count; i++) {
+    const el = document.createElement('div');
+    el.className = 'particle';
+    el.textContent = arr[Math.floor(Math.random()*arr.length)];
+    el.style.left  = (Math.random()*95) + 'vw';
+    el.style.top   = '-40px';
+    el.style.animationDuration = (1.2 + Math.random()*1.2) + 's';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2800);
+  }
+}
+
+// ─── Tab switcher ─────────────────────────────────────
+function switchTab(name) {
+  ['flash','match','quiz'].forEach(t => {
+    document.getElementById('panel-'+t).classList.toggle('hidden', t!==name);
+    const btn = document.getElementById('tab-'+t);
+    btn.className = t===name
+      ? 'tab-btn tab-active flex-1 py-3 rounded-xl font-bold text-base shadow-lg'
+      : 'tab-btn flex-1 py-3 rounded-xl font-bold text-base bg-white border-2 border-indigo-200 text-gray-700 shadow-sm';
+  });
+}
+
+// ─── History display ──────────────────────────────────
+function updateHistory() {
+  const fs = JSON.parse(localStorage.getItem('qmath_flashcard_scores')||'[]');
+  const ms = JSON.parse(localStorage.getItem('qmath_match_scores')||'[]');
+  const qs = JSON.parse(localStorage.getItem('qmath_quiz_scores')||'[]');
+  const fl = fs.length ? fs[fs.length-1] : null;
+  const ml = ms.length ? ms[ms.length-1] : null;
+  const ql = qs.length ? qs[qs.length-1] : null;
+  document.getElementById('hist-flash').innerHTML = fl ? `${fl.grade}학년 ⭐${fl.stars}` : '기록 없음';
+  document.getElementById('hist-match').innerHTML = ml ? `${ml.grade}학년 ${ml.time}초 ⭐${ml.stars}` : '기록 없음';
+  document.getElementById('hist-quiz').innerHTML  = ql ? `${ql.grade}학년 ${ql.score}점 ⭐${ql.stars}` : '기록 없음';
+}
+
+// ═══════════════════════════════════════════════════════
+// FLASHCARD
+// ═══════════════════════════════════════════════════════
+let fcCards=[], fcIdx=0, fcKnow=0, fcDontKnow=0, fcFlipped=false;
+
+function startFlash(grade) {
+  currentFlashGrade = grade;
+  const pool = CONCEPTS.filter(c=>c.grade==grade).sort(()=>Math.random()-.5);
+  fcCards = pool.flatMap(c =>
+    c.questions.slice(0,1).map(q=>({ icon:c.icon, title:c.title, question:q.q, answer:q.hint }))
+  ).sort(()=>Math.random()-.5).slice(0,10);
+  fcIdx=0; fcKnow=0; fcDontKnow=0;
+
+  show('flash-play'); hide('flash-setup'); hide('flash-result');
+  document.getElementById('fc-total').textContent = fcCards.length;
+  renderFlashCard();
+}
+
+function renderFlashCard() {
+  if(fcIdx >= fcCards.length) { endFlash(); return; }
+  const c = fcCards[fcIdx];
+  fcFlipped = false;
+  document.getElementById('fc-card').classList.remove('flipped');
+  document.getElementById('fc-buttons').classList.add('hidden');
+  document.getElementById('fc-q-icon').textContent   = c.icon;
+  document.getElementById('fc-question').textContent = c.question;
+  document.getElementById('fc-answer').textContent   = c.answer;
+  document.getElementById('fc-concept-title').textContent = c.title;
+  document.getElementById('fc-current').textContent  = fcIdx + 1;
+  document.getElementById('fc-know').textContent     = fcKnow;
+  document.getElementById('fc-dontknow').textContent = fcDontKnow;
+  document.getElementById('fc-prog').style.width     = (fcIdx/fcCards.length*100)+'%';
+}
+
+function flipCard() {
+  if(fcFlipped) return;
+  fcFlipped = true;
+  document.getElementById('fc-card').classList.add('flipped');
+  setTimeout(()=>document.getElementById('fc-buttons').classList.remove('hidden'), 320);
+}
+
+function flashAnswer(know) {
+  if(know) fcKnow++; else fcDontKnow++;
+  fcIdx++;
+  document.getElementById('fc-buttons').classList.add('hidden');
+  setTimeout(renderFlashCard, 180);
+}
+
+function endFlash() {
+  const pct   = fcKnow / fcCards.length;
+  const stars = pct>=.9 ? 3 : pct>=.6 ? 2 : 1;
+  const xp    = stars * 50;
+  addXP(xp);
+  const arr = JSON.parse(localStorage.getItem('qmath_flashcard_scores')||'[]');
+  arr.push({ grade:currentFlashGrade, know:fcKnow, total:fcCards.length, stars, xp, date:Date.now() });
+  localStorage.setItem('qmath_flashcard_scores', JSON.stringify(arr));
+  updateHistory();
+
+  hide('flash-play'); show('flash-result');
+  document.getElementById('fr-emoji').textContent = pct>=.9?'🏆':pct>=.6?'🎉':'😊';
+  document.getElementById('fr-title').textContent = pct>=.9?'완벽해요!':pct>=.6?'잘했어요!':'계속 연습해요!';
+  document.getElementById('fr-desc').textContent  = `${fcCards.length}개 중 ${fcKnow}개를 알고 있어요.`;
+  document.getElementById('fr-stars').innerHTML   = starsHTML(stars);
+  document.getElementById('fr-xp').textContent    = '+'+xp+' XP';
+  if(stars===3) launchParticles(22,['🌟','⭐','✨']);
+  else if(stars>=2) launchParticles(10,'⭐');
+}
+
+function stopFlash() { hide('flash-play'); hide('flash-result'); show('flash-setup'); }
+
+// ═══════════════════════════════════════════════════════
+// MATCH GAME
+// ═══════════════════════════════════════════════════════
+let matchPairs=[], matchSel=null, matchMatched=0, matchErrors=0;
+let matchTimerInterval=null, matchStartTime=0;
+
+function startMatch(grade) {
+  currentMatchGrade = grade;
+  const pool = CONCEPTS.filter(c=>c.grade==grade).sort(()=>Math.random()-.5).slice(0,6);
+  matchPairs = pool.map(c=>({ id:c.id, title:c.title, desc:c.desc.length>28 ? c.desc.substring(0,28)+'…' : c.desc }));
+  matchSel=null; matchMatched=0; matchErrors=0; matchStartTime=Date.now();
+
+  show('match-play'); hide('match-setup'); hide('match-result');
+  document.getElementById('match-left').textContent   = matchPairs.length;
+  document.getElementById('match-errors').textContent = '0';
+
+  clearInterval(matchTimerInterval);
+  matchTimerInterval = setInterval(()=>{
+    document.getElementById('match-time').textContent = Math.floor((Date.now()-matchStartTime)/1000);
+  }, 500);
+
+  renderMatchGrid();
+}
+
+function renderMatchGrid() {
+  const cards = [
+    ...matchPairs.map(p=>({ id:p.id, text:p.title, side:'title' })),
+    ...matchPairs.map(p=>({ id:p.id, text:p.desc,  side:'desc'  }))
+  ].sort(()=>Math.random()-.5);
+
+  document.getElementById('match-grid').innerHTML = cards.map((c,i)=>`
+    <button onclick="matchClick(${i})" data-idx="${i}" data-id="${c.id}" data-side="${c.side}"
+      class="match-card rounded-xl p-3 text-xs font-medium text-gray-700 leading-snug text-left min-h-[60px] flex items-center shadow-sm">
+      ${c.text}
+    </button>
+  `).join('');
+}
+
+function matchClick(idx) {
+  const btn = document.querySelector(`[data-idx="${idx}"]`);
+  if(!btn || btn.classList.contains('matched')) return;
+
+  if(!matchSel) {
+    matchSel = { idx, id:btn.dataset.id, side:btn.dataset.side };
+    btn.classList.add('selected');
+    return;
+  }
+
+  const prev = document.querySelector(`[data-idx="${matchSel.idx}"]`);
+
+  if(matchSel.idx === idx) {           // same card
+    prev.classList.remove('selected');
+    matchSel = null;
+    return;
+  }
+
+  if(matchSel.id===btn.dataset.id && matchSel.side!==btn.dataset.side) {
+    prev.classList.remove('selected'); prev.classList.add('matched');
+    btn.classList.add('matched');
+    matchMatched++;
+    document.getElementById('match-left').textContent = matchPairs.length - matchMatched;
+    matchSel = null;
+    if(matchMatched===matchPairs.length) { clearInterval(matchTimerInterval); setTimeout(endMatch,400); }
+  } else {
+    matchErrors++;
+    document.getElementById('match-errors').textContent = matchErrors;
+    btn.classList.add('wrong'); prev.classList.add('wrong');
+    setTimeout(()=>{ btn.classList.remove('wrong','selected'); prev.classList.remove('wrong','selected'); matchSel=null; }, 650);
+  }
+}
+
+function endMatch() {
+  const elapsed = Math.floor((Date.now()-matchStartTime)/1000);
+  const stars = (elapsed<=20 && matchErrors<=1) ? 3 : (elapsed<=45 && matchErrors<=3) ? 2 : 1;
+  const xp    = stars * 60;
+  addXP(xp);
+  const arr = JSON.parse(localStorage.getItem('qmath_match_scores')||'[]');
+  arr.push({ grade:currentMatchGrade, time:elapsed, errors:matchErrors, stars, xp, date:Date.now() });
+  localStorage.setItem('qmath_match_scores', JSON.stringify(arr));
+  updateHistory();
+
+  hide('match-play'); show('match-result');
+  document.getElementById('mr-emoji').textContent  = stars===3?'🏆':stars===2?'🎉':'😊';
+  document.getElementById('mr-desc').textContent   = `${elapsed}초 완료! 실수 ${matchErrors}번`;
+  document.getElementById('mr-stars').innerHTML    = starsHTML(stars);
+  document.getElementById('mr-xp').textContent     = '+'+xp+' XP';
+  if(stars===3) launchParticles(25,['🌟','⭐','🎊']);
+  else if(stars>=2) launchParticles(12,'⭐');
+}
+
+function stopMatch() {
+  clearInterval(matchTimerInterval);
+  hide('match-play'); hide('match-result'); show('match-setup');
+}
+
+// ═══════════════════════════════════════════════════════
+// QUIZ RACE
+// ═══════════════════════════════════════════════════════
+let quizQs=[], quizIdx=0, quizScore=0, quizCorrect=0;
+let quizCombo=1, quizSec=30, quizInterval=null, quizActive=false, quizBest=0;
+
+function startQuiz(grade) {
+  currentQuizGrade = grade;
+  const pool = CONCEPTS.filter(c=>c.grade==grade);
+  quizQs = pool.flatMap(c=>c.questions.map(q=>({
+    icon:c.icon, concept:c.title, q:q.q, hint:q.hint,
+    options: makeOptions(q.hint, pool)
+  }))).sort(()=>Math.random()-.5).slice(0,25);
+
+  quizIdx=0; quizScore=0; quizCorrect=0; quizCombo=1; quizSec=30; quizActive=false;
+  const hist = JSON.parse(localStorage.getItem('qmath_quiz_scores')||'[]');
+  quizBest = hist.filter(s=>s.grade==grade).reduce((m,s)=>Math.max(m,s.score),0);
+
+  show('quiz-play'); hide('quiz-setup'); hide('quiz-result');
+  document.getElementById('quiz-feedback').classList.add('hidden');
+  document.getElementById('combo-badge').classList.add('hidden');
+  updateTimerUI();
+
+  clearInterval(quizInterval);
+  quizInterval = setInterval(()=>{
+    quizSec--;
+    updateTimerUI();
+    if(quizSec<=0){ clearInterval(quizInterval); endQuiz(); }
+  },1000);
+
+  renderQuizQ();
+}
+
+function cleanHint(h) { return h.replace(/\.\.\./g,'').replace(/…/g,'').trim().split('(')[0].trim(); }
+
+function makeOptions(correctHint, pool) {
+  const correct = cleanHint(correctHint);
+  const others  = pool.flatMap(c=>c.questions.map(q=>cleanHint(q.hint)))
+    .filter(h=>h && h!==correct && h.length>0);
+  const distractors = others.sort(()=>Math.random()-.5).slice(0,3);
+  return [correct,...distractors].sort(()=>Math.random()-.5);
+}
+
+function updateTimerUI() {
+  document.getElementById('quiz-sec').textContent = quizSec;
+  document.getElementById('quiz-timer-bar').style.width = (quizSec/30*100)+'%';
+}
+
+function renderQuizQ() {
+  if(quizIdx>=quizQs.length){ clearInterval(quizInterval); endQuiz(); return; }
+  const q = quizQs[quizIdx];
+  quizActive = true;
+
+  document.getElementById('quiz-q-num').textContent    = 'Q'+(quizIdx+1);
+  document.getElementById('quiz-concept').textContent  = q.icon+' '+q.concept;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('quiz-score').textContent    = quizScore;
+  document.getElementById('quiz-feedback').classList.add('hidden');
+
+  const combo = document.getElementById('combo-badge');
+  if(quizCombo>1){ combo.classList.remove('hidden'); document.getElementById('combo-num').textContent=quizCombo; }
+  else           { combo.classList.add('hidden'); }
+
+  const correct = cleanHint(q.hint);
+  document.getElementById('quiz-options').innerHTML = q.options.map((opt,i)=>`
+    <button onclick="quizAnswer(${i})" class="quiz-opt rounded-2xl p-4 text-sm font-medium text-left text-gray-800 shadow-sm leading-snug">
+      <span class="font-black text-primary mr-2">${['①','②','③','④'][i]}</span>${opt}
+    </button>
+  `).join('');
+}
+
+function quizAnswer(i) {
+  if(!quizActive) return;
+  quizActive = false;
+  const q   = quizQs[quizIdx];
+  const correct = cleanHint(q.hint);
+  const chosen  = q.options[i];
+  const isRight = chosen===correct;
+
+  document.querySelectorAll('.quiz-opt').forEach((btn,j)=>{
+    if(q.options[j]===correct) btn.classList.add('correct');
+    else if(j===i && !isRight) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('quiz-feedback');
+  fb.classList.remove('hidden');
+
+  if(isRight) {
+    quizCorrect++;
+    quizCombo = Math.min(quizCombo+1, 4);
+    const gained = 10 * quizCombo;
+    quizScore += gained;
+    fb.className = 'text-center text-sm font-bold py-2.5 rounded-2xl bg-green-100 text-green-700';
+    fb.textContent = quizCombo>1 ? `🔥 정답! +${gained}점 (콤보 ×${quizCombo})` : `✅ 정답! +${gained}점`;
+  } else {
+    quizCombo = 1;
+    fb.className = 'text-center text-sm font-bold py-2.5 rounded-2xl bg-red-100 text-red-700';
+    fb.textContent = `❌ 오답! 정답: ${correct}`;
+  }
+
+  quizIdx++;
+  setTimeout(renderQuizQ, 1100);
+}
+
+function endQuiz() {
+  clearInterval(quizInterval);
+  const stars = quizScore>=100?3:quizScore>=40?2:1;
+  const xp    = stars * 70;
+  addXP(xp);
+  const best = Math.max(quizScore, quizBest);
+  const arr = JSON.parse(localStorage.getItem('qmath_quiz_scores')||'[]');
+  arr.push({ grade:currentQuizGrade, score:quizScore, correct:quizCorrect, stars, xp, date:Date.now() });
+  localStorage.setItem('qmath_quiz_scores', JSON.stringify(arr));
+  updateHistory();
+
+  hide('quiz-play'); show('quiz-result');
+  document.getElementById('qr-emoji').textContent    = stars===3?'🏆':stars===2?'🎉':'😊';
+  document.getElementById('qr-desc').textContent     = `${quizCorrect}문제 정답!`;
+  document.getElementById('qr-stars').innerHTML      = starsHTML(stars);
+  document.getElementById('qr-score').textContent    = quizScore;
+  document.getElementById('qr-correct').textContent  = quizCorrect;
+  document.getElementById('qr-best').textContent     = best;
+  document.getElementById('qr-xp').textContent       = '+'+xp+' XP';
+  if(stars===3) launchParticles(30,['🌟','⭐','🎊','🎉']);
+  else if(stars>=2) launchParticles(15,['⭐','🎉']);
+}
+
+function stopQuiz() {
+  clearInterval(quizInterval);
+  hide('quiz-play'); hide('quiz-result'); show('quiz-setup');
+}
+
+// ─── Helpers ──────────────────────────────────────────
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
+
+// ─── Init ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderXPBar();
+  updateHistory();
+});
+</script>
+</body>
+</html>

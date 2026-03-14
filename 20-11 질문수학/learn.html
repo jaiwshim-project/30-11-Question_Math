@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학습하기 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.fade-in{animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:linear-gradient(#4F46E5,#7C3AED);border-radius:3px;}
+nav{box-shadow:0 2px 20px rgba(79,70,229,.1)!important;border-bottom:1px solid rgba(99,91,255,.15)!important;}
+.type-badge{font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+
+/* Concept card */
+.concept-card{
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  border:1px solid rgba(99,91,255,.15);
+  background:white;
+  position:relative;
+  overflow:hidden;
+}
+.concept-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 48px rgba(79,70,229,.2),0 0 0 1px rgba(79,70,229,.12);
+  border-color:rgba(79,70,229,.3);
+}
+/* Completed card */
+.concept-card.done{border-color:rgba(16,185,129,.35);}
+.concept-card.done:hover{box-shadow:0 24px 48px rgba(16,185,129,.18),0 0 0 1px rgba(16,185,129,.2);}
+
+/* Hover preview overlay */
+.card-preview{
+  position:absolute;inset:0;background:rgba(79,70,229,.93);
+  border-radius:inherit;padding:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+}
+.concept-card:hover .card-preview{opacity:1;}
+
+/* NEW badge pulse */
+.new-pulse{animation:newPulse 2s ease infinite;}
+@keyframes newPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+
+/* Streak fire */
+.streak-fire{animation:firePop .5s ease;}
+@keyframes firePop{0%{transform:scale(.8)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* XP fill */
+.xp-fill{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .8s ease;}
+
+/* Daily card */
+.daily-card{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);position:relative;overflow:hidden;}
+.daily-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:rgba(255,255,255,.07);border-radius:50%;}
+.daily-card::after{content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;background:rgba(255,255,255,.05);border-radius:50%;}
+
+/* Grade progress pill */
+.grade-prog{height:3px;background:rgba(79,70,229,.15);border-radius:2px;overflow:hidden;margin-top:4px;}
+.grade-prog-fill{height:100%;background:linear-gradient(90deg,#4F46E5,#7C3AED);border-radius:2px;transition:width .6s ease;}
+
+/* Particle */
+.particle{position:fixed;pointer-events:none;font-size:1.3rem;animation:particleFall 2s ease forwards;z-index:9999;}
+@keyframes particleFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(90vh) rotate(720deg)}}
+
+/* Bounce button */
+.bounce-btn{animation:bounceIn .5s ease;}
+@keyframes bounceIn{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+
+/* Roadmap */
+.road-node{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;transition:all .25s;position:relative;flex-shrink:0;}
+.road-node.done{background:linear-gradient(135deg,#059669,#10B981);color:white;box-shadow:0 4px 12px rgba(16,185,129,.4);}
+.road-node.active{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 16px rgba(79,70,229,.5);animation:nodePulse 2s ease infinite;}
+.road-node.locked{background:#F3F4F6;color:#9CA3AF;border:2px solid #E5E7EB;}
+.road-node:hover:not(.locked){transform:scale(1.15);}
+@keyframes nodePulse{0%,100%{box-shadow:0 4px 16px rgba(79,70,229,.5)}50%{box-shadow:0 4px 24px rgba(79,70,229,.8),0 0 0 8px rgba(79,70,229,.1)}}
+.road-connector{height:3px;background:#E5E7EB;flex:1;border-radius:2px;min-width:8px;}
+.road-connector.done{background:linear-gradient(90deg,#10B981,#059669);}
+
+/* Milestone modal */
+.milestone-modal{background:rgba(15,10,40,.75);backdrop-filter:blur(10px);}
+.milestone-content{background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);border:1px solid rgba(255,255,255,.15);}
+@keyframes milestoneIn{0%{transform:scale(.5) rotate(-5deg);opacity:0}60%{transform:scale(1.08) rotate(1deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.milestone-pop{animation:milestoneIn .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-9 h-9 gradient-bg rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div><div class="font-black text-gray-900 text-sm leading-tight">질문수학</div><div class="text-xs text-gray-500">CREQUESSION Math</div></div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+      <a href="index.html"     data-nav="index.html"     class="hover:text-primary transition">홈</a>
+      <a href="learn.html"     data-nav="learn.html"     class="font-bold text-primary border-b-2 border-primary">학습하기</a>
+      <a href="game.html"      data-nav="game.html"      class="hover:text-primary transition">게임</a>
+      <a href="tetris.html"   data-nav="tetris.html"   class="hover:text-primary transition">수학테트리스</a>
+      <a href="ai.html"        data-nav="ai.html"        class="hover:text-primary transition">AI 튜터</a>
+      <a href="test.html"      data-nav="test.html"      class="hover:text-primary transition">레벨 테스트</a>
+      <a href="dashboard.html" data-nav="dashboard.html" class="hover:text-primary transition">대시보드</a>
+      <a href="admin.html"     data-nav="admin.html"     class="hover:text-primary transition">관리</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout">
+        <button onclick="showModal('loginModal')" class="text-sm text-primary font-medium px-4 py-2 border border-primary rounded-lg hover:bg-primary hover:text-white transition">로그인</button>
+      </div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-gray-700">학생</span>
+        <button onclick="doLogout()" class="text-xs text-gray-500 hover:text-red-500 ml-1">로그아웃</button>
+      </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"     class="block py-2 text-gray-600">홈</a>
+    <a href="learn.html"     class="block py-2 text-primary font-bold">학습하기</a>
+    <a href="game.html"      class="block py-2 text-gray-600">게임</a>
+    <a href="tetris.html"    class="block py-2 text-gray-600">수학테트리스</a>
+    <a href="ai.html"        class="block py-2 text-gray-600">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-gray-600">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-gray-600">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-gray-600">관리</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="max-w-6xl mx-auto px-4 py-8 fade-in">
+
+  <!-- ── 헤더 ── -->
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-black text-gray-900">📚 학습하기</h1>
+      <p class="text-gray-600 text-sm mt-1">개념을 선택하고 6단계 학습을 시작하세요</p>
+    </div>
+    <button onclick="randomConcept()" class="bounce-btn flex items-center gap-2 px-4 py-2.5 gradient-bg text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition">
+      🎲 랜덤 도전!
+    </button>
+  </div>
+
+  <!-- ── XP + 스트릭 바 ── -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+    <!-- XP 레벨 -->
+    <div class="sm:col-span-2 bg-white rounded-2xl p-4 border border-indigo-100 shadow-sm flex items-center gap-4">
+      <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+        <span id="xp-level">1</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex justify-between text-xs font-medium mb-1.5">
+          <span class="text-gray-600">레벨 <span id="xp-level2" class="text-primary font-black">1</span> 달성까지</span>
+          <span class="text-gray-500"><span id="xp-now">0</span> / <span id="xp-next">200</span> XP</span>
+        </div>
+        <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div id="xp-fill" class="h-full xp-fill rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="text-yellow-500 font-black">⭐ <span id="total-stars-disp">0</span></div>
+        <div class="text-xs text-gray-500">총 별</div>
+      </div>
+    </div>
+    <!-- 스트릭 -->
+    <div class="bg-white rounded-2xl p-4 border border-orange-100 shadow-sm flex items-center gap-3">
+      <div class="text-3xl streak-fire" id="streak-icon">🔥</div>
+      <div>
+        <div class="text-xl font-black text-orange-500"><span id="streak-count">0</span>일 연속</div>
+        <div class="text-xs text-gray-500" id="streak-msg">오늘 학습해보세요!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 전체 진행률 ── -->
+  <div class="bg-white rounded-2xl p-4 border border-indigo-100 shadow-sm mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm font-bold text-gray-700">📊 전체 진행 현황</span>
+      <span class="text-xs text-gray-500"><span id="total-done">0</span> / 102개 완료</span>
+    </div>
+    <div class="h-3 bg-gray-100 rounded-full overflow-hidden mb-3">
+      <div id="overall-prog" class="h-full xp-fill rounded-full" style="width:0%"></div>
+    </div>
+    <!-- 학년별 미니 진행률 -->
+    <div class="grid grid-cols-6 gap-2">
+      <div class="text-center" id="grade-prog-1"><div class="text-xs font-bold text-gray-600 mb-1">1학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+      <div class="text-center" id="grade-prog-2"><div class="text-xs font-bold text-gray-600 mb-1">2학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+      <div class="text-center" id="grade-prog-3"><div class="text-xs font-bold text-gray-600 mb-1">3학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+      <div class="text-center" id="grade-prog-4"><div class="text-xs font-bold text-gray-600 mb-1">4학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+      <div class="text-center" id="grade-prog-5"><div class="text-xs font-bold text-gray-600 mb-1">5학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+      <div class="text-center" id="grade-prog-6"><div class="text-xs font-bold text-gray-600 mb-1">6학년</div><div class="grade-prog"><div class="grade-prog-fill" style="width:0%"></div></div><div class="text-xs text-gray-500 mt-1">0/17</div></div>
+    </div>
+  </div>
+
+  <!-- ── 오늘의 도전 ── -->
+  <div id="daily-section" class="mb-6">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-sm font-black text-gray-800">⚡ 오늘의 도전</span>
+      <span class="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full border border-amber-200">TODAY</span>
+    </div>
+    <a id="daily-card-link" href="#" class="daily-card rounded-2xl p-5 shadow-lg block text-white">
+      <div class="relative z-10 flex items-center gap-4">
+        <div id="daily-icon" class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">🔢</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold opacity-70 mb-1">오늘 추천 개념</div>
+          <div id="daily-title" class="font-black text-lg leading-tight">9까지의 수</div>
+          <div id="daily-desc"  class="text-sm opacity-80 mt-1 truncate">1부터 9까지의 수를 배워요</div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div id="daily-grade" class="text-xs font-bold bg-white/20 px-2 py-1 rounded-lg mb-1">1학년</div>
+          <div id="daily-stars" class="text-sm">⭐⭐⭐</div>
+        </div>
+      </div>
+      <div class="relative z-10 mt-4 bg-white/10 rounded-xl p-3 text-sm">
+        <span class="opacity-70 text-xs">첫 번째 질문 </span>
+        <span id="daily-q" class="font-medium">질문을 불러오는 중...</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── 이어서 학습 (있을 때만) ── -->
+  <div id="continue-section" class="hidden mb-6">
+    <div class="text-sm font-black text-gray-800 mb-3">▶️ 이어서 학습</div>
+    <div id="continue-cards" class="flex gap-3 overflow-x-auto pb-2"></div>
+  </div>
+
+  <!-- ── 검색 + 단원 필터 ── -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-4">
+    <input type="text" id="search-input" placeholder="개념 검색..." oninput="filterConcepts()"
+      class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary flex-1 bg-white shadow-sm">
+    <select id="topic-filter" onchange="filterConcepts()"
+      class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white shadow-sm">
+      <option value="">전체 단원</option>
+      <option value="수와 연산">수와 연산</option>
+      <option value="도형">도형</option>
+      <option value="측정">측정</option>
+      <option value="규칙성">규칙성</option>
+      <option value="자료와 가능성">자료와 가능성</option>
+    </select>
+    <select id="status-filter" onchange="filterConcepts()"
+      class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white shadow-sm">
+      <option value="">전체 상태</option>
+      <option value="new">아직 안 한 것</option>
+      <option value="done">완료한 것</option>
+      <option value="progress">진행 중</option>
+    </select>
+  </div>
+
+  <!-- ── 학년 필터 ── -->
+  <div class="flex gap-2 mb-5 overflow-x-auto pb-1">
+    <button onclick="setGrade('all')" data-grade="all" class="grade-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">전체</button>
+    <button onclick="setGrade('1')" data-grade="1" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">1학년</button>
+    <button onclick="setGrade('2')" data-grade="2" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">2학년</button>
+    <button onclick="setGrade('3')" data-grade="3" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">3학년</button>
+    <button onclick="setGrade('4')" data-grade="4" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">4학년</button>
+    <button onclick="setGrade('5')" data-grade="5" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">5학년</button>
+    <button onclick="setGrade('6')" data-grade="6" class="grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm">6학년</button>
+  </div>
+
+  <!-- ── 뷰 전환 + 개수 ── -->
+  <div class="flex items-center justify-between mb-4">
+    <div class="text-sm text-gray-500" id="concepts-count"></div>
+    <div class="flex items-center gap-3">
+      <div class="flex gap-2 text-xs text-gray-500 hidden sm:flex">
+        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-200 rounded-full inline-block border border-green-300"></span>완료</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-indigo-200 rounded-full inline-block border border-indigo-300"></span>진행 중</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-200 rounded-full inline-block border border-gray-300"></span>시작 전</span>
+      </div>
+      <div class="flex rounded-xl overflow-hidden border border-indigo-200 shadow-sm">
+        <button id="view-grid" onclick="setView('grid')" class="px-3 py-1.5 bg-primary text-white text-xs font-bold transition">📋 목록</button>
+        <button id="view-road" onclick="setView('road')" class="px-3 py-1.5 bg-white text-gray-600 text-xs font-bold transition hover:bg-indigo-50">🗺️ 로드맵</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 개념 그리드 ── -->
+  <div id="concepts-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+  <!-- ── 로드맵 뷰 ── -->
+  <div id="roadmap-view" class="hidden">
+    <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-sm mb-4">
+      <p class="text-xs text-gray-500 mb-4">각 원을 클릭하면 해당 개념 학습으로 이동합니다. ✅ 완료 · 🔵 진행중 · ⚪ 시작전</p>
+      <div id="roadmap-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone Modal -->
+<div id="milestoneModal" class="hidden fixed inset-0 milestone-modal z-[100] flex items-center justify-center p-4">
+  <div class="milestone-content milestone-pop rounded-3xl p-8 w-full max-w-sm text-center text-white shadow-2xl">
+    <div class="text-6xl mb-4" id="ms-emoji">🏆</div>
+    <div class="text-xs font-bold tracking-widest text-white/60 mb-2 uppercase">마일스톤 달성!</div>
+    <h2 class="text-2xl font-black mb-2" id="ms-title">축하합니다!</h2>
+    <p class="text-white/80 text-sm mb-6" id="ms-desc">새로운 단계에 도달했어요.</p>
+    <div class="bg-white/10 rounded-xl p-4 mb-6">
+      <div class="text-3xl font-black text-yellow-300" id="ms-reward">+100 XP</div>
+      <div class="text-white/60 text-xs mt-1">보너스 경험치 획득!</div>
+    </div>
+    <button onclick="closeMilestone()" class="w-full py-3 bg-white text-primary font-black rounded-xl hover:bg-indigo-50 transition shadow-lg">계속 학습하기 🚀</button>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"></div>
+      <div><label class="block text-sm font-medium mb-1">역할</label><select id="login-role" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select></div>
+      <div>
+        <label class="block text-sm font-medium mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer hover:border-sky-400 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span>
+            <span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer hover:border-pink-400 transition has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span>
+            <span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-800 shadow-md hover:shadow-lg transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let selectedGrade = 'all';
+
+// ── localStorage helpers ──────────────────────────────
+function getXP()       { return parseInt(localStorage.getItem('qmath_xp')||'0'); }
+function getStars()    { return JSON.parse(localStorage.getItem('qmath_stars')||'{}'); }
+function getDone()     { return JSON.parse(localStorage.getItem('qmath_completed_lessons')||'[]'); }
+function getProgress() { return JSON.parse(localStorage.getItem('qmath_progress')||'{}'); }
+function totalStarsCount() { return Object.values(getStars()).reduce((a,b)=>a+b,0); }
+
+// ── XP bar ───────────────────────────────────────────
+function renderXPBar() {
+  const xp  = getXP();
+  const lvl = Math.floor(xp/200)+1;
+  const cur = xp % 200;
+  const pct = (cur/200)*100;
+  document.getElementById('xp-level').textContent   = lvl;
+  document.getElementById('xp-level2').textContent  = lvl+1;
+  document.getElementById('xp-now').textContent     = cur;
+  document.getElementById('xp-next').textContent    = 200;
+  document.getElementById('xp-fill').style.width    = pct+'%';
+  document.getElementById('total-stars-disp').textContent = totalStarsCount();
+}
+
+// ── Streak ───────────────────────────────────────────
+function renderStreak() {
+  const today   = new Date().toDateString();
+  const data    = JSON.parse(localStorage.getItem('qmath_streak')||'{"last":"","count":0}');
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+
+  let count = data.count;
+  if(data.last === today) {
+    // already visited today — keep count
+  } else if(data.last === yesterday) {
+    count++;
+    localStorage.setItem('qmath_streak', JSON.stringify({last:today, count}));
+  } else if(data.last !== today) {
+    count = 1;
+    localStorage.setItem('qmath_streak', JSON.stringify({last:today, count}));
+  }
+
+  document.getElementById('streak-count').textContent = count;
+  const icon = count>=7?'🔥':count>=3?'⚡':'✨';
+  document.getElementById('streak-icon').textContent  = icon;
+  document.getElementById('streak-msg').textContent   =
+    count>=7 ? '대단해요! 일주일 연속!' :
+    count>=3 ? '잘하고 있어요!' :
+    count===1 ? '오늘 학습 시작!' : '오늘 학습해보세요!';
+}
+
+// ── Overall progress ─────────────────────────────────
+function renderProgress() {
+  const done = getDone();
+  const prog = getProgress();
+  const total = 102;
+  const completedCount = done.length;
+
+  document.getElementById('total-done').textContent = completedCount;
+  document.getElementById('overall-prog').style.width = (completedCount/total*100)+'%';
+
+  // Per-grade
+  for(let g=1; g<=6; g++) {
+    const gradeTotal = 17;
+    const gradeDone  = CONCEPTS.filter(c=>c.grade==g && done.includes(c.id)).length;
+    const el = document.getElementById('grade-prog-'+g);
+    if(el) {
+      el.querySelector('.grade-prog-fill').style.width = (gradeDone/gradeTotal*100)+'%';
+      el.querySelector('.text-xs.text-gray-500').textContent = gradeDone+'/'+gradeTotal;
+    }
+  }
+}
+
+// ── Daily challenge ───────────────────────────────────
+function renderDaily() {
+  const today  = new Date().toDateString();
+  const saved  = JSON.parse(localStorage.getItem('qmath_daily')||'{}');
+  let concept;
+
+  if(saved.date===today && saved.id) {
+    concept = CONCEPTS.find(c=>c.id===saved.id) || CONCEPTS[0];
+  } else {
+    // Pick a not-yet-done concept, or random
+    const done     = getDone();
+    const notDone  = CONCEPTS.filter(c=>!done.includes(c.id));
+    const pool     = notDone.length ? notDone : CONCEPTS;
+    const seed     = new Date().getDate() + new Date().getMonth()*31;
+    concept        = pool[seed % pool.length];
+    localStorage.setItem('qmath_daily', JSON.stringify({date:today, id:concept.id}));
+  }
+
+  const stars    = getStars();
+  const starVal  = stars[concept.id] || 0;
+  const starStr  = starVal>0 ? '⭐'.repeat(starVal) : '도전해보세요!';
+
+  document.getElementById('daily-card-link').href = `lesson.html?id=${concept.id}`;
+  document.getElementById('daily-icon').textContent  = concept.icon;
+  document.getElementById('daily-title').textContent = concept.title;
+  document.getElementById('daily-desc').textContent  = concept.desc;
+  document.getElementById('daily-grade').textContent = concept.grade+'학년 · '+concept.topic;
+  document.getElementById('daily-stars').textContent = starStr;
+  document.getElementById('daily-q').textContent     = concept.questions[0]?.q || '';
+}
+
+// ── Continue section ──────────────────────────────────
+function renderContinue() {
+  const prog    = getProgress();
+  const done    = getDone();
+  const inProg  = CONCEPTS.filter(c =>
+    prog[c.id] && prog[c.id]>0 && !done.includes(c.id)
+  ).slice(0,4);
+
+  const sec = document.getElementById('continue-section');
+  if(!inProg.length) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+
+  document.getElementById('continue-cards').innerHTML = inProg.map(c=>`
+    <a href="lesson.html?id=${c.id}" class="flex-shrink-0 w-44 bg-white rounded-2xl p-3 border border-indigo-100 shadow-sm hover:shadow-md hover:border-primary transition block">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xl">${c.icon}</span>
+        <span class="text-xs font-bold text-gray-800 truncate">${c.title}</span>
+      </div>
+      <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width:${(prog[c.id]||0)/6*100}%"></div>
+      </div>
+      <div class="text-xs text-gray-500 mt-1">${prog[c.id]||0}/6 단계</div>
+    </a>
+  `).join('');
+}
+
+// ── Particles ─────────────────────────────────────────
+function launchParticles(count, emojis) {
+  const arr = Array.isArray(emojis)?emojis:[emojis];
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='particle';
+    el.textContent=arr[Math.floor(Math.random()*arr.length)];
+    el.style.left=(Math.random()*95)+'vw';
+    el.style.top='-40px';
+    el.style.animationDuration=(1.2+Math.random()*1)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2500);
+  }
+}
+
+// ── Random concept ────────────────────────────────────
+function randomConcept() {
+  launchParticles(8, ['🎲','⭐','🎊']);
+  const pool = CONCEPTS.filter(c =>
+    selectedGrade==='all' || c.grade==selectedGrade
+  );
+  const c = pool[Math.floor(Math.random()*pool.length)];
+  setTimeout(()=>{ window.location.href = `lesson.html?id=${c.id}`; }, 600);
+}
+
+// ── Grade filter ──────────────────────────────────────
+function setGrade(grade) {
+  selectedGrade = grade;
+  document.querySelectorAll('.grade-btn').forEach(btn => {
+    const active = btn.dataset.grade === grade;
+    btn.className = active
+      ? 'grade-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm'
+      : 'grade-btn bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:border-primary hover:text-primary transition shadow-sm';
+  });
+  filterConcepts();
+}
+
+// ── Filter ────────────────────────────────────────────
+function filterConcepts() {
+  const search  = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const topic   = document.getElementById('topic-filter')?.value||'';
+  const status  = document.getElementById('status-filter')?.value||'';
+  const done    = getDone();
+  const prog    = getProgress();
+
+  const filtered = CONCEPTS.filter(c => {
+    const matchGrade  = selectedGrade==='all' || c.grade==selectedGrade;
+    const matchTopic  = !topic || c.topic===topic;
+    const matchSearch = !search || c.title.toLowerCase().includes(search) || c.desc.toLowerCase().includes(search);
+    const isDone      = done.includes(c.id);
+    const isInProg    = prog[c.id]>0 && !isDone;
+    const matchStatus = !status
+      || (status==='done'     && isDone)
+      || (status==='new'      && !isDone && !isInProg)
+      || (status==='progress' && isInProg);
+    return matchGrade && matchTopic && matchSearch && matchStatus;
+  });
+  renderGrid(filtered);
+}
+
+// ── Render grid ───────────────────────────────────────
+const diffColor = {
+  '초급':'bg-green-100 text-green-700 border border-green-200',
+  '중급':'bg-amber-100 text-amber-700 border border-amber-200',
+  '고급':'bg-red-100 text-red-700 border border-red-200'
+};
+
+function renderGrid(list) {
+  const grid  = document.getElementById('concepts-grid');
+  const count = document.getElementById('concepts-count');
+  count.textContent = `총 ${list.length}개 개념`;
+
+  if(!list.length) {
+    grid.innerHTML = '<div class="col-span-3 text-center py-20 text-gray-500">조건에 맞는 개념이 없습니다.</div>';
+    return;
+  }
+
+  const done = getDone();
+  const prog = getProgress();
+  const stars = getStars();
+
+  grid.innerHTML = list.map(c => {
+    const isDone    = done.includes(c.id);
+    const stepsDone = prog[c.id] || 0;
+    const starVal   = stars[c.id] || 0;
+    const isNew     = !isDone && stepsDone===0;
+    const pct       = isDone ? 100 : (stepsDone/6*100);
+
+    // Border color by status
+    const cardBorder = isDone
+      ? 'border-green-200 bg-green-50/30'
+      : stepsDone>0
+      ? 'border-indigo-200'
+      : 'border-gray-200/80';
+
+    // Star display
+    const starHTML = isDone
+      ? (starVal>0 ? '⭐'.repeat(starVal) : '✅')
+      : stepsDone>0
+      ? `<span class="text-xs text-indigo-500 font-bold">${stepsDone}/6단계</span>`
+      : '';
+
+    // Progress bar color
+    const barColor = isDone ? 'from-green-400 to-emerald-500' : 'from-primary to-secondary';
+
+    // Status label
+    const statusLabel = isDone
+      ? '<span class="text-xs bg-green-100 text-green-700 border border-green-200 font-bold px-2 py-0.5 rounded-full">완료</span>'
+      : stepsDone>0
+      ? '<span class="text-xs bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2 py-0.5 rounded-full">진행중</span>'
+      : '';
+
+    // NEW badge
+    const newBadge = isNew
+      ? '<span class="new-pulse text-xs bg-red-500 text-white font-bold px-2 py-0.5 rounded-full">NEW</span>'
+      : '';
+
+    // Hover preview (first question)
+    const firstQ = c.questions[0]?.q || '';
+
+    return `
+    <a href="lesson.html?id=${c.id}" class="concept-card ${isDone?'done':''} rounded-2xl p-5 shadow-sm block ${cardBorder}">
+
+      <!-- Hover preview overlay -->
+      <div class="card-preview">
+        <div class="text-3xl mb-3">${c.icon}</div>
+        <div class="text-white font-black text-base mb-2">${c.title}</div>
+        <div class="text-white/70 text-xs mb-4 leading-relaxed">${c.desc}</div>
+        <div class="bg-white/15 rounded-xl p-3 text-left w-full">
+          <div class="text-white/60 text-xs mb-1">첫 번째 질문</div>
+          <div class="text-white text-xs font-medium leading-snug">${firstQ}</div>
+        </div>
+        <div class="mt-4 text-white/80 text-xs font-bold">클릭하여 학습 시작 →</div>
+      </div>
+
+      <!-- Card content -->
+      <div class="flex items-start justify-between mb-3">
+        <div class="w-12 h-12 bg-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-center text-2xl ${isDone?'bg-green-50 border-green-200':''}">${c.icon}</div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="type-badge ${diffColor[c.difficulty]}">${c.difficulty}</span>
+          ${newBadge}
+          ${statusLabel}
+        </div>
+      </div>
+
+      <h3 class="font-bold text-gray-900 mb-1 leading-snug">${c.title}</h3>
+      <p class="text-xs text-gray-600 mb-3 leading-relaxed">${c.desc}</p>
+
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex gap-1">
+          <span class="type-badge bg-indigo-50 text-primary border border-indigo-100">${c.grade}학년</span>
+          <span class="type-badge bg-indigo-50 text-indigo-700 border border-indigo-100">${c.topic}</span>
+        </div>
+        <div class="text-sm">${starHTML}</div>
+      </div>
+
+      <div class="w-full bg-gray-100 rounded-full h-1.5">
+        <div class="h-1.5 rounded-full bg-gradient-to-r ${barColor} transition-all" style="width:${pct}%"></div>
+      </div>
+      <div class="text-xs text-gray-500 mt-1.5">
+        ${isDone ? '🎉 학습 완료!' : stepsDone>0 ? stepsDone+'/6 단계 완료' : '시작 전'}
+      </div>
+    </a>`;
+  }).join('');
+}
+
+// ── View toggle ───────────────────────────────────────
+let currentView = 'grid';
+function setView(v) {
+  currentView = v;
+  document.getElementById('concepts-grid').classList.toggle('hidden', v!=='grid');
+  document.getElementById('roadmap-view').classList.toggle('hidden', v!=='road');
+  document.getElementById('view-grid').className = v==='grid'
+    ? 'px-3 py-1.5 bg-primary text-white text-xs font-bold transition'
+    : 'px-3 py-1.5 bg-white text-gray-600 text-xs font-bold transition hover:bg-indigo-50';
+  document.getElementById('view-road').className = v==='road'
+    ? 'px-3 py-1.5 bg-primary text-white text-xs font-bold transition'
+    : 'px-3 py-1.5 bg-white text-gray-600 text-xs font-bold transition hover:bg-indigo-50';
+  if(v==='road') renderRoadmap();
+}
+
+// ── Roadmap ───────────────────────────────────────────
+const GRADE_COLORS = {
+  1:'from-red-400 to-orange-400',
+  2:'from-orange-400 to-amber-400',
+  3:'from-amber-400 to-yellow-400',
+  4:'from-green-400 to-emerald-500',
+  5:'from-teal-400 to-cyan-500',
+  6:'from-blue-500 to-indigo-600'
+};
+
+function renderRoadmap() {
+  const done    = getDone();
+  const prog    = getProgress();
+  const stars   = getStars();
+  const el      = document.getElementById('roadmap-content');
+
+  let html = '';
+  for(let g=1; g<=6; g++) {
+    const gradeConcepts = CONCEPTS.filter(c=>c.grade==g);
+    const gradeDone     = gradeConcepts.filter(c=>done.includes(c.id)).length;
+    const allDone       = gradeDone===gradeConcepts.length;
+
+    html += `
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br ${GRADE_COLORS[g]} text-white text-xs font-black">${g}</div>
+        <span class="font-black text-gray-800 text-sm">${g}학년</span>
+        ${allDone ? '<span class="text-xs bg-green-100 text-green-700 border border-green-200 font-bold px-2 py-0.5 rounded-full">🏅 완주!</span>' : ''}
+        <span class="text-xs text-gray-500 ml-auto">${gradeDone}/${gradeConcepts.length} 완료</span>
+      </div>
+      <div class="relative">
+        <div class="flex items-center flex-wrap gap-y-6">
+    `;
+
+    gradeConcepts.forEach((c, i) => {
+      const isDone   = done.includes(c.id);
+      const inProg   = (prog[c.id]||0)>0 && !isDone;
+      const starVal  = stars[c.id]||0;
+      const nodeClass = isDone ? 'done' : inProg ? 'active' : 'locked';
+      const tooltip  = isDone
+        ? `${c.title} ⭐${starVal}`
+        : inProg
+        ? `${c.title} (${prog[c.id]}/6단계)`
+        : c.title;
+      const inner = isDone ? (starVal>0?'⭐':'✅') : inProg ? c.icon : c.icon;
+
+      html += `
+        <div class="flex items-center">
+          <div class="road-node ${nodeClass}" onclick="window.location='lesson.html?id=${c.id}'" title="${tooltip}">
+            <span style="font-size:${isDone&&starVal===0?'.8rem':'1rem'}">${inner}</span>
+            ${inProg?`<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:#4F46E5;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900">${prog[c.id]}</span>`:''}
+          </div>
+          ${i<gradeConcepts.length-1 ? `<div class="road-connector ${isDone?'done':''}"></div>` : ''}
+        </div>
+      `;
+    });
+
+    html += `</div></div></div>`;
+  }
+
+  // Overall finish line
+  const totalDone = done.length;
+  if(totalDone>0) {
+    html += `
+    <div class="mt-2 bg-gradient-to-r from-yellow-50 to-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+      <div class="text-2xl mb-1">${totalDone>=102?'🏆':totalDone>=50?'🎯':'🚀'}</div>
+      <div class="font-black text-amber-700 text-sm">${totalDone>=102?'전 과정 완주!':totalDone>=50?'절반 달성!':'학습 여정 진행 중...'}</div>
+      <div class="text-xs text-amber-600 mt-1">${totalDone} / 102 개념 완료</div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── Milestones ────────────────────────────────────────
+const MILESTONES = [
+  { key:'first',    check: d=>d>=1,   emoji:'🌱', title:'첫 걸음!',       desc:'첫 번째 개념을 완료했어요.',         xp:50  },
+  { key:'five',     check: d=>d>=5,   emoji:'⭐', title:'5개 완료!',      desc:'5개 개념을 마스터했어요.',           xp:100 },
+  { key:'ten',      check: d=>d>=10,  emoji:'🎯', title:'10개 돌파!',     desc:'꾸준히 학습하고 있어요!',            xp:150 },
+  { key:'grade1',   check:(d,g)=>g[1]>=17, emoji:'🥇', title:'1학년 완주!', desc:'1학년 전 과정을 마쳤어요.',       xp:200 },
+  { key:'grade2',   check:(d,g)=>g[2]>=17, emoji:'🥈', title:'2학년 완주!', desc:'2학년 전 과정을 마쳤어요.',       xp:200 },
+  { key:'grade3',   check:(d,g)=>g[3]>=17, emoji:'🥉', title:'3학년 완주!', desc:'3학년 전 과정을 마쳤어요.',       xp:200 },
+  { key:'grade4',   check:(d,g)=>g[4]>=17, emoji:'🏅', title:'4학년 완주!', desc:'4학년 전 과정을 마쳤어요.',       xp:250 },
+  { key:'grade5',   check:(d,g)=>g[5]>=17, emoji:'🎖️', title:'5학년 완주!', desc:'5학년 전 과정을 마쳤어요.',     xp:250 },
+  { key:'grade6',   check:(d,g)=>g[6]>=17, emoji:'🏆', title:'6학년 완주!', desc:'초등 전 과정 마스터!',           xp:300 },
+  { key:'half',     check: d=>d>=51,  emoji:'🎊', title:'절반 달성!',     desc:'102개 중 51개! 놀라워요!',           xp:300 },
+  { key:'hundred',  check: d=>d>=100, emoji:'💎', title:'100개 돌파!',    desc:'거의 다 왔어요! 2개 남았어요!',     xp:500 },
+  { key:'complete', check: d=>d>=102, emoji:'👑', title:'전 과정 완주!',  desc:'대한민국 초등수학 정복! 대단해요!', xp:1000 },
+];
+
+let milestoneQueue = [];
+let milestoneShowing = false;
+
+function checkMilestones() {
+  const done     = getDone();
+  const achieved = JSON.parse(localStorage.getItem('qmath_milestones')||'[]');
+  const byGrade  = {};
+  for(let g=1; g<=6; g++) byGrade[g] = CONCEPTS.filter(c=>c.grade==g && done.includes(c.id)).length;
+
+  MILESTONES.forEach(ms => {
+    if(achieved.includes(ms.key)) return;
+    if(ms.check(done.length, byGrade)) {
+      achieved.push(ms.key);
+      milestoneQueue.push(ms);
+    }
+  });
+  localStorage.setItem('qmath_milestones', JSON.stringify(achieved));
+  if(milestoneQueue.length && !milestoneShowing) showNextMilestone();
+}
+
+function showNextMilestone() {
+  if(!milestoneQueue.length) { milestoneShowing=false; return; }
+  milestoneShowing = true;
+  const ms = milestoneQueue.shift();
+
+  // Award bonus XP
+  const xp = parseInt(localStorage.getItem('qmath_xp')||'0') + ms.xp;
+  localStorage.setItem('qmath_xp', xp);
+  renderXPBar();
+
+  document.getElementById('ms-emoji').textContent  = ms.emoji;
+  document.getElementById('ms-title').textContent  = ms.title;
+  document.getElementById('ms-desc').textContent   = ms.desc;
+  document.getElementById('ms-reward').textContent = '+'+ms.xp+' XP';
+  document.getElementById('milestoneModal').classList.remove('hidden');
+
+  // Big confetti
+  launchParticles(40, ['🌟','⭐','🎊','🎉','✨','💫']);
+  // Extra after a moment
+  setTimeout(()=>launchParticles(20,['🏆','⭐','🎊']), 600);
+}
+
+function closeMilestone() {
+  document.getElementById('milestoneModal').classList.add('hidden');
+  setTimeout(()=>{ if(milestoneQueue.length) showNextMilestone(); else milestoneShowing=false; }, 300);
+}
+
+// ── Init ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderXPBar();
+  renderStreak();
+  renderProgress();
+  renderDaily();
+  renderContinue();
+  filterConcepts();
+  setTimeout(checkMilestones, 800); // slight delay so page fully renders first
+});
+</script>
+</body>
+</html>

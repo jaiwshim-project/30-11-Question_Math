@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>레벨 테스트 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.card-hover{transition:all .3s cubic-bezier(.4,0,.2,1);}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(79,70,229,.2);}
+.progress-bar{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .8s ease;}
+.fade-in{animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:linear-gradient(#4F46E5,#7C3AED);border-radius:3px;}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
+.step-active{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 12px rgba(79,70,229,.35);}
+.step-done{background:linear-gradient(135deg,#059669,#10B981);color:white;}
+.question-card{border-left:4px solid #6366F1;background:white;}
+.type-badge{font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+.option-label{transition:all .2s;border:2px solid #E5E7EB;border-radius:.75rem;background:white;}
+.option-label:hover{border-color:#4F46E5;background:#EEF2FF;}
+.option-label.selected{border-color:#4F46E5;background:#EEF2FF;}
+.option-label.correct{border-color:#10B981;background:#ECFDF5;}
+.option-label.wrong{border-color:#EF4444;background:#FEF2F2;}
+.btn-scale{transition:all .25s;} .btn-scale:hover{transform:scale(1.03);}
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div><div class="font-black text-white text-sm leading-tight">질문수학</div><div class="text-xs text-white/60">CREQUESSION Math</div></div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="index.html"     class="text-white/90 hover:text-white transition">홈</a>
+      <a href="learn.html"     class="text-white/90 hover:text-white transition">학습하기</a>
+      <a href="game.html"      data-nav="game.html" class="text-white/90 hover:text-white transition">게임</a>
+      <a href="tetris.html"   data-nav="tetris.html" class="text-white/90 hover:text-white transition">수학테트리스</a>
+      <a href="ai.html"        class="text-white/90 hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="text-white font-black border-b-2 border-white pb-0.5">레벨 테스트</a>
+      <a href="dashboard.html" class="text-white/90 hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="text-white/90 hover:text-white transition">관리</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-3 py-1.5 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white hidden sm:inline">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white">로그아웃</button>
+      </div>
+      <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/10 px-4 py-3 space-y-2 text-sm font-medium">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="tetris.html"    class="block py-2 text-white/90">수학테트리스</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white font-black">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+  </div>
+</nav>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  <!-- INTRO -->
+  <div id="section-intro" class="fade-in">
+    <div class="text-center mb-8">
+      <div class="w-20 h-20 gradient-bg rounded-2xl mx-auto flex items-center justify-center text-4xl mb-4 shadow-xl">📊</div>
+      <h1 class="text-3xl font-black mb-2">수학 레벨 테스트</h1>
+      <p class="text-gray-600">현재 수학 이해 수준을 파악하고 맞춤 학습 경로를 제공합니다</p>
+    </div>
+
+    <!-- 테스트 안내 카드 -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100 mb-6 card-hover" style="border-left:4px solid #6366F1;">
+      <h2 class="font-bold mb-4 flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500"></span> 테스트 안내</h2>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2"><span class="text-green-500 text-base font-bold">✓</span> 총 10문항, 약 10분 소요</li>
+        <li class="flex items-center gap-2"><span class="text-green-500 text-base font-bold">✓</span> 개념 이해 중심 질문 (암기 아님)</li>
+        <li class="flex items-center gap-2"><span class="text-green-500 text-base font-bold">✓</span> 테스트 후 맞춤 학습 경로 제공</li>
+        <li class="flex items-center gap-2"><span class="text-green-500 text-base font-bold">✓</span> A+ ~ D 레벨 분류 및 피드백</li>
+      </ul>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 mb-6">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">이름 (선택)</label>
+        <input type="text" id="test-user-name" placeholder="이름 입력" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">학년 선택</label>
+        <select id="test-grade-select" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+          <option value="3">3학년</option>
+          <option value="4">4학년</option>
+          <option value="5">5학년</option>
+          <option value="6">6학년</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="startTest()" class="btn-scale w-full gradient-bg text-white font-bold py-4 rounded-2xl text-lg shadow-xl hover:shadow-2xl transition">테스트 시작하기 →</button>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="section-questions" class="hidden fade-in">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-bold text-lg" id="test-title">레벨 테스트</h2>
+      <span class="text-sm font-bold text-gray-500 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full" id="q-counter"></span>
+    </div>
+    <!-- 진행 바 (그라디언트 강화) -->
+    <div class="w-full bg-gray-200 rounded-full h-3 mb-6 overflow-hidden shadow-inner">
+      <div id="q-progress" class="progress-bar h-3 rounded-full" style="width:0%;transition:width .8s ease;"></div>
+    </div>
+    <div id="q-area" class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100"></div>
+    <div class="flex justify-between mt-6">
+      <button onclick="prevQ()" id="btn-prev-q" class="btn-scale px-6 py-3 border-2 border-gray-200 rounded-2xl text-gray-600 hover:border-primary hover:text-primary transition font-bold" disabled>← 이전</button>
+      <button onclick="nextQ()" id="btn-next-q" class="btn-scale px-6 py-3 gradient-bg text-white rounded-2xl shadow-md hover:shadow-lg transition font-bold">다음 →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="section-result" class="hidden fade-in text-center">
+    <div class="w-24 h-24 gradient-bg rounded-2xl mx-auto flex items-center justify-center text-5xl mb-6 shadow-xl">🎉</div>
+    <h2 class="text-3xl font-black mb-1">테스트 완료!</h2>
+    <p id="result-name" class="text-gray-600 mb-6 font-medium"></p>
+
+    <div id="result-card" class="bg-white rounded-2xl p-8 shadow-sm border-2 border-indigo-100 mb-6">
+      <div id="result-score" class="text-7xl font-black text-primary mb-2"></div>
+      <div id="result-level" class="text-2xl font-bold text-gray-700 mb-4"></div>
+      <div class="w-full bg-gray-100 rounded-full h-3 mb-6 overflow-hidden">
+        <div id="result-bar" class="progress-bar h-3 rounded-full" style="width:0%"></div>
+      </div>
+      <div id="result-feedback" class="text-left bg-gray-50 rounded-2xl p-4 text-sm text-gray-700 border border-gray-100"></div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-100 mb-6 text-left">
+      <h3 class="font-bold mb-3 flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span> 추천 학습 개념</h3>
+      <div id="result-recs" class="grid grid-cols-2 gap-3"></div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button onclick="restartTest()" class="btn-scale flex-1 gradient-bg text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl transition">다시 테스트</button>
+      <a href="learn.html" class="btn-scale flex-1 bg-white border-2 border-primary text-primary font-bold py-4 rounded-2xl hover:bg-primary hover:text-white transition text-center">학습 시작하기</a>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-black">로그인</h2><button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button></div>
+    <div class="space-y-4">
+      <input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+      <select id="login-role" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select>
+      <div>
+        <label class="block text-sm font-medium mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer hover:border-sky-400 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer hover:border-pink-400 transition has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full gradient-bg text-white font-bold py-3 rounded-2xl shadow-md hover:shadow-lg transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+let testState = { questions:[], answers:[], current:0, grade:'3' };
+
+function show(id) { ['intro','questions','result'].forEach(s=>document.getElementById('section-'+s).classList.add('hidden')); document.getElementById('section-'+id).classList.remove('hidden'); }
+
+function startTest() {
+  const grade = document.getElementById('test-grade-select').value;
+  testState.grade = grade;
+  const pool = TEST_QUESTIONS[grade] || TEST_QUESTIONS['3'];
+  testState.questions = [...pool].sort(()=>Math.random()-.5).slice(0,10);
+  testState.answers = new Array(testState.questions.length).fill(-1);
+  testState.current = 0;
+  document.getElementById('test-title').textContent = grade + '학년 레벨 테스트';
+  show('questions');
+  renderQ();
+}
+
+function renderQ() {
+  const q = testState.questions[testState.current];
+  const n = testState.current;
+  document.getElementById('q-counter').textContent = (n+1) + ' / ' + testState.questions.length;
+  document.getElementById('q-progress').style.width = ((n+1)/testState.questions.length*100) + '%';
+  document.getElementById('btn-prev-q').disabled = n === 0;
+  document.getElementById('btn-next-q').textContent = n === testState.questions.length-1 ? '결과 보기' : '다음 →';
+
+  // 난이도별 문제 카드 왼쪽 border 색상
+  const diffBorder = q.difficulty === 'hard' ? '#EF4444' : q.difficulty === 'medium' ? '#F59E0B' : '#10B981';
+  const diffLabel  = q.difficulty === 'hard' ? '고급' : q.difficulty === 'medium' ? '중급' : '초급';
+  const diffColor  = q.difficulty === 'hard' ? 'text-red-500 bg-red-50 border-red-200' : q.difficulty === 'medium' ? 'text-amber-600 bg-amber-50 border-amber-200' : 'text-green-600 bg-green-50 border-green-200';
+
+  document.getElementById('q-area').innerHTML = `
+    <div style="border-left:4px solid ${diffBorder};" class="pl-3 mb-4 flex items-center gap-2">
+      <div class="text-xs text-gray-500 font-bold">문제 ${n+1}번</div>
+      <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${diffColor}">${diffLabel}</span>
+    </div>
+    <div class="font-bold text-lg text-gray-800 mb-5 leading-relaxed">${q.q}</div>
+    <div class="space-y-3">
+      ${q.opts.map((opt,i)=>`
+        <label onclick="selectOpt(${i})" class="option-label flex items-center gap-3 p-3 cursor-pointer ${testState.answers[n]===i?'selected':''}">
+          <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${testState.answers[n]===i?'border-primary bg-primary':'border-gray-300'}">
+            ${testState.answers[n]===i?'<div class="w-2.5 h-2.5 bg-white rounded-full"></div>':''}
+          </div>
+          <span class="text-sm font-medium">${opt}</span>
+        </label>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectOpt(i) { testState.answers[testState.current] = i; renderQ(); }
+function prevQ() { if(testState.current>0){testState.current--;renderQ();} }
+function nextQ() {
+  if(testState.current < testState.questions.length-1) { testState.current++; renderQ(); }
+  else showResult();
+}
+
+const LEVELS = [
+  { min:90, level:'A+', msg:'탁월합니다! 수학 개념 이해가 매우 뛰어납니다. 심화 학습을 시작할 준비가 되었습니다.', color:'text-purple-600', cardStyle:'border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50', barColor:'background:linear-gradient(90deg,#F59E0B,#FCD34D)' },
+  { min:80, level:'A',  msg:'우수합니다! 대부분의 개념을 잘 이해하고 있습니다. 꾸준히 유지하세요.', color:'text-blue-600', cardStyle:'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50', barColor:'background:linear-gradient(90deg,#10B981,#34D399)' },
+  { min:70, level:'B+', msg:'양호합니다! 기본 개념을 잘 이해하지만 일부 개념 보완이 필요합니다.', color:'text-green-600', cardStyle:'border-green-200 bg-green-50', barColor:'background:linear-gradient(90deg,#10B981,#6EE7B7)' },
+  { min:60, level:'B',  msg:'기본기가 있습니다. 질문수학으로 개념 이해를 더 탄탄히 다져봅시다.', color:'text-green-500', cardStyle:'border-blue-200 bg-blue-50', barColor:'background:linear-gradient(90deg,#3B82F6,#93C5FD)' },
+  { min:50, level:'C',  msg:'기초 개념부터 차근차근 학습하면 빠르게 향상될 수 있습니다.', color:'text-amber-500', cardStyle:'border-blue-100 bg-indigo-50', barColor:'background:linear-gradient(90deg,#6366F1,#A5B4FC)' },
+  { min:0,  level:'D',  msg:'걱정하지 마세요! 질문수학은 수포자도 즐겁게 배울 수 있도록 설계되었습니다.', color:'text-red-500', cardStyle:'border-red-200 bg-red-50', barColor:'background:linear-gradient(90deg,#EF4444,#FCA5A5)' },
+];
+
+function showResult() {
+  const correct = testState.answers.filter((a,i)=>a===testState.questions[i].answer).length;
+  const score = Math.round(correct/testState.questions.length*100);
+  const info = LEVELS.find(l=>score>=l.min) || LEVELS[LEVELS.length-1];
+  const name = document.getElementById('test-user-name')?.value.trim();
+
+  show('result');
+
+  // 결과 카드 점수 색상 변화 적용
+  const resultCard = document.getElementById('result-card');
+  resultCard.className = `rounded-2xl p-8 shadow-sm border-2 mb-6 ${info.cardStyle}`;
+
+  document.getElementById('result-name').textContent = name ? name + '님의 테스트 결과' : '테스트 결과';
+  document.getElementById('result-score').textContent = score + '점';
+  document.getElementById('result-level').innerHTML = `레벨: <span class="${info.color} font-black">${info.level}</span>`;
+  document.getElementById('result-feedback').innerHTML = `
+    <p class="font-bold mb-2">📋 분석 결과</p>
+    <p>${info.msg}</p>
+    <p class="mt-2 text-gray-600">정답: <strong>${correct}</strong> / ${testState.questions.length}문항</p>`;
+
+  // 진행바 색상 점수에 따라 변화
+  const bar = document.getElementById('result-bar');
+  bar.style.cssText = `width:0%;height:100%;border-radius:9999px;${info.barColor};transition:width .8s ease;`;
+  setTimeout(()=>{ bar.style.width = score + '%'; }, 100);
+
+  // 추천 개념 — 해당 학년 또는 이전 학년 개념 추천
+  const g = parseInt(testState.grade);
+  const recs = CONCEPTS.filter(c=>c.grade===g||c.grade===g-1).slice(0,4);
+  document.getElementById('result-recs').innerHTML = recs.map(c=>`
+    <a href="lesson.html?id=${c.id}" class="bg-white border-2 border-gray-100 rounded-2xl p-3 hover:border-primary hover:bg-indigo-50 transition block card-hover">
+      <div class="text-xl mb-1">${c.icon}</div>
+      <div class="text-xs font-bold text-gray-700">${c.title}</div>
+      <div class="text-xs text-gray-500">${c.grade}학년 · ${c.topic}</div>
+    </a>
+  `).join('');
+
+  // 결과 저장
+  const prev = JSON.parse(localStorage.getItem('qmath_test_results')||'[]');
+  prev.push({ date: new Date().toISOString().split('T')[0], score, level: info.level, grade: testState.grade });
+  localStorage.setItem('qmath_test_results', JSON.stringify(prev.slice(-10)));
+}
+
+function restartTest() { show('intro'); }
+</script>
+</body>
+</html>
