@@ -35,7 +35,8 @@
       "Bash(git clone:*)",
       "Bash(wc:*)",
       "Bash(cd:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:metabiz101.tistory.com)"
     ]
   }
 }

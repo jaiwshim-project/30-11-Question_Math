@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>질문수학 탄생스토리 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.gradient-text{background:linear-gradient(135deg,#4F46E5,#7C3AED,#DB2777);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.fade-in{animation:fadeIn .6s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+.timeline-line{position:absolute;left:50%;transform:translateX(-50%);width:3px;background:linear-gradient(to bottom,#4F46E5,#7C3AED,#DB2777);top:0;bottom:0;border-radius:2px;}
+.step-badge{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;}
+.hero-bg{background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%);}
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50" style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-2">
+      <img src="logo.png" alt="질문수학" class="h-11 object-contain rounded-xl">
+      <div class="hidden sm:block text-xs text-white/70 font-medium leading-tight">세계 최초<br>질문으로 배우는 수학</div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
+      <div class="relative group">
+        <a href="index.html" class="hover:text-white transition flex items-center gap-1">홈 <span class="text-xs opacity-60">▾</span></a>
+        <div class="absolute top-full left-0 hidden group-hover:block bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[180px] z-50 mt-1">
+          <a href="story.html" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 font-medium">✨ 질문수학 탄생스토리</a>
+        </div>
+      </div>
+      <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+      <a href="game.html"      class="hover:text-white transition">게임</a>
+      <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="hover:text-white transition">관리</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
+      </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="story.html"     class="block py-2 pl-4 text-yellow-300 font-bold">✨ 질문수학 탄생스토리</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-bg text-white py-16 px-4">
+  <div class="max-w-3xl mx-auto text-center fade-in">
+    <div class="inline-block bg-yellow-400 text-gray-900 text-xs font-black px-4 py-1.5 rounded-full mb-4">세계 최초 질문으로 배우는 수학</div>
+    <h1 class="text-3xl sm:text-4xl font-black mb-4 leading-tight">
+      질문수학<br><span class="text-purple-300">탄생스토리</span>
+    </h1>
+    <p class="text-white/70 text-sm leading-relaxed max-w-xl mx-auto">
+      대한민국 수백만 수포자의 아픔에서 시작된 하나의 질문.<br>
+      "왜 아이들은 수학을 포기해야 할까?"
+    </p>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="max-w-3xl mx-auto px-4 py-12 fade-in">
+
+  <!-- 1. 문제 인식 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">1</div>
+      <h2 class="text-xl font-black text-gray-900">수포자, 대한민국의 아픔</h2>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100 space-y-4">
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl">
+        <p class="text-sm font-bold text-red-700 mb-1">충격적인 현실</p>
+        <p class="text-sm text-gray-700 leading-relaxed">대한민국 부모의 절반도 수포자였습니다. 부모 자신이 수학을 포기했으면서도 자녀에게는 수학을 잘하길 요구하는 악순환이 반복되고 있습니다.</p>
+      </div>
+      <p class="text-sm text-gray-700 leading-relaxed">학교와 학원은 모두 상위권 학생 위주로 운영됩니다. 하위권 학생들은 실질적으로 방치되고, 수학 때문에 심각한 정서적 부담과 사회적 낙인을 안고 살아갑니다.</p>
+      <p class="text-sm text-gray-700 leading-relaxed"><strong>암기 위주의 전통적인 학습 방식</strong>은 수학적 사고력 발달을 저해합니다. 성과 압박과 심리적 불안이 복합적으로 작용하여 아이들은 스스로 "나는 수학을 못 해"라는 틀 속에 갇혀버립니다.</p>
+    </div>
+  </section>
+
+  <!-- 2. 창업자 이야기 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">2</div>
+      <h2 class="text-xl font-black text-gray-900">한 사람의 도전</h2>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100 space-y-4">
+      <div class="flex gap-4 items-start">
+        <div class="text-4xl flex-shrink-0">🔬</div>
+        <div>
+          <p class="font-bold text-gray-900 mb-1">기계공학 → 산업 컨설팅 → 교육 혁신</p>
+          <p class="text-sm text-gray-600 leading-relaxed">현대경제연구원, GE 근무를 거쳐 23년간 산업 컨설팅 경력을 쌓은 심재우 대표. 그는 15년간 <strong>창의적 질문 기법</strong>을 연구하던 중, 수학으로 힘들어하는 한 중학생을 만났습니다.</p>
+        </div>
+      </div>
+      <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r-xl">
+        <p class="text-sm text-gray-700 leading-relaxed italic">"수학 개념을 질문으로 가르치면 어떨까? 암기가 아닌 스스로 발견하게 하면?"</p>
+        <p class="text-xs text-gray-500 mt-1">— 질문수학 탄생의 씨앗이 된 질문</p>
+      </div>
+      <p class="text-sm text-gray-700 leading-relaxed">이 물음 하나가 <strong>크리퀘션 매쓰(CreQuestion Math)</strong>의 탄생으로 이어졌습니다. 목표는 단 하나 — 대한민국에서 수포자 문제를 완전히 없애는 것.</p>
+    </div>
+  </section>
+
+  <!-- 3. 첫 번째 기적 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">3</div>
+      <h2 class="text-xl font-black text-gray-900">수포자의 기적 — 단 이틀 만에</h2>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100 space-y-5">
+      <p class="text-sm text-gray-700 leading-relaxed">중학교 수포자 학생 5명이 특별 수학 프로그램에 참가했습니다. 처음엔 무기력하고 위축된 모습이었습니다.</p>
+
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
+          <div class="text-2xl mb-1">😔</div>
+          <div class="text-xs font-bold text-gray-600">첫날 오전</div>
+          <div class="text-xs text-gray-500 mt-1">무기력, 회피, 위축</div>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
+          <div class="text-2xl mb-1">😊</div>
+          <div class="text-xs font-bold text-blue-600">첫날 오후 (4시간 후)</div>
+          <div class="text-xs text-gray-500 mt-1">"재미있어요" "신기해요"</div>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4 text-center border border-green-200">
+          <div class="text-2xl mb-1">🙌</div>
+          <div class="text-xs font-bold text-green-600">둘째 날</div>
+          <div class="text-xs text-gray-500 mt-1">스스로 문제 풀기, 적극 참여</div>
+        </div>
+      </div>
+
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl">
+        <p class="text-sm text-gray-700 leading-relaxed">첫날 가장 위축됐던 학생이 둘째 날 <strong>가장 적극적인 참여자</strong>로 변했습니다. 8시간의 과정이 끝났을 때, 단 한 명도 거부감 없이 프로그램을 마쳤습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 6단계 학습법 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">4</div>
+      <h2 class="text-xl font-black text-gray-900">수포자 제로를 만드는 6단계</h2>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100">
+      <div class="text-center mb-5">
+        <span class="bg-indigo-100 text-indigo-700 text-xs font-black px-4 py-1.5 rounded-full">수포자 제로 청정학교 만들기</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">1</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">개념 강의</p>
+            <p class="text-xs text-gray-500 mt-0.5">강사가 전체 대상으로 수학 개념을 질문 중심으로 강의합니다</p>
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">2</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">워크북 작성</p>
+            <p class="text-xs text-gray-500 mt-0.5">학생 개인이 질문수학 학습 워크북을 스스로 작성합니다</p>
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">3</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">말로 설명하기</p>
+            <p class="text-xs text-gray-500 mt-0.5">모둠을 이루어 수학 개념을 서로에게 말로 설명하며 이해를 확인합니다</p>
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">4</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">반복 심화</p>
+            <p class="text-xs text-gray-500 mt-0.5">1~3단계를 반복하여 학년별 전체 개념을 완전히 다룹니다</p>
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">5</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">질문 답변</p>
+            <p class="text-xs text-gray-500 mt-0.5">강사가 질문수학 핵심 질문을 제시하고 학생들이 직접 대답합니다</p>
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-8 h-8 step-badge rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0">6</div>
+          <div class="flex-1 bg-gray-50 rounded-xl p-3">
+            <p class="text-sm font-bold text-gray-800">문제 풀기</p>
+            <p class="text-xs text-gray-500 mt-0.5">개념이 완전히 내면화된 후 학습지 문제를 풀며 적용합니다</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 bg-indigo-50 rounded-xl p-3 flex gap-3 items-center">
+        <span class="text-xl">📊</span>
+        <p class="text-xs text-gray-600"><strong>레벨 테스트 (전·후):</strong> 수업 전후 진단 평가로 이해도를 확인하고, 학생 수준에 맞는 개념 학습 자료를 배정합니다</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 과학적 근거 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">5</div>
+      <h2 class="text-xl font-black text-gray-900">왜 질문이 효과적인가</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-100">
+        <div class="text-2xl mb-2">🧠</div>
+        <h3 class="font-black text-gray-900 text-sm mb-2">신경과학적 근거</h3>
+        <ul class="text-xs text-gray-600 space-y-1.5">
+          <li class="flex gap-2"><span class="text-indigo-500 font-bold">✓</span>질문이 <strong>전전두엽 피질</strong>을 활성화시켜 고차원적 사고를 유도</li>
+          <li class="flex gap-2"><span class="text-indigo-500 font-bold">✓</span>자기 발견 학습이 <strong>시냅스 가소성</strong>을 강화해 장기 기억 형성</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-100">
+        <div class="text-2xl mb-2">📚</div>
+        <h3 class="font-black text-gray-900 text-sm mb-2">학습이론적 근거</h3>
+        <ul class="text-xs text-gray-600 space-y-1.5">
+          <li class="flex gap-2"><span class="text-purple-500 font-bold">✓</span><strong>구성주의 학습이론</strong> — 스스로 발견하는 자기주도 학습</li>
+          <li class="flex gap-2"><span class="text-purple-500 font-bold">✓</span><strong>자기결정이론</strong> — 자율성과 유능감 강조</li>
+          <li class="flex gap-2"><span class="text-purple-500 font-bold">✓</span><strong>메타인지 기술</strong> 개발로 스스로 학습 조절</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. AI와의 결합 -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center text-white font-black text-lg flex-shrink-0">6</div>
+      <h2 class="text-xl font-black text-gray-900">AI 시대의 질문수학</h2>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border-2 border-indigo-100 space-y-4">
+      <p class="text-sm text-gray-700 leading-relaxed">질문수학은 이제 AI 에이전트와 결합하여 한 단계 더 진화했습니다. 초등 전 학년의 개념 체계를 AI가 학생 개인의 수준에 맞게 제공합니다.</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
+          <div class="text-lg mb-1">🎯</div>
+          <p class="text-xs font-bold text-gray-800">개인 맞춤 학습</p>
+          <p class="text-xs text-gray-500 mt-1">레벨 테스트 기반 개인화된 학습 경로 제공</p>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
+          <div class="text-lg mb-1">💬</div>
+          <p class="text-xs font-bold text-gray-800">AI 튜터</p>
+          <p class="text-xs text-gray-500 mt-1">질문·풀이 과정에 대한 즉각적인 피드백</p>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
+          <div class="text-lg mb-1">🎮</div>
+          <p class="text-xs font-bold text-gray-800">게임 기반 학습</p>
+          <p class="text-xs text-gray-500 mt-1">플래시카드·짝맞추기·퀴즈레이스·테트리스로 개념을 재미있게</p>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
+          <div class="text-lg mb-1">📈</div>
+          <p class="text-xs font-bold text-gray-800">학습 성과 추적</p>
+          <p class="text-xs text-gray-500 mt-1">XP·별·대시보드로 성장을 눈으로 확인</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="text-center">
+    <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl">
+      <div class="text-4xl mb-3">🚀</div>
+      <h2 class="text-2xl font-black mb-2">지금 시작하세요</h2>
+      <p class="text-white/80 text-sm mb-6">세계 최초 질문으로 배우는 수학<br>수포자 제로의 꿈이 현실이 됩니다</p>
+      <div class="flex gap-3 justify-center flex-wrap">
+        <a href="test.html" class="bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-black px-6 py-3 rounded-2xl transition shadow-lg text-sm">레벨 테스트 시작 →</a>
+        <a href="game.html" class="bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-2xl transition text-sm border border-white/30">게임으로 배우기</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"></div>
+      <div><label class="block text-sm font-medium mb-1">역할</label><select id="login-role" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select></div>
+      <div>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full gradient-bg text-white font-bold py-3 rounded-2xl shadow-md hover:shadow-lg transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<footer style="background:linear-gradient(135deg,#0d0820 0%,#1a0d3e 60%,#0d0515 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-col items-center sm:items-start gap-1">
+        <img src="logo.png" alt="질문수학" class="h-10 object-contain rounded-xl">
+        <div class="text-yellow-400 text-xs font-bold">세계 최초 질문으로 배우는 수학</div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>
