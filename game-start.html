@@ -12,14 +12,14 @@
 body{background:#0F0A2E;min-height:100vh;color:white;}
 nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
 .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;backdrop-filter:blur(8px);}
-.grade-btn{border-radius:12px;font-weight:900;font-size:.85rem;cursor:pointer;border:2px solid;transition:all .2s;padding:10px 0;}
+.grade-btn{border-radius:10px;font-weight:900;font-size:.75rem;cursor:pointer;border:2px solid;transition:all .2s;padding:6px 0;}
 .concept-btn{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:10px 4px;border-radius:14px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 4px;border-radius:12px;font-weight:700;
   cursor:pointer;border:2px solid;transition:all .2s;text-align:center;
-  min-height:68px;justify-content:center;font-size:.78rem;
+  min-height:50px;justify-content:center;font-size:.72rem;
 }
-.diff-btn{border-radius:14px;font-weight:900;font-size:.9rem;cursor:pointer;border:2px solid;transition:all .2s;padding:12px 0;}
+.diff-btn{border-radius:12px;font-weight:900;font-size:.8rem;cursor:pointer;border:2px solid;transition:all .2s;padding:7px 0;}
 .modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
 </style>
 </head>
@@ -33,38 +33,49 @@ nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-s
       <div class="font-black text-white text-sm">질문수학</div>
     </a>
     <div class="hidden md:flex items-center gap-5 text-sm font-medium text-white/90">
-      <a href="index.html"      class="hover:text-white transition">홈</a>
-      <a href="learn.html"      class="hover:text-white transition">학습하기</a>
-      <a href="game.html"       class="hover:text-white transition">게임</a>
-      <a href="tetris-start.html" class="text-white font-black border-b-2 border-white pb-0.5">수학테트리스</a>
-      <a href="ai.html"         class="hover:text-white transition">AI 튜터</a>
-      <a href="dashboard.html"  class="hover:text-white transition">대시보드</a>
+      <a href="index.html"     class="hover:text-white transition">홈</a>
+      <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+      <a href="game.html"      class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
+      <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="hover:text-white transition">관리</a>
     </div>
-    <div class="flex items-center gap-2">
-      <div id="user-area-loggedout">
-        <button onclick="showModal('loginModal')" class="text-xs text-white border border-white rounded-lg px-3 py-1.5 hover:bg-white hover:text-primary transition">로그인</button>
-      </div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
-        <div id="user-avatar" class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
-        <span id="user-name-display" class="text-xs font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/60 hover:text-white">로그아웃</button>
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
       </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
   </div>
 </nav>
 
 <!-- MAIN -->
-<div class="max-w-xl mx-auto px-4 py-8">
+<div class="max-w-xl mx-auto px-4 py-4">
 
   <!-- 타이틀 -->
-  <div class="text-center mb-8">
-    <div class="text-5xl mb-3">🧱</div>
-    <h1 class="text-4xl font-black mb-2" style="background:linear-gradient(90deg,#818CF8,#C084FC,#F472B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">수학 테트리스</h1>
-    <p class="text-white/50 text-sm">문제를 못 풀면 블록이 쌓여요!<br>꼭대기까지 쌓이면 목숨을 잃어요!</p>
+  <div class="text-center mb-4">
+    <div class="text-3xl mb-1" id="title-icon">🧱</div>
+    <h1 class="text-2xl font-black mb-1" id="title-text" style="background:linear-gradient(90deg,#818CF8,#C084FC,#F472B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">수학 테트리스</h1>
+    <p class="text-white/50 text-xs" id="title-desc">문제를 못 풀면 블록이 쌓여요! 꼭대기까지 쌓이면 목숨을 잃어요!</p>
   </div>
 
   <!-- 설정 카드 -->
-  <div class="card p-6 mb-5 flex flex-col gap-6">
+  <div class="card p-3 mb-3 flex flex-col gap-3">
 
     <!-- ① 학년 선택 -->
     <div>
@@ -106,31 +117,32 @@ nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-s
   </div>
 
   <!-- 시작 버튼 -->
-  <button onclick="goGame()" class="w-full py-4 rounded-2xl font-black text-xl text-white shadow-2xl mb-5 hover:scale-105 active:scale-95 transition-transform"
+  <button onclick="goGame()" class="w-full py-3 rounded-2xl font-black text-lg text-white shadow-2xl mb-3 hover:scale-105 active:scale-95 transition-transform"
     style="background:linear-gradient(135deg,#4F46E5,#7C3AED,#DB2777)">
     🚀 게임 시작!
   </button>
 
-  <!-- 안내 아이콘 -->
-  <div class="grid grid-cols-3 gap-3 text-center mb-8">
-    <div class="card p-3">
-      <div class="text-2xl mb-1">📦</div>
-      <div class="text-white/60 text-xs">못 풀면 쌓임</div>
+  <!-- 안내 태그 + 최고 기록 -->
+  <div class="flex items-center justify-center gap-5 mt-2" id="info-cards">
+    <div id="info-0" class="flex flex-col items-center gap-0.5">
+      <span class="text-2xl" id="info-icon-0">📦</span>
+      <span class="text-white/45 text-xs" id="info-label-0">못 풀면 쌓임</span>
     </div>
-    <div class="card p-3">
-      <div class="text-2xl mb-1">💀</div>
-      <div class="text-white/60 text-xs">목숨 3개</div>
+    <div class="w-px h-6 bg-white/15"></div>
+    <div id="info-1" class="flex flex-col items-center gap-0.5">
+      <span class="text-2xl" id="info-icon-1">💀</span>
+      <span class="text-white/45 text-xs" id="info-label-1">목숨 3개</span>
     </div>
-    <div class="card p-3">
-      <div class="text-2xl mb-1">🔥</div>
-      <div class="text-white/60 text-xs">콤보 보너스</div>
+    <div class="w-px h-6 bg-white/15"></div>
+    <div id="info-2" class="flex flex-col items-center gap-0.5">
+      <span class="text-2xl" id="info-icon-2">🔥</span>
+      <span class="text-white/45 text-xs" id="info-label-2">콤보 보너스</span>
     </div>
-  </div>
-
-  <!-- 최고 기록 -->
-  <div class="card p-4 flex items-center justify-between">
-    <div class="text-white/50 text-sm">🏆 최고 기록</div>
-    <div class="text-yellow-300 font-black text-xl" id="best-score-disp">0</div>
+    <div class="w-px h-6 bg-white/15"></div>
+    <div class="flex flex-col items-center gap-0.5">
+      <span class="text-yellow-300 font-black text-base" id="best-score-disp">0</span>
+      <span class="text-white/45 text-xs">🏆 최고기록</span>
+    </div>
   </div>
 </div>
 
@@ -162,6 +174,28 @@ nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-s
     </div>
   </div>
 </div>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
 
 <script src="shared.js"></script>
 <script>
@@ -237,7 +271,7 @@ function selectGrade(g) {
     <button onclick="selectConcept('${c.id}')" id="cbtn-${c.id}"
       class="concept-btn"
       style="border-color:${c.color}40;color:rgba(255,255,255,.7);background:${c.color}15;">
-      <span style="font-size:1.2rem;line-height:1">${c.emoji}</span>
+      <span style="font-size:1rem;line-height:1">${c.emoji}</span>
       <span style="white-space:pre-line;line-height:1.3">${c.name}</span>
     </button>
   `).join('');
@@ -252,15 +286,19 @@ function selectConcept(id) {
     const btn=document.getElementById('cbtn-'+c.id);
     if(!btn) return;
     if(c.id===id){
-      btn.style.background=c.color+'55';
+      btn.style.background=c.color;
       btn.style.borderColor=c.color;
       btn.style.color='white';
-      btn.style.boxShadow=`0 0 12px ${c.color}66`;
+      btn.style.boxShadow=`0 0 18px ${c.color}99, 0 0 6px ${c.color}cc`;
+      btn.style.transform='scale(1.08)';
+      btn.style.fontWeight='900';
     } else {
-      btn.style.background=c.color+'15';
+      btn.style.background=c.color+'18';
       btn.style.borderColor=c.color+'40';
-      btn.style.color='rgba(255,255,255,.7)';
+      btn.style.color='rgba(255,255,255,.6)';
       btn.style.boxShadow='none';
+      btn.style.transform='scale(1)';
+      btn.style.fontWeight='700';
     }
   });
   if(sel) document.getElementById('concept-sel-label').textContent = `✓ ${sel.name.replace('\n',' ')} 선택됨`;
@@ -283,10 +321,18 @@ function selectDiff(d) {
 }
 
 function goGame() {
-  localStorage.setItem('qmath_tetris_grade',    grade);
-  localStorage.setItem('qmath_tetris_concept',  conceptId);
-  localStorage.setItem('qmath_tetris_diff',     difficulty);
-  window.location.href = 'tetris.html';
+  const type = localStorage.getItem('qmath_game_type') || 'tetris';
+  localStorage.setItem('qmath_game_start', JSON.stringify({ tab: type, grade }));
+
+  if (type === 'flash')       window.location.href = 'flash.html';
+  else if (type === 'match')  window.location.href = 'match.html';
+  else if (type === 'quiz')   window.location.href = 'quiz.html';
+  else {
+    localStorage.setItem('qmath_tetris_grade',   grade);
+    localStorage.setItem('qmath_tetris_concept', conceptId);
+    localStorage.setItem('qmath_tetris_diff',    difficulty);
+    window.location.href = 'tetris.html';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -294,6 +340,41 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('best-score-disp').textContent = best.toLocaleString();
   selectGrade(1);
   selectDiff(1);
+
+  // 타이틀 + 안내 카드 동적 변경 — qmath_game_type 기준
+  const GAME_META = {
+    flash:  {
+      icon:'🃏', title:'플래시카드로 개념 정복!',
+      desc:'카드를 뒤집어 개념을 확인하고 알면 ✅, 모르면 ❌로 체크해요!',
+      cards: [['🃏','카드 뒤집기'], ['✅','알아요/몰라요'], ['🔁','반복 복습'], ],
+    },
+    match:  {
+      icon:'🧩', title:'짝 맞추기로 개념 연결!',
+      desc:'개념 이름과 설명을 빠르게 연결해 실수 없이 완성하세요!',
+      cards: [['🧩','짝 연결'], ['⏱','빠를수록 UP'], ['❌','실수 최소화'], ],
+    },
+    quiz:   {
+      icon:'🏁', title:'퀴즈 레이스 도전!',
+      desc:'30초 안에 최대한 많이 맞혀요! 연속 정답으로 콤보 보너스 획득!',
+      cards: [['⏱','30초 제한'], ['🔥','콤보 보너스'], ['🏁','4지선다'], ],
+    },
+    tetris: {
+      icon:'🧱', title:'수학 테트리스',
+      desc:'문제를 못 풀면 블록이 쌓여요! 꼭대기까지 쌓이면 목숨을 잃어요!',
+      cards: [['📦','못 풀면 쌓임'], ['💀','목숨 3개'], ['🔥','콤보 보너스'], ],
+    },
+  };
+  const gameType = localStorage.getItem('qmath_game_type') || 'tetris';
+  const meta = GAME_META[gameType] || GAME_META.tetris;
+
+  document.getElementById('title-icon').textContent = meta.icon;
+  document.getElementById('title-text').textContent = meta.title;
+  document.getElementById('title-desc').textContent = meta.desc;
+
+  meta.cards.forEach((c, i) => {
+    document.getElementById('info-icon-' + i).textContent  = c[0];
+    document.getElementById('info-label-' + i).textContent = c[1];
+  });
 });
 </script>
 </body>

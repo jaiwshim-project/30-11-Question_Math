@@ -39,21 +39,32 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
     <div class="hidden md:flex items-center gap-6 text-sm font-medium">
       <a href="index.html"     class="text-white/90 hover:text-white transition">홈</a>
       <a href="learn.html"     class="text-white/90 hover:text-white transition">학습하기</a>
-      <a href="game.html"      data-nav="game.html" class="text-white/90 hover:text-white transition">게임</a>
-      <a href="tetris.html"   data-nav="tetris.html" class="text-white/90 hover:text-white transition">수학테트리스</a>
+      <a href="game.html"      class="text-white/90 hover:text-white transition">게임</a>
       <a href="ai.html"        class="text-white font-black border-b-2 border-white pb-0.5">AI 튜터</a>
       <a href="test.html"      class="text-white/90 hover:text-white transition">레벨 테스트</a>
       <a href="dashboard.html" class="text-white/90 hover:text-white transition">대시보드</a>
       <a href="admin.html"     class="text-white/90 hover:text-white transition">관리</a>
     </div>
-    <div class="flex items-center gap-2">
-      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-3 py-1.5 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
         <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
-        <span id="user-name-display" class="text-sm font-medium text-white hidden sm:inline">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white">로그아웃</button>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
       </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
   </div>
 </nav>
 

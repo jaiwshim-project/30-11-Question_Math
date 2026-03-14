@@ -85,19 +85,32 @@ body.playing .lives-row{padding:2px 8px;width:min(96vw,68vh);max-width:520px;mar
     <div class="hidden md:flex items-center gap-5 text-sm font-medium text-white/90">
       <a href="index.html"     class="hover:text-white transition">홈</a>
       <a href="learn.html"     class="hover:text-white transition">학습하기</a>
-      <a href="game.html"      class="hover:text-white transition">게임</a>
-      <a href="tetris-start.html" class="text-white font-black border-b-2 border-white pb-0.5">수학테트리스</a>
+      <a href="game.html"      class="text-white font-black border-b-2 border-white pb-0.5">게임</a>
       <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="hover:text-white transition">레벨 테스트</a>
       <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="hover:text-white transition">관리</a>
     </div>
-    <div class="flex items-center gap-2">
-      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-xs text-white border border-white rounded-lg px-3 py-1.5 hover:bg-white hover:text-primary transition">로그인</button></div>
+    <div class="flex items-center gap-3">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-4 py-2 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
       <div id="user-area-loggedin" class="hidden flex items-center gap-2">
-        <div id="user-avatar" class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
-        <span id="user-name-display" class="text-xs font-medium text-white">학생</span>
-        <button onclick="doLogout()" class="text-xs text-white/60 hover:text-white">로그아웃</button>
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white ml-1">로그아웃</button>
       </div>
+      <button class="md:hidden" onclick="toggleMobileMenu()">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden bg-indigo-900 border-t border-white/20 px-4 py-3 space-y-2 text-sm">
+    <a href="index.html"     class="block py-2 text-white/90">홈</a>
+    <a href="learn.html"     class="block py-2 text-white/90">학습하기</a>
+    <a href="game.html"      class="block py-2 text-white/90">게임</a>
+    <a href="ai.html"        class="block py-2 text-white/90">AI 튜터</a>
+    <a href="test.html"      class="block py-2 text-white/90">레벨 테스트</a>
+    <a href="dashboard.html" class="block py-2 text-white/90">대시보드</a>
+    <a href="admin.html"     class="block py-2 text-white/90">관리</a>
   </div>
 </nav>
 
@@ -1157,7 +1170,7 @@ function togglePause(){
 
 function showSetup(){
   gameRunning=false;cancelAnimationFrame(frameId);
-  window.location.href='tetris-start.html';
+  window.location.href='game-start.html';
 }
 
 function domParticle(){
@@ -1186,7 +1199,7 @@ canvas.addEventListener('click',(e)=>{
   if(hit.length){ blocks.forEach(b=>b.targeted=false);targetBlock=hit[0];targetBlock.targeted=true;updateHint();document.getElementById('answer-input').focus(); }
 });
 
-// ── 초기화: tetris-start.html에서 설정값 읽어 자동 시작 ──
+// ── 초기화: game-start.html에서 설정값 읽어 자동 시작 ──
 document.addEventListener('DOMContentLoaded',()=>{
   grade      = parseInt(localStorage.getItem('qmath_tetris_grade')   || '1');
   conceptId  = localStorage.getItem('qmath_tetris_concept')          || 'add1';
@@ -1200,5 +1213,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   startGame();
 });
 </script>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
