@@ -233,6 +233,39 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
       <a href="learn.html" class="block mt-5 gradient-bg text-white font-medium py-3 rounded-2xl shadow-lg hover:shadow-xl transition text-sm text-center">학습 계속하기 →</a>
     </div>
   </div>
+
+  <!-- 교사 전용: 학생 현황 (role=teacher일 때만 표시) -->
+  <div id="teacher-section" class="hidden mt-6">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-purple-200 border-t-4 border-t-purple-500">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">👩‍🏫</span>
+          <h3 class="font-bold text-gray-900">학생 활동 현황</h3>
+          <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold">교사 전용</span>
+        </div>
+        <button onclick="loadTeacherData()" class="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-xl font-bold hover:bg-purple-200 transition">🔄 새로고침</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b-2 border-gray-100">
+              <th class="text-left py-2 px-2 text-gray-500 font-bold">학생</th>
+              <th class="text-left py-2 px-2 text-gray-500 font-bold">게임</th>
+              <th class="text-center py-2 px-2 text-gray-500 font-bold">학년</th>
+              <th class="text-center py-2 px-2 text-gray-500 font-bold">점수</th>
+              <th class="text-center py-2 px-2 text-gray-500 font-bold">별</th>
+              <th class="text-center py-2 px-2 text-gray-500 font-bold">XP</th>
+              <th class="text-left py-2 px-2 text-gray-500 font-bold">일시</th>
+            </tr>
+          </thead>
+          <tbody id="teacher-table-body">
+            <tr><td colspan="7" class="text-center py-8 text-gray-400">데이터 로딩 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="teacher-summary" class="grid grid-cols-3 gap-3 mt-4"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Login Modal -->
@@ -276,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTestHistory();
   initCharts();
   loadGameStats();
+  initTeacherSection();
 });
 
 function initGreeting() {
@@ -369,6 +403,56 @@ function loadGameStats() {
 
   // 뱃지
   loadBadges(xp, level, totalStars, Object.keys(stars).length);
+}
+
+const GAME_LABEL = { flash:'🃏 플래시', match:'🧩 짝맞추기', quiz:'🏁 퀴즈', tetris:'🧱 테트리스' };
+
+async function loadTeacherData() {
+  const rows = await dbGetAllActivity();
+  const tbody = document.getElementById('teacher-table-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">기록 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const date = new Date(r.created_at).toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    const scoreVal = r.game_type === 'match' ? (r.time_sec||0)+'초' : (r.score||r.correct||0)+(r.game_type==='flash'?'개':'점');
+    return `<tr class="border-b border-gray-50 hover:bg-gray-50">
+      <td class="py-1.5 px-2 font-medium">${r.user_name||'익명'}</td>
+      <td class="py-1.5 px-2">${GAME_LABEL[r.game_type]||r.game_type}</td>
+      <td class="py-1.5 px-2 text-center">${r.grade}학년</td>
+      <td class="py-1.5 px-2 text-center font-bold text-indigo-600">${scoreVal}</td>
+      <td class="py-1.5 px-2 text-center text-yellow-500">${'⭐'.repeat(r.stars||0)}</td>
+      <td class="py-1.5 px-2 text-center text-green-600 font-bold">+${r.xp||0}</td>
+      <td class="py-1.5 px-2 text-gray-400">${date}</td>
+    </tr>`;
+  }).join('');
+
+  // summary
+  const students = [...new Set(rows.map(r => r.user_name))].length;
+  const totalXp  = rows.reduce((s, r) => s + (r.xp||0), 0);
+  const sessions = rows.length;
+  document.getElementById('teacher-summary').innerHTML = `
+    <div class="bg-purple-50 rounded-xl p-3 text-center border border-purple-200">
+      <div class="text-xl font-black text-purple-700">${students}</div>
+      <div class="text-xs text-gray-500">참여 학생</div>
+    </div>
+    <div class="bg-indigo-50 rounded-xl p-3 text-center border border-indigo-200">
+      <div class="text-xl font-black text-indigo-700">${sessions}</div>
+      <div class="text-xs text-gray-500">총 게임 수</div>
+    </div>
+    <div class="bg-green-50 rounded-xl p-3 text-center border border-green-200">
+      <div class="text-xl font-black text-green-700">${totalXp}</div>
+      <div class="text-xs text-gray-500">총 획득 XP</div>
+    </div>`;
+}
+
+function initTeacherSection() {
+  const user = getUser();
+  if (user?.role === 'teacher') {
+    document.getElementById('teacher-section').classList.remove('hidden');
+    loadTeacherData();
+  }
 }
 
 // 뱃지 정의 및 획득 여부 체크

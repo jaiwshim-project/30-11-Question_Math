@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f -exec ls -lh {})",
+      "Bash(sort -k2)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f | wc -l)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f -printf \"%s %p\\\\n\")",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f -name \"*.pdf\" | wc -l)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f -name \"*.pptx\" | wc -l)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f -name \"*.xlsx\" | wc -l)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type d | sort)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -type f | sed 's/.*\\\\.//' | sort | uniq -c | sort -rn)",
+      "Bash(du -sh \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" 2>/dev/null || echo \"Size calculation skipped\")",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" -maxdepth 1 -type f -exec ls -lh {})",
+      "Bash(ls -lhS \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)\" | grep -v \"^d\" | grep -v \"^total\")",
+      "Bash(ls -la \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\" | head -50)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/큐매쓰 레벨 테스트 자료\" -maxdepth 2 -type f | wc -l)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/경쟁사 자료\" -type f | wc -l)",
+      "Bash(ls -la \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/경쟁사 자료/\")",
+      "Bash(ls -lhS \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/경쟁사 자료/올인원매쓰/\")",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/큐매쓰 레벨 테스트 자료/00 레벨 테스트\" -type d | head -20)",
+      "Bash(find \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/큐매쓰 레벨 테스트 자료/00 레벨 테스트/\\(191104\\)MOM'S Question Math Program\" -type f -name \"*.pdf\" | wc -l)",
+      "Bash(ls -lhS \"/c/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/큐매쓰 레벨 테스트 자료/00 레벨 테스트/\\(191104\\)MOM'S Question Math Program/그룹리포트/\" | head -20)",
+      "Bash(ls \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\")",
+      "Bash(ls \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.js 2>/dev/null)",
+      "Bash(sed -i \"s/class=\\\\\"text-sm text-gray-400 text-center py-4\\\\\">아직 테스트 기록이 없습니다./class=\\\\\"text-sm text-gray-500 text-center py-4\\\\\">아직 테스트 기록이 없습니다./g\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/dashboard.html\"\nsed -i \"s/class=\\\\\"p-3 text-xs text-gray-400 border-t\\\\\"/class=\\\\\"p-3 text-xs text-gray-500 border-t\\\\\"/g\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/admin.html\"\nsed -i 's/class=\"text-center py-8 text-gray-400\">질문이 없습니다./class=\"text-center py-8 text-gray-500\">질문이 없습니다./g; s/class=\"text-center py-8 text-gray-400\">학생이 없습니다./class=\"text-center py-8 text-gray-500\">학생이 없습니다./g' \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/admin.html\"\nsed -i 's/class=\"px-5 py-3 text-sm text-gray-400\">\\\\${s.last}/class=\"px-5 py-3 text-sm text-gray-500\">\\\\${s.last}/g' \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/admin.html\"\nsed -i \"s/col-span-3 text-center py-20 text-gray-400\\\\\">조건에 맞는 개념이 없습니다./col-span-3 text-center py-20 text-gray-500\\\\\">조건에 맞는 개념이 없습니다./g\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/learn.html\")",
+      "Bash(echo \"=== FINAL VERIFICATION ===\"\necho \"\"\necho \"1. Premium body background \\(#EDEEFF + radial gradients\\):\"\ngrep -l \"background:#EDEEFF\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html | wc -l\necho \"   files updated \\(should be 7\\)\"\necho \"\"\necho \"2. Enhanced gradient-bg \\(#4338CA → #7C3AED → #DB2777\\):\"\ngrep -l \"4338CA\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html | wc -l\necho \"   files updated \\(should be 7\\)\"\necho \"\"\necho \"3. body class=text-gray-900:\"\ngrep -l \"body class=\\\\\"text-gray-900\\\\\"\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html | wc -l\necho \"   files updated \\(should be 7\\)\"\necho \"\"\necho \"4. Modal overlay rgba\\(15,10,40\\):\"\ngrep -l \"rgba\\(15,10,40\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html | wc -l\necho \"   files updated \\(should be 7\\)\"\necho \"\"\necho \"5. No old hover:bg-indigo-700 left:\"\ngrep -c \"hover:bg-indigo-700\" \"C:/2 에스비컨설팅/0000 작업 폴더/01 큐매쓰\\(질문수학\\)/\"*.html | grep -v \":0\" | wc -l\necho \"   files with old hover \\(should be 0\\)\")",
+      "Bash(echo \"\" > \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)\\\\game.html\")",
+      "Bash(ls -la \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/\"*.html)",
+      "Bash(wc -l \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/index.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/ai.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/test.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/dashboard.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/admin.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/lesson.html\" \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)/game.html\" 2>/dev/null)",
+      "Bash(echo \"\" > \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)\\\\tetris.html\")",
+      "Bash(cd \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)\" && grep -l \"수학블록\\\\|수학 블록\\\\|수학블록\" *.html)",
+      "Bash(cd \"C:\\\\2 에스비컨설팅\\\\0000 작업 폴더\\\\01 큐매쓰\\(질문수학\\)\" && sed -i 's/수학 블록/수학 테트리스/g; s/수학블록/수학테트리스/g' tetris.html game.html index.html ai.html test.html dashboard.html admin.html learn.html lesson.html)",
+      "Bash(ls:*)",
+      "Bash(git clone:*)",
+      "Bash(wc:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)"
+    ]
+  }
+}

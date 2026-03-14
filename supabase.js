@@ -99,3 +99,49 @@ async function dbGetMyScores(gameType) {
     return [];
   }
 }
+
+// ── 교사 대시보드: 전체 학생 활동 조회 ─────────────────
+async function dbGetAllActivity() {
+  try {
+    const { data, error } = await db
+      .from('game_scores')
+      .select('user_name, game_type, grade, stars, xp, score, time_sec, correct, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    return data || [];
+  } catch (e) { console.warn(e); return []; }
+}
+
+// ── 배틀: 방 생성 ───────────────────────────────────────
+async function dbCreateBattle(grade, p1Name, questions) {
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const { data, error } = await db
+    .from('battles')
+    .insert({ code, grade, p1_name: p1Name, questions, status: 'waiting' })
+    .select().single();
+  if (error) throw error;
+  return data;
+}
+
+// ── 배틀: 방 참가 ───────────────────────────────────────
+async function dbJoinBattle(code, p2Name) {
+  const { data, error } = await db
+    .from('battles')
+    .update({ p2_name: p2Name, status: 'playing' })
+    .eq('code', code).eq('status', 'waiting')
+    .select().single();
+  if (error) throw error;
+  return data;
+}
+
+// ── 배틀: 점수 업데이트 ─────────────────────────────────
+async function dbUpdateBattleScore(battleId, player, score) {
+  const col = player === 1 ? 'p1_score' : 'p2_score';
+  await db.from('battles').update({ [col]: score }).eq('id', battleId);
+}
+
+// ── 배틀: 종료 ─────────────────────────────────────────
+async function dbEndBattle(battleId) {
+  await db.from('battles').update({ status: 'done' }).eq('id', battleId);
+}
