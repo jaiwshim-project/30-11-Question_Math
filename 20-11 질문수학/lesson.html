@@ -320,16 +320,38 @@ function renderAnswerInput() {
   </div>`;
 }
 
-// ── 답변 평가 (키워드 매칭) ────────────────────────────────
+// ── 답변 평가 (키워드 매칭 + 단위 생략 허용) ────────────────
 function evaluateAnswer(userAns, hint) {
   if (!userAns || userAns.trim().length < 1) return 'wrong';
   const clean = hint.replace(/\.\.\./g, '').toLowerCase();
-  const terms = clean.split(/[,·\s\/\(\)\[\]]+/).map(t => t.trim()).filter(t => t.length > 1);
-  const ans = userAns.toLowerCase();
-  const matches = terms.filter(t => ans.includes(t));
-  if (matches.length === 0) return 'wrong';
-  if (terms.length <= 2) return matches.length >= 1 ? 'correct' : 'wrong';
-  return matches.length >= 2 ? 'correct' : 'partial';
+  const terms = clean.split(/[,·\s\/\(\)\[\]]+/).map(t => t.trim()).filter(t => t.length > 0);
+  const ans = userAns.toLowerCase().trim();
+
+  // 긴 단위 먼저 체크 (예: "시간" before "시", "mm" before "m")
+  const UNITS = ['시간','개월','주일','학년','배수','리터','그램','미터',
+                 'cm','mm','km','kg','mg','ml','lv',
+                 '시','분','초','일','개','쪽','명','번','칸','배','단','원','점'];
+  function coreOf(t) {
+    for (const u of UNITS) {
+      if (t.endsWith(u) && t.length > u.length) return t.slice(0, t.length - u.length).trim();
+    }
+    return t;
+  }
+
+  let matchCount = 0;
+  for (const t of terms) {
+    const core = coreOf(t);
+    // 한글 단일 문자(예: 괄호 안 약어)는 정확 일치만 허용, 나머지는 포함 관계 허용
+    const isSingleKorean = t.length === 1 && /[가-힣]/.test(t);
+    const directMatch = isSingleKorean ? ans === t : ans.includes(t);
+    // 단위 제거 후 핵심어가 사용자 답과 정확히 일치 (예: "3시"→"3", 사용자 답 "3")
+    const coreMatch = core !== t && core.length > 0 && ans === core;
+    if (directMatch || coreMatch) matchCount++;
+  }
+
+  if (matchCount === 0) return 'wrong';
+  if (terms.length <= 2) return 'correct';
+  return matchCount >= 2 ? 'correct' : 'partial';
 }
 
 // ── 제출 처리 ────────────────────────────────────────────
