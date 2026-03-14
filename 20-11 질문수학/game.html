@@ -138,16 +138,17 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   <div id="panel-flash" class="fade-in">
 
     <div id="flash-setup" class="bg-white rounded-2xl p-6 border-2 border-indigo-200 shadow-sm">
-      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
-      <p class="text-sm text-gray-500 mb-5">카드를 클릭하면 답이 뒤집혀요!</p>
-      <div class="grid grid-cols-3 gap-3 mb-5">
-        <button onclick="startFlash(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
-        <button onclick="startFlash(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
-        <button onclick="startFlash(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
-        <button onclick="startFlash(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
-        <button onclick="startFlash(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
-        <button onclick="startFlash(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      <h2 class="font-black text-lg text-gray-800 mb-1">① 학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-4">카드를 클릭하면 답이 뒤집혀요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-4" id="flash-grade-btns">
+        <button onclick="selectFlashGrade(1)" id="fgbtn-1" class="grade-sel-btn p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="selectFlashGrade(2)" id="fgbtn-2" class="grade-sel-btn p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="selectFlashGrade(3)" id="fgbtn-3" class="grade-sel-btn p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="selectFlashGrade(4)" id="fgbtn-4" class="grade-sel-btn p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="selectFlashGrade(5)" id="fgbtn-5" class="grade-sel-btn p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="selectFlashGrade(6)" id="fgbtn-6" class="grade-sel-btn p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
       </div>
+      <button id="flash-start-btn" onclick="startFlash(currentFlashGrade)" class="hidden w-full gradient-bg text-white font-black py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition text-base mb-4">🚀 게임 시작!</button>
       <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 text-sm text-indigo-700">
         💡 "알아요" → ⭐ 획득 | "몰라요" → 다시 복습!
       </div>
@@ -211,16 +212,17 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   <div id="panel-match" class="hidden fade-in">
 
     <div id="match-setup" class="bg-white rounded-2xl p-6 border-2 border-amber-200 shadow-sm">
-      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
-      <p class="text-sm text-gray-500 mb-5">개념 이름 ↔ 설명을 빠르게 연결하세요!</p>
-      <div class="grid grid-cols-3 gap-3 mb-5">
-        <button onclick="startMatch(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
-        <button onclick="startMatch(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
-        <button onclick="startMatch(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
-        <button onclick="startMatch(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
-        <button onclick="startMatch(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
-        <button onclick="startMatch(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      <h2 class="font-black text-lg text-gray-800 mb-1">① 학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-4">개념 이름 ↔ 설명을 빠르게 연결하세요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-4" id="match-grade-btns">
+        <button onclick="selectMatchGrade(1)" id="mgbtn-1" class="grade-sel-btn p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="selectMatchGrade(2)" id="mgbtn-2" class="grade-sel-btn p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="selectMatchGrade(3)" id="mgbtn-3" class="grade-sel-btn p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="selectMatchGrade(4)" id="mgbtn-4" class="grade-sel-btn p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="selectMatchGrade(5)" id="mgbtn-5" class="grade-sel-btn p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="selectMatchGrade(6)" id="mgbtn-6" class="grade-sel-btn p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
       </div>
+      <button id="match-start-btn" onclick="startMatch(currentMatchGrade)" class="hidden w-full gradient-bg text-white font-black py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition text-base mb-4">🚀 게임 시작!</button>
       <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 text-sm text-amber-700">
         💡 빨리 맞힐수록 별이 더 많아요! 실수는 최소로!
       </div>
@@ -256,16 +258,17 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
   <div id="panel-quiz" class="hidden fade-in">
 
     <div id="quiz-setup" class="bg-white rounded-2xl p-6 border-2 border-red-200 shadow-sm">
-      <h2 class="font-black text-lg text-gray-800 mb-1">학년을 선택하세요</h2>
-      <p class="text-sm text-gray-500 mb-5">30초 안에 최대한 많이 맞혀요!</p>
-      <div class="grid grid-cols-3 gap-3 mb-5">
-        <button onclick="startQuiz(1)" class="p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
-        <button onclick="startQuiz(2)" class="p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
-        <button onclick="startQuiz(3)" class="p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
-        <button onclick="startQuiz(4)" class="p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
-        <button onclick="startQuiz(5)" class="p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
-        <button onclick="startQuiz(6)" class="p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
+      <h2 class="font-black text-lg text-gray-800 mb-1">① 학년을 선택하세요</h2>
+      <p class="text-sm text-gray-500 mb-4">30초 안에 최대한 많이 맞혀요!</p>
+      <div class="grid grid-cols-3 gap-3 mb-4" id="quiz-grade-btns">
+        <button onclick="selectQuizGrade(1)" id="qgbtn-1" class="grade-sel-btn p-4 bg-red-100 border-2 border-red-300 rounded-xl font-bold text-red-700 hover:bg-red-500 hover:text-white hover:border-red-500 transition text-sm">1학년</button>
+        <button onclick="selectQuizGrade(2)" id="qgbtn-2" class="grade-sel-btn p-4 bg-orange-100 border-2 border-orange-300 rounded-xl font-bold text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition text-sm">2학년</button>
+        <button onclick="selectQuizGrade(3)" id="qgbtn-3" class="grade-sel-btn p-4 bg-amber-100 border-2 border-amber-300 rounded-xl font-bold text-amber-700 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition text-sm">3학년</button>
+        <button onclick="selectQuizGrade(4)" id="qgbtn-4" class="grade-sel-btn p-4 bg-green-100 border-2 border-green-300 rounded-xl font-bold text-green-700 hover:bg-green-500 hover:text-white hover:border-green-500 transition text-sm">4학년</button>
+        <button onclick="selectQuizGrade(5)" id="qgbtn-5" class="grade-sel-btn p-4 bg-blue-100 border-2 border-blue-300 rounded-xl font-bold text-blue-700 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition text-sm">5학년</button>
+        <button onclick="selectQuizGrade(6)" id="qgbtn-6" class="grade-sel-btn p-4 bg-purple-100 border-2 border-purple-300 rounded-xl font-bold text-purple-700 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition text-sm">6학년</button>
       </div>
+      <button id="quiz-start-btn" onclick="startQuiz(currentQuizGrade)" class="hidden w-full gradient-bg text-white font-black py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition text-base mb-4">🚀 게임 시작!</button>
       <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-700">
         🔥 연속 정답 시 콤보 보너스 ×2~×4! 더 많은 XP를 획득하세요.
       </div>
@@ -420,6 +423,26 @@ nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;border-bottom:none!import
 let currentFlashGrade = 1;
 let currentMatchGrade = 1;
 let currentQuizGrade  = 1;
+
+// ─── Grade Selection ──────────────────────────────────
+function selectFlashGrade(g) {
+  currentFlashGrade = g;
+  document.querySelectorAll('#flash-grade-btns .grade-sel-btn').forEach(btn => btn.classList.remove('ring-4','ring-white'));
+  document.getElementById('fgbtn-' + g).classList.add('ring-4', 'ring-white');
+  document.getElementById('flash-start-btn').classList.remove('hidden');
+}
+function selectMatchGrade(g) {
+  currentMatchGrade = g;
+  document.querySelectorAll('#match-grade-btns .grade-sel-btn').forEach(btn => btn.classList.remove('ring-4','ring-white'));
+  document.getElementById('mgbtn-' + g).classList.add('ring-4', 'ring-white');
+  document.getElementById('match-start-btn').classList.remove('hidden');
+}
+function selectQuizGrade(g) {
+  currentQuizGrade = g;
+  document.querySelectorAll('#quiz-grade-btns .grade-sel-btn').forEach(btn => btn.classList.remove('ring-4','ring-white'));
+  document.getElementById('qgbtn-' + g).classList.add('ring-4', 'ring-white');
+  document.getElementById('quiz-start-btn').classList.remove('hidden');
+}
 
 // ─── XP / Stars ───────────────────────────────────────
 function getXP()      { return parseInt(localStorage.getItem('qmath_xp') || '0'); }
