@@ -12,7 +12,7 @@
 body{background:#0F0A2E;min-height:100vh;color:white;}
 nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
 .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;backdrop-filter:blur(8px);}
-.grade-btn{border-radius:12px;font-weight:900;font-size:.85rem;cursor:pointer;border:2px solid;transition:all .2s;padding:10px 0;}
+.grade-btn{border-radius:12px;font-weight:900;font-size:.85rem;cursor:pointer;border:2px solid;transition:all .2s;padding:12px 0;min-height:44px;}
 .concept-btn{
   display:flex;flex-direction:column;align-items:center;gap:4px;
   padding:10px 4px;border-radius:14px;font-weight:700;
@@ -82,7 +82,7 @@ nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-s
     <!-- ① 학년 선택 -->
     <div>
       <div class="text-white/50 text-xs font-bold mb-2 tracking-wider">① 학년 선택</div>
-      <div class="grid grid-cols-6 gap-1.5" id="grade-row">
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="grade-row">
         <button onclick="selectGrade(1)" id="gbtn-1" class="grade-btn text-red-300    border-red-500">1학년</button>
         <button onclick="selectGrade(2)" id="gbtn-2" class="grade-btn text-orange-300 border-orange-500">2학년</button>
         <button onclick="selectGrade(3)" id="gbtn-3" class="grade-btn text-amber-300  border-amber-500">3학년</button>
