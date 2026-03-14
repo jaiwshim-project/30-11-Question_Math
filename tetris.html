@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수학 테트리스 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;}
+body{background:#0F0A2E;min-height:100vh;color:white;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+nav{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2877 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);}
+#game-wrap{position:relative;display:block;width:min(420px,96vw);margin:0 auto;}
+#game-canvas{display:block;border-radius:16px;box-shadow:0 0 40px rgba(99,91,255,.5),0 0 80px rgba(99,91,255,.2);width:100%;height:auto;}
+.hud-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:16px;backdrop-filter:blur(8px);}
+#answer-input{
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3);
+  border-radius:16px;color:white;font-size:1.4rem;font-weight:900;
+  text-align:center;outline:none;transition:all .2s;width:100%;
+}
+#answer-input:focus{border-color:#7C3AED;background:rgba(124,58,237,.25);box-shadow:0 0 20px rgba(124,58,237,.4);}
+#answer-input::placeholder{color:rgba(255,255,255,.3);}
+#answer-input.shake{animation:inputShake .35s ease;}
+#answer-input.glow-correct{border-color:#10B981;background:rgba(16,185,129,.2);box-shadow:0 0 20px rgba(16,185,129,.5);}
+#submit-btn{
+  background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;border-radius:14px;
+  color:white;font-weight:900;font-size:1rem;cursor:pointer;transition:all .2s;padding:12px 24px;
+}
+#submit-btn:hover{transform:scale(1.05);box-shadow:0 8px 24px rgba(79,70,229,.5);}
+#submit-btn:active{transform:scale(.97);}
+.heart{font-size:1.5rem;transition:all .3s;}
+.heart.lost{filter:grayscale(1);opacity:.3;}
+#combo-display{
+  background:linear-gradient(135deg,#F59E0B,#EF4444);border-radius:999px;
+  padding:4px 14px;font-weight:900;font-size:.9rem;animation:comboPop .3s ease;display:inline-block;
+}
+@keyframes comboPop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.screen{
+  position:absolute;inset:0;border-radius:16px;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  background:rgba(10,6,40,.95);backdrop-filter:blur(4px);
+  padding:16px 20px;text-align:center;z-index:10;overflow-y:auto;
+}
+.grade-btn-t{padding:10px 0;border-radius:12px;font-weight:900;font-size:.85rem;cursor:pointer;border:2px solid;transition:all .2s;}
+.concept-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:7px 4px;border-radius:12px;font-weight:700;
+  cursor:pointer;border:2px solid;transition:all .2s;text-align:center;
+  min-height:52px;justify-content:center;
+}
+@keyframes inputShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}60%{transform:translateX(8px)}}
+.particle-div{position:absolute;pointer-events:none;font-size:1.4rem;animation:pFall 1.5s ease forwards;z-index:20;}
+@keyframes pFall{0%{opacity:1;transform:translateY(0) rotate(0) scale(1)}100%{opacity:0;transform:translateY(-120px) rotate(360deg) scale(.3)}}
+#answer-area{max-width:480px;margin:0 auto;}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+/* ── 게임 플레이 모드: nav/HUD 숨김, 캔버스 최대화 ── */
+body.playing > nav{display:none !important;}
+body.playing #left-hud{display:none !important;}
+body.playing #right-hud{display:none !important;}
+body.playing #mobile-hud-strip{display:none !important;}
+body.playing #title-desktop{display:none !important;}
+body.playing #outer-container{padding:0 !important;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
+body.playing #inner-row{gap:0 !important;width:100%;justify-content:center;}
+body.playing #center-col{width:100% !important;display:flex;flex-direction:column;align-items:center;}
+body.playing #game-wrap{width:min(96vw,68vh);max-width:520px;display:block;margin:0 auto;border:2px solid rgba(124,58,237,.8);border-radius:14px;overflow:hidden;}
+body.playing #game-canvas{width:100%;height:auto;border-radius:0;box-shadow:none;}
+body.playing #answer-area{padding:4px 8px;width:min(96vw,68vh);max-width:520px;margin:0 auto;}
+body.playing #answer-input{font-size:1.1rem;padding:8px 12px;}
+body.playing #submit-btn{padding:8px 16px;font-size:.9rem;}
+body.playing #target-hint{display:none;}
+body.playing .lives-row{padding:2px 8px;width:min(96vw,68vh);max-width:520px;margin:0 auto;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+    <a href="index.html" class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div class="font-black text-white text-sm">질문수학</div>
+    </a>
+    <div class="hidden md:flex items-center gap-5 text-sm font-medium text-white/90">
+      <a href="index.html"     class="hover:text-white transition">홈</a>
+      <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+      <a href="game.html"      class="hover:text-white transition">게임</a>
+      <a href="tetris-start.html" class="text-white font-black border-b-2 border-white pb-0.5">수학테트리스</a>
+      <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+      <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-xs text-white border border-white rounded-lg px-3 py-1.5 hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-xs font-medium text-white">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/60 hover:text-white">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- GAME LAYOUT -->
+<div id="outer-container" class="flex flex-col items-center px-0 lg:px-4 py-0 lg:py-6 gap-0 lg:gap-4">
+
+  <!-- 타이틀: 데스크탑만 표시 -->
+  <div id="title-desktop" class="hidden lg:block text-center mb-2">
+    <h1 class="text-3xl font-black" style="background:linear-gradient(90deg,#818CF8,#C084FC,#F472B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🧱 수학 테트리스</h1>
+    <p class="text-white/60 text-sm">문제를 못 풀면 블록이 쌓여요! 꼭대기까지 쌓이면 목숨을 잃어요!</p>
+  </div>
+
+  <div id="inner-row" class="flex flex-col lg:flex-row gap-2 lg:gap-6 items-center lg:items-start justify-center w-full max-w-4xl">
+
+    <!-- Left HUD: 데스크탑만 -->
+    <div id="left-hud" class="hidden lg:flex flex-col gap-3 w-36">
+      <div class="hud-card p-4 text-center"><div class="text-white/60 text-xs mb-1">점수</div><div class="text-2xl font-black text-white" id="score-disp">0</div></div>
+      <div class="hud-card p-4 text-center"><div class="text-white/60 text-xs mb-1">레벨</div><div class="text-2xl font-black text-purple-300" id="level-disp">1</div></div>
+      <div class="hud-card p-4 text-center"><div class="text-white/60 text-xs mb-1">최고</div><div class="text-2xl font-black text-yellow-300" id="best-disp">0</div></div>
+    </div>
+
+    <!-- Center Canvas -->
+    <div id="center-col" class="flex flex-col items-center gap-1.5 lg:gap-4 w-full lg:w-auto">
+
+      <!-- 모바일 미니 HUD (캔버스 위, 한 줄) -->
+      <div id="mobile-hud-strip" class="flex lg:hidden items-center justify-between w-full px-2 py-1" style="max-width:420px">
+        <div class="flex gap-2">
+          <span class="text-white text-xs font-black">점수 <span id="score-disp-m" class="text-purple-300">0</span></span>
+          <span class="text-white/50 text-xs">|</span>
+          <span class="text-white text-xs font-black">Lv <span id="level-disp-m" class="text-purple-300">1</span></span>
+          <span class="text-white/50 text-xs">|</span>
+          <span class="text-yellow-300 text-xs font-black">최고 <span id="best-disp-m">0</span></span>
+        </div>
+        <div class="flex gap-2">
+          <span class="text-green-400 text-xs font-black">✓<span id="correct-disp-m">0</span></span>
+          <span class="text-red-400 text-xs font-black">↑<span id="stacked-disp-m">0</span></span>
+        </div>
+      </div>
+
+      <div id="game-wrap" class="relative">
+        <canvas id="game-canvas" width="420" height="560"></canvas>
+
+
+        <!-- Game Over Screen -->
+        <div id="screen-gameover" class="hidden screen" style="justify-content:center;padding:14px 16px;">
+          <div class="text-4xl mb-1" id="go-emoji">💀</div>
+          <h2 class="text-xl font-black mb-0.5">게임 오버!</h2>
+          <p class="text-white/60 text-xs mb-3" id="go-desc"></p>
+          <!-- 점수 + 최고점수 -->
+          <div class="grid grid-cols-2 gap-2 w-full mb-2">
+            <div class="hud-card p-2.5 text-center">
+              <div class="text-xl font-black text-white" id="go-score">0</div>
+              <div class="text-xs text-white/50">이번 점수</div>
+            </div>
+            <div class="hud-card p-2.5 text-center">
+              <div class="text-xl font-black text-yellow-300" id="go-best">0</div>
+              <div class="text-xs text-white/50">최고 점수</div>
+            </div>
+          </div>
+          <!-- 상세 통계 -->
+          <div class="grid grid-cols-3 gap-2 w-full mb-2">
+            <div class="hud-card p-2 text-center">
+              <div class="text-lg font-black text-green-400" id="go-correct">0</div>
+              <div class="text-xs text-white/50">정답 수</div>
+            </div>
+            <div class="hud-card p-2 text-center">
+              <div class="text-lg font-black text-cyan-300" id="go-destroyed">0</div>
+              <div class="text-xs text-white/50">파괴 수</div>
+            </div>
+            <div class="hud-card p-2 text-center">
+              <div class="text-lg font-black text-red-400" id="go-missed">0</div>
+              <div class="text-xs text-white/50">쌓임 수</div>
+            </div>
+          </div>
+          <!-- 평균 점수 + XP -->
+          <div class="grid grid-cols-2 gap-2 w-full mb-3">
+            <div class="hud-card p-2 text-center">
+              <div class="text-lg font-black text-orange-300" id="go-avg">0</div>
+              <div class="text-xs text-white/50">평균 점수</div>
+            </div>
+            <div class="hud-card p-2 text-center">
+              <div class="text-lg font-black text-purple-300" id="go-xp">+0 XP</div>
+              <div class="text-xs text-white/50">획득 XP</div>
+            </div>
+          </div>
+          <div class="flex gap-2 w-full">
+            <button onclick="startGame()" class="flex-1 py-2.5 rounded-2xl font-black text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">🔄 다시 하기</button>
+            <button onclick="showSetup()"  class="flex-1 py-2.5 rounded-2xl font-black text-sm border border-white/30 text-white/80 hover:bg-white/10">🏠 초기 화면</button>
+          </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <!-- 일시정지: 전체 오버레이 — 아무 곳이나 터치하면 재개 -->
+        <div id="screen-pause" class="hidden screen" style="cursor:pointer;justify-content:center;gap:0;"
+          ontouchstart="event.preventDefault();togglePause();"
+          onclick="togglePause();">
+          <div class="text-5xl mb-3" style="pointer-events:none;">⏸️</div>
+          <div class="text-2xl font-black text-white mb-2" style="pointer-events:none;">일시정지</div>
+          <div class="text-white/50 text-sm mb-8" style="pointer-events:none;">화면을 터치하면 계속해요</div>
+          <button ontouchstart="event.stopPropagation();event.preventDefault();togglePause();"
+                  onclick="event.stopPropagation();togglePause();"
+                  class="w-48 py-3 rounded-2xl font-black text-sm mb-3"
+                  style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">▶ 계속하기</button>
+          <button ontouchstart="event.stopPropagation();event.preventDefault();startGame();"
+                  onclick="event.stopPropagation();startGame();"
+                  class="w-48 py-2.5 rounded-2xl font-black text-sm mb-2 border border-white/30 text-white/80">🔄 다시 하기</button>
+          <button ontouchstart="event.stopPropagation();event.preventDefault();showSetup();"
+                  onclick="event.stopPropagation();showSetup();"
+                  class="w-48 py-2 rounded-2xl font-black text-xs border border-white/20 text-white/50">🏠 초기 화면으로</button>
+        </div>
+      </div>
+
+      <!-- Lives + Combo -->
+      <div class="lives-row flex items-center justify-between w-full px-1" style="max-width:420px">
+        <div class="flex gap-1" id="lives-display">
+          <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+        </div>
+        <div id="combo-wrap" class="hidden"><span id="combo-display">🔥 ×2</span></div>
+        <div id="game-btns" class="hidden flex gap-1.5">
+          <button onclick="togglePause()" id="pause-btn" class="text-white/60 hover:text-white text-xs font-bold px-2 py-1 border border-white/20 rounded-lg">⏸</button>
+          <button onclick="startGame()" class="text-white/60 hover:text-white text-xs font-bold px-2 py-1 border border-white/20 rounded-lg">🔄</button>
+          <button onclick="showSetup()" class="text-white/60 hover:text-white text-xs font-bold px-2 py-1 border border-white/20 rounded-lg">🏠</button>
+        </div>
+      </div>
+
+      <!-- Answer input -->
+      <div id="answer-area" class="w-full" style="max-width:420px">
+        <div class="flex gap-3">
+          <input type="number" id="answer-input" step="0.1" placeholder="답을 입력하세요..." autocomplete="off"
+            onkeydown="if(event.key==='Enter')submitAnswer()">
+          <button id="submit-btn" onclick="submitAnswer()">확인!</button>
+        </div>
+        <div class="text-center mt-2 text-white/40 text-xs" id="target-hint">게임을 시작하면 블록이 떨어져요!</div>
+      </div>
+    </div>
+
+    <!-- Right HUD -->
+    <div id="right-hud" class="flex lg:flex-col gap-2 lg:w-28 w-full">
+      <div class="hud-card p-2 flex-1 text-center"><div class="text-white/60 text-xs mb-0.5">정답</div><div class="text-lg font-black text-green-400" id="correct-disp">0</div></div>
+      <div class="hud-card p-2 flex-1 text-center"><div class="text-white/60 text-xs mb-0.5">파괴</div><div class="text-lg font-black text-cyan-300" id="destroyed-disp">0</div></div>
+      <div class="hud-card p-2 flex-1 text-center"><div class="text-white/60 text-xs mb-0.5">쌓임</div><div class="text-lg font-black text-red-400" id="stacked-disp">0</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black text-gray-900">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">이름</label><input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary text-gray-900"></div>
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">역할</label><select id="login-role" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm text-gray-900"><option value="student">학생</option><option value="teacher">교사</option></select></div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full text-white font-bold py-3 rounded-2xl shadow-md" style="background:linear-gradient(135deg,#4338CA,#7C3AED,#DB2877)">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+//  수학 테트리스 — 학년별 개념 카테고리 + 스택 시스템
+// ═══════════════════════════════════════════════════════
+
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const COLS = 4, COL_W = W/COLS;  // 105px 직사각형 블록
+const BLOCK_H = 90;
+const MAX_STACK = Math.floor(H / BLOCK_H); // 6
+
+// ── 난이도 설정 ──────────────────────────────────────────
+const DIFF = [
+  { name:'쉬움',   speedMult:.55,  spawnBase:270, spawnMin:140 },
+  { name:'보통',   speedMult:1.0,  spawnBase:185, spawnMin:80  },
+  { name:'어려움', speedMult:1.75, spawnBase:110, spawnMin:45  },
+];
+
+// ── 학년별 개념 정의 ─────────────────────────────────────
+// 수와연산/도형/측정/규칙성/자료와통계 5개 영역 기반
+const GRADE_CONCEPTS = {
+  1: [
+    { id:'add1',    name:'덧셈',      emoji:'➕', color:'#4F46E5', desc:'한 자리 더하기' },
+    { id:'sub1',    name:'뺄셈',      emoji:'➖', color:'#EC4899', desc:'한 자리 빼기' },
+    { id:'num1',    name:'수 비교',   emoji:'🔢', color:'#06B6D4', desc:'크기 비교' },
+    { id:'shape1',  name:'도형',      emoji:'🔷', color:'#8B5CF6', desc:'변·꼭짓점 수' },
+    { id:'time1',   name:'시간',      emoji:'🕐', color:'#F59E0B', desc:'몇 시 몇 분' },
+  ],
+  2: [
+    { id:'add2',    name:'받아올림\n덧셈', emoji:'➕', color:'#4F46E5', desc:'두 자리 덧셈' },
+    { id:'sub2',    name:'받아내림\n뺄셈', emoji:'➖', color:'#EC4899', desc:'두 자리 뺄셈' },
+    { id:'mul2',    name:'곱셈 입문', emoji:'✖️', color:'#10B981', desc:'×2 ~×5' },
+    { id:'time2',   name:'시각·시간', emoji:'🕐', color:'#F59E0B', desc:'시·분·초' },
+    { id:'measure2',name:'길이 재기', emoji:'📏', color:'#8B5CF6', desc:'cm·m 단위' },
+  ],
+  3: [
+    { id:'times3',  name:'구구단',    emoji:'📋', color:'#EF4444', desc:'2~9단 완성' },
+    { id:'div3',    name:'나눗셈',    emoji:'➗', color:'#F59E0B', desc:'기초 나눗셈' },
+    { id:'frac3',   name:'분수 기초', emoji:'½', color:'#F97316', desc:'분수 의미' },
+    { id:'dec3',    name:'소수 기초', emoji:'🔢', color:'#06B6D4', desc:'0.1 단위' },
+    { id:'time3',   name:'시간 계산', emoji:'🕐', color:'#F59E0B', desc:'분·초 변환' },
+    { id:'graph3',  name:'표·그래프', emoji:'📊', color:'#10B981', desc:'자료 읽기' },
+  ],
+  4: [
+    { id:'bignum4', name:'큰 수\n곱·나눗',  emoji:'🔢', color:'#4F46E5', desc:'두 자리×두 자리' },
+    { id:'frac4',   name:'분수\n덧·뺄셈', emoji:'½', color:'#F97316', desc:'같은 분모' },
+    { id:'dec4',    name:'소수\n덧·뺄셈', emoji:'🔢', color:'#06B6D4', desc:'소수점 계산' },
+    { id:'angle4',  name:'각도',     emoji:'📐', color:'#8B5CF6', desc:'각도 계산' },
+    { id:'area4',   name:'넓이·둘레', emoji:'🔲', color:'#EC4899', desc:'직사각형·정사각형' },
+    { id:'data4',   name:'자료·\n통계',   emoji:'📊', color:'#10B981', desc:'막대·꺾은선그래프' },
+    { id:'stat4',   name:'확률·\n가능성', emoji:'🎲', color:'#A855F7', desc:'일어날 가능성' },
+  ],
+  5: [
+    { id:'lcm5',    name:'약수·배수', emoji:'🔗', color:'#4F46E5', desc:'최대공약수·최소공배수' },
+    { id:'frac5',   name:'분수 곱셈', emoji:'½', color:'#F97316', desc:'분수×자연수' },
+    { id:'dec5',    name:'소수 곱셈', emoji:'🔢', color:'#06B6D4', desc:'소수×자연수' },
+    { id:'avg5',    name:'평균',      emoji:'📊', color:'#10B981', desc:'평균 구하기' },
+    { id:'pattern5',name:'규칙·대응', emoji:'🔄', color:'#8B5CF6', desc:'수열·규칙' },
+    { id:'stat5',   name:'확률·\n통계',   emoji:'🎲', color:'#A855F7', desc:'가능성·자료 해석' },
+  ],
+  6: [
+    { id:'ratio6',  name:'비와 비율', emoji:'📊', color:'#EC4899', desc:'비율 계산' },
+    { id:'fracdiv6',name:'분수 나눗셈',emoji:'½', color:'#F97316', desc:'분수÷자연수' },
+    { id:'decdiv6', name:'소수 나눗셈',emoji:'🔢', color:'#06B6D4', desc:'소수÷자연수' },
+    { id:'prob6',   name:'경우의 수', emoji:'🎲', color:'#8B5CF6', desc:'순열·조합 기초' },
+    { id:'stat6',   name:'확률·\n통계',   emoji:'📈', color:'#A855F7', desc:'확률·평균·대푯값' },
+    { id:'prop6',   name:'비례식',   emoji:'⚖️', color:'#4F46E5', desc:'비례식 풀기' },
+    { id:'vol6',    name:'입체도형',  emoji:'📦', color:'#10B981', desc:'부피·겉넓이' },
+  ],
+};
+
+// ── 문제 생성기 ───────────────────────────────────────────
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pick(arr){ return arr[rand(0,arr.length-1)]; }
+
+const Q = {
+  // ── 1학년 ──
+  add1: () => { const a=rand(1,9),b=rand(1,9); return {expr:`${a} + ${b}`,answer:a+b,op:'+'}; },
+  sub1: () => { let a=rand(2,9),b=rand(1,a); return {expr:`${a} - ${b}`,answer:a-b,op:'-'}; },
+  num1: () => {
+    const facts=[
+      {expr:'1보다 1 큰 수',answer:2},{expr:'5보다 1 작은 수',answer:4},
+      {expr:'9보다 1 큰 수',answer:10},{expr:'10보다 1 작은 수',answer:9},
+      {expr:'3+2와 4+1 중 큰 것',answer:5},{expr:'7-2와 2+2 중 큰 것',answer:5},
+    ];
+    const a=rand(1,9),b=rand(a+1,a+5);
+    const extras=[{expr:`${a}과 ${b} 중 큰 수`,answer:b},{expr:`${b}과 ${a} 중 작은 수`,answer:a}];
+    return pick([...facts,...extras]);
+  },
+  shape1: () => pick([
+    {expr:'삼각형의 변의 수',answer:3},{expr:'사각형의 변의 수',answer:4},
+    {expr:'오각형의 변의 수',answer:5},{expr:'삼각형의 꼭짓점 수',answer:3},
+    {expr:'사각형의 꼭짓점 수',answer:4},{expr:'오각형의 꼭짓점 수',answer:5},
+    {expr:'육각형의 변의 수',answer:6},
+  ]),
+  time1: () => pick([
+    {expr:'1시간 = □ 분',answer:60},{expr:'하루 = □ 시간',answer:24},
+    {expr:'1주일 = □ 일',answer:7},{expr:'1달 = □ 주',answer:4},
+    {expr:'반 시간 = □ 분',answer:30},{expr:'1년 = □ 달',answer:12},
+  ]),
+
+  // ── 2학년 ──
+  add2: () => { const a=rand(11,50),b=rand(9,40); return {expr:`${a} + ${b}`,answer:a+b,op:'+'}; },
+  sub2: () => { const a=rand(20,80),b=rand(5,a-1); return {expr:`${a} - ${b}`,answer:a-b,op:'-'}; },
+  mul2: () => { const a=rand(2,5),b=rand(2,9); return {expr:`${a} × ${b}`,answer:a*b,op:'×'}; },
+  time2: () => pick([
+    {expr:'1시간 = □ 분',answer:60},{expr:'1분 = □ 초',answer:60},
+    {expr:'2시간 = □ 분',answer:120},{expr:'90분 = □ 시간 □ 분',answer:90},
+    {expr:'1시간 30분 = □ 분',answer:90},{expr:'하루 = □ 시간',answer:24},
+    {expr:'1주일 = □ 일',answer:7},{expr:'1년 = □ 개월',answer:12},
+  ]),
+  measure2: () => {
+    const cm=rand(1,9)*10, m=rand(1,5);
+    return pick([
+      {expr:`${m}m = □ cm`,answer:m*100},
+      {expr:`${cm}cm = □ m □ cm`,answer:cm},
+      {expr:'1m = □ cm',answer:100},
+      {expr:'2m 50cm = □ cm',answer:250},
+      {expr:'300cm = □ m',answer:3},
+    ]);
+  },
+
+  // ── 3학년 ──
+  times3: () => { const a=rand(2,9),b=rand(2,9); return {expr:`${a} × ${b}`,answer:a*b,op:'×'}; },
+  div3: () => { const b=rand(2,9),ans=rand(2,9); return {expr:`${b*ans} ÷ ${b}`,answer:ans,op:'÷'}; },
+  frac3: () => {
+    const n=rand(2,6),ans=rand(1,n-1);
+    return pick([
+      {expr:`1/${n}의 분모`,answer:n},{expr:`${ans}/${n}의 분자`,answer:ans},
+      {expr:`${n}분의 1 = 1/□`,answer:n},{expr:`3/4 중 분자`,answer:3},
+      {expr:`4분의 3의 분모`,answer:4},
+    ]);
+  },
+  dec3: () => {
+    const a=rand(1,9),b=rand(1,9);
+    return pick([
+      {expr:`0.${a}에서 0.${b<a?b:1}를 뺀 값`,answer:+(a/10-Math.min(b,a-1)/10).toFixed(1)},
+      {expr:`0.${a} + 0.${b}`,answer:+((a+b)/10).toFixed(1)},
+      {expr:`${a} × 0.1`,answer:+(a*0.1).toFixed(1)},
+      {expr:`0.1이 ${a}개`,answer:+(a*0.1).toFixed(1)},
+    ]);
+  },
+  time3: () => pick([
+    {expr:'1시간 = □ 초',answer:3600},{expr:'1분 = □ 초',answer:60},
+    {expr:'2분 30초 = □ 초',answer:150},{expr:'120초 = □ 분',answer:2},
+    {expr:'3분 = □ 초',answer:180},{expr:'1시간 = □ 분',answer:60},
+  ]),
+  graph3: () => {
+    const data=[rand(3,10),rand(3,10),rand(3,10),rand(3,10)];
+    const names=['사과','배','딸기','포도'];
+    const maxIdx=data.indexOf(Math.max(...data));
+    const sum=data.reduce((a,b)=>a+b,0);
+    return pick([
+      {expr:`${names[0]}:${data[0]}, ${names[1]}:${data[1]}\n가장 많은 과일은 몇 개?`, answer:Math.max(...data)},
+      {expr:`${names[0]}:${data[0]}, ${names[1]}:${data[1]}\n두 과일의 합은?`, answer:data[0]+data[1]},
+      {expr:`4가지 과일 합계\n${data.join('+')}=?`, answer:sum},
+    ]);
+  },
+
+  // ── 4학년 ──
+  bignum4: () => {
+    const r=Math.random();
+    if(r<.4){ const a=rand(10,40),b=rand(10,25); return {expr:`${a} × ${b}`,answer:a*b,op:'×'}; }
+    else     { const b=rand(3,9),ans=rand(10,20); return {expr:`${b*ans} ÷ ${b}`,answer:ans,op:'÷'}; }
+  },
+  frac4: () => {
+    const n=rand(2,8),a=rand(1,n-1),b=rand(1,n-1);
+    if(a+b<n) return {expr:`${a}/${n} + ${b}/${n}`,answer:+(a+b)/n,op:'+'};
+    if(a>b)   return {expr:`${a}/${n} - ${b}/${n}`,answer:+(a-b)/n,op:'-'};
+    return {expr:`${a}/${n} + ${b}/${n}`,answer:+(a+b)/n,op:'+'};
+  },
+  dec4: () => {
+    const a=rand(1,9),b=rand(1,9),af=rand(1,9),bf=rand(1,9);
+    const r=Math.random();
+    if(r<.5) return {expr:`${a}.${af} + ${b}.${bf}`,answer:+((a+b)+(af+bf)/10).toFixed(1),op:'+'};
+    const big=a>b?{i:a,f:af}:{i:b,f:bf}, sm=a>b?{i:b,f:bf}:{i:a,f:af};
+    return {expr:`${big.i}.${big.f} - ${sm.i}.${sm.f}`,answer:+((big.i-sm.i)+(big.f-sm.f)/10).toFixed(1),op:'-'};
+  },
+  angle4: () => pick([
+    {expr:'직각 = □°',answer:90},{expr:'평각 = □°',answer:180},
+    {expr:'삼각형 내각의 합 = □°',answer:180},{expr:'사각형 내각의 합 = □°',answer:360},
+    {expr:'직각 × 2 = □°',answer:180},{expr:'직각의 절반 = □°',answer:45},
+    {expr:'정삼각형 한 각 = □°',answer:60},
+    ...Array.from({length:4},()=>{
+      const a=rand(2,8)*10,b=rand(2,8)*10;
+      return {expr:`삼각형 두 각이 ${a}°, ${b}°일 때\n나머지 각은?`,answer:180-a-b>0?180-a-b:30};
+    }),
+  ]),
+  area4: () => {
+    const l=rand(2,12),w=rand(2,10);
+    return pick([
+      {expr:`가로 ${l}cm, 세로 ${w}cm\n직사각형 넓이(cm²)`,answer:l*w},
+      {expr:`한 변이 ${l}cm인\n정사각형 넓이(cm²)`,answer:l*l},
+      {expr:`가로 ${l}cm, 세로 ${w}cm\n직사각형 둘레(cm)`,answer:2*(l+w)},
+      {expr:`한 변이 ${l}cm인\n정사각형 둘레(cm)`,answer:l*4},
+    ]);
+  },
+  data4: () => {
+    const a=rand(5,15),b=rand(5,15),c=rand(5,15);
+    return pick([
+      {expr:`A:${a}명, B:${b}명, C:${c}명\n전체 합계는?`,answer:a+b+c},
+      {expr:`A:${a}명, B:${b}명\n차이는 몇 명?`,answer:Math.abs(a-b)},
+      {expr:`${a}명, ${b}명, ${c}명 중\n가장 많은 수는?`,answer:Math.max(a,b,c)},
+    ]);
+  },
+  stat4: () => pick([
+    {expr:'반드시 일어나는 일\n가능성: 0, ½, 1 중?',answer:1},
+    {expr:'절대 안 일어나는 일\n가능성: 0, ½, 1 중?',answer:0},
+    {expr:'동전 앞면이 나올\n가능성×2=?',answer:1},
+    {expr:'주사위 홀수 나올\n가능성×6=?',answer:3},
+    {expr:'빨강3 파랑3 공 중\n빨강 뽑을 가능성×2=?',answer:1},
+    {expr:'파란 공 2개, 빨간 공 8개\n파란 공 뽑을 가능성(분모10)',answer:2},
+  ]),
+
+  // ── 5학년 ──
+  lcm5: () => {
+    const primes=[2,3,5,7];
+    const a=pick(primes),b=pick(primes);
+    const pairs=[[2,4],[3,6],[4,6],[2,6],[3,9],[4,8],[6,9],[6,8]];
+    const [x,y]=pick(pairs);
+    function gcd(a,b){return b?gcd(b,a%b):a;}
+    function lcm(a,b){return a*b/gcd(a,b);}
+    return pick([
+      {expr:`${x}와 ${y}의 최소공배수`,answer:lcm(x,y)},
+      {expr:`${x}와 ${y}의 최대공약수`,answer:gcd(x,y)},
+      {expr:`${x*2}의 약수 개수`,answer:function(){let c=0;for(let i=1;i<=x*2;i++)if((x*2)%i===0)c++;return c;}()},
+      {expr:`${a}의 배수 중\n${a*3}보다 큰 가장 작은 수`,answer:a*4},
+    ]);
+  },
+  frac5: () => {
+    const n=rand(2,6),k=rand(2,6);
+    return pick([
+      {expr:`${k} × 1/${n}`,answer:+(k/n).toFixed(2).replace(/\.?0+$/,'')},
+      {expr:`${n*k}의 1/${n}`,answer:k},
+      {expr:`${n*k}의 2/${n}`,answer:k*2},
+      {expr:`3/4 × ${n*4}`,answer:3*n},
+    ]);
+  },
+  dec5: () => {
+    const a=rand(2,9),b=rand(2,5);
+    const af=rand(1,9);
+    return pick([
+      {expr:`${a} × 0.${b}`,answer:+(a*b/10).toFixed(1)},
+      {expr:`${a}.${af} × ${b}`,answer:+((a*b)+(af*b/10)).toFixed(1)},
+      {expr:`${a} × 0.1`,answer:+(a/10).toFixed(1)},
+      {expr:`0.${af} × ${b}`,answer:+(af*b/10).toFixed(1)},
+    ]);
+  },
+  avg5: () => {
+    const n=rand(2,4);
+    const nums=Array.from({length:n},()=>rand(2,10)*2);
+    const s=nums.reduce((a,b)=>a+b,0);
+    if(s%n===0) return {expr:`${nums.join(', ')}\n의 평균은?`,answer:s/n};
+    const even=Array.from({length:n},()=>rand(1,5)*n);
+    const es=even.reduce((a,b)=>a+b,0);
+    return {expr:`${even.join(', ')}\n의 평균은?`,answer:es/n};
+  },
+  pattern5: () => {
+    const start=rand(1,8),step=rand(2,6);
+    const s=[start,start+step,start+2*step];
+    return pick([
+      {expr:`${s[0]}, ${s[1]}, ${s[2]}, □\n다음 수는?`,answer:start+3*step},
+      {expr:`□, ${s[1]}, ${s[2]}, ${s[2]+step}\n첫 번째 수는?`,answer:start},
+      {expr:`${s[0]}, □, ${s[2]}, ${s[2]+step}\n두 번째 수는?`,answer:s[1]},
+    ]);
+  },
+  prob5: () => pick([
+    {expr:'반드시 일어나는 일의\n가능성(0~1)',answer:1},
+    {expr:'절대 일어나지 않는 일의\n가능성(0~1)',answer:0},
+    {expr:'동전 앞면이 나올\n가능성(분수)',answer:.5},
+    {expr:'주사위 1이 나올\n가능성×6=?',answer:1},
+    {expr:'파란 공 3개, 빨간 공 3개\n파란 뽑을 가능성×2=?',answer:1},
+  ]),
+  stat5: () => {
+    const nums=Array.from({length:rand(3,4)},()=>rand(2,10)*2);
+    const s=nums.reduce((a,b)=>a+b,0);
+    const avg=s/nums.length;
+    const a=rand(5,15),b=rand(5,15),c=rand(5,15),d=rand(5,15);
+    return pick([
+      ...(Number.isInteger(avg)?[{expr:`${nums.join(', ')}\n의 평균은?`,answer:avg}]:[]),
+      {expr:`${a}명, ${b}명, ${c}명, ${d}명\n4반의 평균 학생 수는?`,answer:Math.round((a+b+c+d)/4)},
+      {expr:'가장 자주 나오는 값을\n무엇이라 하나요? (최빈값=0)',answer:0},
+      {expr:`${a}, ${b}, ${c} 중\n가장 큰 수와 작은 수의 차는?`,answer:Math.max(a,b,c)-Math.min(a,b,c)},
+      {expr:`자료: ${a}, ${b}, ${c}\n평균은?`,answer:Math.round((a+b+c)/3)},
+    ]);
+  },
+
+  // ── 6학년 ──
+  ratio6: () => {
+    const a=rand(2,8),b=rand(2,8);
+    const pcts=[10,20,25,50];
+    const pct=pick(pcts);
+    const base=pct===10?rand(1,9)*10:pct===20?rand(1,5)*5:pct===25?rand(1,4)*4:rand(1,9)*2;
+    return pick([
+      {expr:`${a}:${b}에서\n전항을 말하면?`,answer:a},
+      {expr:`${a}:${b}에서\n후항을 말하면?`,answer:b},
+      {expr:`${base}의 ${pct}%는?`,answer:base*pct/100},
+      {expr:`${a*3}의 1/${a}은?`,answer:3},
+      {expr:`비율 ${a}/${a+b}을\n소수로(소수점1자리)`,answer:+(a/(a+b)).toFixed(1)},
+    ]);
+  },
+  fracdiv6: () => {
+    const n=rand(2,6),k=rand(2,5);
+    return pick([
+      {expr:`${k} ÷ 1/${n}`,answer:k*n},
+      {expr:`${n*k} ÷ ${n}`,answer:k},
+      {expr:`1/${n} ÷ ${k}`,answer:+(1/(n*k)).toFixed(2).replace(/\.?0+$/,'')},
+      {expr:`${n} ÷ ${n}/${k}`,answer:k},
+    ]);
+  },
+  decdiv6: () => {
+    const b=rand(2,9),ans=rand(2,9);
+    const af=rand(1,5);
+    return pick([
+      {expr:`${b*ans}.0 ÷ ${b}`,answer:ans},
+      {expr:`${b*ans} ÷ 0.${b<5?b:5}`,answer:b*ans/(b<5?b:5)*10},
+      {expr:`${af}.0 ÷ ${af}`,answer:1},
+      {expr:`${af*b} ÷ ${af}`,answer:b},
+    ]);
+  },
+  prob6: () => pick([
+    {expr:'동전 1개 던지기\n경우의 수',answer:2},
+    {expr:'주사위 1개 던지기\n경우의 수',answer:6},
+    {expr:'동전 2개 던지기\n경우의 수',answer:4},
+    {expr:'1,2,3 중 2개 뽑아\n순서 있게 나열하는 경우의 수',answer:6},
+    {expr:'1,2,3 중 2개 뽑기\n순서 없이 경우의 수',answer:3},
+    {expr:'주사위에서 짝수\n나오는 경우의 수',answer:3},
+    {expr:'A,B,C 3명이\n1줄로 서는 경우의 수',answer:6},
+  ]),
+  stat6: () => {
+    const a=rand(4,12),b=rand(4,12),c=rand(4,12),d=rand(4,12),e=rand(4,12);
+    const s5=a+b+c+d+e;
+    const pcts=[10,20,25,50];
+    const pct=pick(pcts);
+    const base=pct===25?rand(1,4)*4:pct===20?rand(1,5)*5:rand(1,9)*10;
+    return pick([
+      {expr:`${a}, ${b}, ${c}, ${d}, ${e}\n평균은?`,answer:Math.round(s5/5)},
+      {expr:`평균이 ${Math.round(s5/5)}인 5개 자료\n총합은?`,answer:Math.round(s5/5)*5},
+      {expr:`${base}개 중 ${pct}%는\n몇 개?`,answer:base*pct/100},
+      {expr:`전체 100명, 20%가 수학 좋아함\n수학 좋아하는 학생 수는?`,answer:20},
+      {expr:`전체 200명, 25%가 독서 선호\n독서 선호 학생 수는?`,answer:50},
+      {expr:`확률 1/4를\n백분율(%)로 나타내면?`,answer:25},
+      {expr:`확률 1/5를\n백분율(%)로 나타내면?`,answer:20},
+    ]);
+  },
+  prop6: () => {
+    const a=rand(1,5),b=rand(1,5),k=rand(2,5);
+    return pick([
+      {expr:`${a}:${b} = ${a*k}:□`,answer:b*k},
+      {expr:`□:${b} = ${a*k}:${b*k}`,answer:a},
+      {expr:`${a}:□ = ${a*k}:${b*k}`,answer:b},
+      {expr:`${a*k}:${b*k}의 비를\n가장 간단히 하면 □:${b}`,answer:a},
+    ]);
+  },
+  vol6: () => {
+    const l=rand(2,8),w=rand(2,6),h=rand(2,5);
+    return pick([
+      {expr:`가로 ${l}, 세로 ${w}, 높이 ${h}\n직육면체 부피(cm³)`,answer:l*w*h},
+      {expr:`한 변이 ${l}cm인\n정육면체 부피(cm³)`,answer:l*l*l},
+      {expr:`직육면체 ${l}×${w}×${h}\n꼭짓점 수`,answer:8},
+      {expr:`직육면체 ${l}×${w}×${h}\n면의 수`,answer:6},
+    ]);
+  },
+};
+
+// ── 상태 변수 ─────────────────────────────────────────────
+let grade=1, conceptId='add1', difficulty=1;
+let currentConcept = null;
+let currentStep = 0;
+
+let blocks=[], particles=[];
+let score=0, lives=3, level=1, combo=0;
+let correctCount=0, destroyed=0, missedCount=0, xpGained=0;
+let spawnTimer=0, spawnRate=185;
+let gameRunning=false, gamePaused=false, frameId=null;
+let targetBlock=null;
+let bestScore=parseInt(localStorage.getItem('qmath_tetris_best')||'0');
+let stackedCols=[], stackedData=[];
+
+function resetStacks(){
+  stackedCols=Array(COLS).fill(0);
+  stackedData=Array.from({length:COLS},()=>[]);
+}
+
+// ── 한 화면 UI ───────────────────────────────────────────
+const GRADE_COLORS = ['','red','orange','amber','green','blue','purple'];
+const GRADE_ACTIVE = ['','bg-red-500','bg-orange-500','bg-amber-500','bg-green-500','bg-blue-500','bg-purple-500'];
+
+function selectGrade(g) {
+  grade = g;
+  // 학년 버튼 하이라이트
+  for(let i=1;i<=6;i++){
+    const btn=document.getElementById('gbtn-'+i);
+    const col=GRADE_COLORS[i];
+    if(i===g){
+      btn.className=`grade-btn-t text-xs py-2 text-white border-${col}-500 ${GRADE_ACTIVE[i]}`;
+    } else {
+      btn.className=`grade-btn-t text-xs py-2 text-${col}-300 border-${col}-500 hover:${GRADE_ACTIVE[i]} hover:text-white`;
+    }
+  }
+  // 개념 라벨
+  document.getElementById('concept-grade-label').textContent=`— ${g}학년`;
+  // 개념 그리드 렌더링
+  const concepts=GRADE_CONCEPTS[g];
+  const grid=document.getElementById('concept-grid');
+  grid.innerHTML=concepts.map(c=>`
+    <button onclick="selectConcept('${c.id}')" id="cbtn-${c.id}"
+      class="concept-btn"
+      style="border-color:${c.color}40;color:rgba(255,255,255,.7);background:${c.color}15;">
+      <span style="font-size:1.1rem;line-height:1">${c.emoji}</span>
+      <span style="white-space:pre-line;line-height:1.25;font-size:.7rem">${c.name}</span>
+    </button>
+  `).join('');
+  // 첫 번째 개념 자동 선택
+  selectConcept(concepts[0].id);
+}
+
+function selectConcept(id) {
+  conceptId = id;
+  currentConcept = null;
+  const concepts = GRADE_CONCEPTS[grade] || [];
+  currentConcept = concepts.find(c=>c.id===id) || null;
+  // 개념 버튼 하이라이트
+  concepts.forEach(c=>{
+    const btn=document.getElementById('cbtn-'+c.id);
+    if(!btn) return;
+    if(c.id===id){
+      btn.style.background=c.color+'55';
+      btn.style.borderColor=c.color;
+      btn.style.color='white';
+      btn.style.boxShadow=`0 0 12px ${c.color}66`;
+    } else {
+      btn.style.background=c.color+'15';
+      btn.style.borderColor=c.color+'40';
+      btn.style.color='rgba(255,255,255,.7)';
+      btn.style.boxShadow='none';
+    }
+  });
+  // 선택된 개념 표시
+  const lbl=document.getElementById('concept-sel-label');
+  if(lbl&&currentConcept) lbl.textContent=`✓ ${currentConcept.name.replace('\n',' ')} 선택됨`;
+}
+
+function selectDiff(d) {
+  difficulty = d;
+  const base=[
+    'py-1.5 rounded-xl font-black text-xs border-2 transition',
+  ][0];
+  const styles=[
+    [base+' border-green-400 text-green-300 hover:bg-green-500 hover:text-white',
+     base+' border-green-400 bg-green-500 text-white'],
+    [base+' border-yellow-400 text-yellow-200 hover:bg-yellow-500 hover:text-white',
+     base+' border-yellow-400 bg-yellow-500 text-white'],
+    [base+' border-red-400 text-red-300 hover:bg-red-500 hover:text-white',
+     base+' border-red-400 bg-red-500 text-white'],
+  ];
+  [0,1,2].forEach(i=>{
+    document.getElementById('diff-btn-'+i).className=styles[i][i===d?1:0];
+  });
+}
+
+// ── 문제 생성 ─────────────────────────────────────────────
+function makeQuestion() {
+  const fn = Q[conceptId];
+  if(!fn) return {expr:'1 + 1', answer:2, op:'+'};
+  try {
+    const q = fn();
+    if(q.answer === undefined || isNaN(q.answer)) return {expr:'2 + 3', answer:5, op:'+'};
+    return q;
+  } catch(e) {
+    return {expr:'1 + 1', answer:2, op:'+'};
+  }
+}
+
+// ── 블록 색상 ─────────────────────────────────────────────
+function getBlockColor() {
+  if(currentConcept) return { fill:currentConcept.color, glow:currentConcept.color+'aa' };
+  return { fill:'#8B5CF6', glow:'rgba(139,92,246,.7)' };
+}
+
+// ── 블록 생성 ─────────────────────────────────────────────
+function createBlock() {
+  const dc = DIFF[difficulty];
+  const baseSpeed = (0.45 + (level-1)*0.1) * dc.speedMult;
+  const palette = getBlockColor();
+  return {
+    col:0, x:0, y:-BLOCK_H, w:COL_W, h:BLOCK_H,
+    ...makeQuestion(),
+    color:palette.fill, glow:palette.glow,
+    speed: baseSpeed + Math.random()*0.15,
+    targeted:false, shakeTimer:0,
+    exploding:false, explodeR:0, alpha:1,
+  };
+}
+
+function spawnBlock() {
+  const occupied=new Set(blocks.filter(b=>!b.exploding&&b.y<BLOCK_H*1.5).map(b=>b.col));
+  for(let c=0;c<COLS;c++) if(stackedCols[c]>=MAX_STACK-2) occupied.add(c);
+  const open=[];
+  for(let c=0;c<COLS;c++) if(!occupied.has(c)) open.push(c);
+  let col = open.length>0 ? open[rand(0,open.length-1)] : rand(0,COLS-1);
+  const blk=createBlock();
+  blk.col=col; blk.x=col*COL_W;
+  blocks.push(blk);
+  pickTarget();
+}
+
+function pickTarget() {
+  const alive=blocks.filter(b=>!b.exploding);
+  if(!alive.length){ targetBlock=null; updateHint(); return; }
+  targetBlock=alive.reduce((best,b)=>{
+    const bd=H-stackedCols[b.col]*BLOCK_H-(b.y+b.h);
+    const bestd=H-stackedCols[best.col]*BLOCK_H-(best.y+best.h);
+    return bd<bestd?b:best;
+  });
+  blocks.forEach(b=>b.targeted=false);
+  targetBlock.targeted=true;
+  updateHint();
+}
+
+function updateHint(){
+  const el=document.getElementById('target-hint');
+  if(targetBlock) el.textContent=`🎯 ${targetBlock.expr} = ?`;
+  else            el.textContent='블록을 기다리는 중...';
+}
+
+// ── 답 입력 ───────────────────────────────────────────────
+function submitAnswer(){
+  if(!gameRunning||gamePaused) return;
+  const inp=document.getElementById('answer-input');
+  const val=parseFloat(inp.value);
+  inp.value=''; inp.focus();
+  if(isNaN(val)) return;
+  if(!targetBlock||targetBlock.exploding){ pickTarget(); return; }
+  // 소수점 비교 (0.1 오차 허용)
+  if(Math.abs(val - targetBlock.answer) < 0.01) correctAnswer();
+  else wrongAnswer();
+}
+
+function correctAnswer(){
+  const blk=targetBlock;
+  combo++; correctCount++; destroyed++;
+  const mult=combo>=5?4:combo>=3?3:combo>=2?2:1;
+  const pts=10*mult*level;
+  score+=pts; xpGained+=pts;
+  if(score>bestScore){ bestScore=score; localStorage.setItem('qmath_tetris_best',bestScore); }
+  blk.exploding=true; blk.explodeR=0;
+  spawnParticles(blk.x+blk.w/2, blk.y+blk.h/2, blk.color);
+  const inp=document.getElementById('answer-input');
+  inp.classList.add('glow-correct');
+  setTimeout(()=>inp.classList.remove('glow-correct'),400);
+  updateCombo(combo,mult);
+  if(destroyed%10===0) levelUp();
+  updateHUD();
+  setTimeout(()=>pickTarget(),100);
+}
+
+function wrongAnswer(){
+  combo=0;
+  const inp=document.getElementById('answer-input');
+  inp.classList.add('shake');
+  setTimeout(()=>inp.classList.remove('shake'),400);
+  updateCombo(0,1);
+  if(targetBlock) targetBlock.shakeTimer=20;
+}
+
+// ── 블록 바닥 착지 → 쌓임 ─────────────────────────────────
+function blockHitBottom(blk){
+  const col=blk.col;
+  stackedCols[col]++;
+  stackedData[col].push({ color:blk.color, expr:blk.expr, answer:blk.answer });
+  missedCount++;
+  blocks=blocks.filter(b=>b!==blk);
+  combo=0; updateCombo(0,1);
+  if(stackedCols[col]>=MAX_STACK){
+    lives--;
+    updateLives();
+    stackedCols[col]=0;
+    stackedData[col]=[];
+    dangerFlash();
+    if(lives<=0){ gameOver(); return; }
+    notice('💔 목숨 -1! 쌓인 열 초기화!');
+  }
+  updateHUD();
+  pickTarget();
+}
+
+// ── 레벨업 ────────────────────────────────────────────────
+function levelUp(){
+  level++;
+  const dc=DIFF[difficulty];
+  spawnRate=Math.max(dc.spawnMin, dc.spawnBase-(level-1)*12);
+  document.getElementById('level-disp').textContent=level;
+  const lm=document.getElementById('level-disp-m'); if(lm) lm.textContent=level;
+  flashOverlay('rgba(124,58,237,.3)');
+}
+
+function flashOverlay(bg){
+  const el=document.createElement('div');
+  el.style.cssText=`position:fixed;inset:0;background:${bg};z-index:99;pointer-events:none;transition:opacity .6s`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),600); },100);
+}
+
+function dangerFlash(){ flashOverlay('rgba(239,68,68,.55)'); }
+
+function notice(msg){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(239,68,68,.9);color:white;font-size:1.2rem;font-weight:900;padding:12px 28px;border-radius:20px;z-index:200;pointer-events:none;';
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+// ── 게임 루프 ─────────────────────────────────────────────
+function gameLoop(){
+  if(!gameRunning||gamePaused) return;
+  frameId=requestAnimationFrame(gameLoop);
+  spawnTimer++;
+  if(spawnTimer>=spawnRate){ spawnTimer=0; spawnBlock(); }
+  for(let i=blocks.length-1;i>=0;i--){
+    const b=blocks[i];
+    if(b.exploding){
+      b.explodeR+=4; b.alpha=Math.max(0,1-b.explodeR/50);
+      if(b.alpha<=0){ blocks.splice(i,1); continue; }
+    } else {
+      if(b.shakeTimer>0) b.shakeTimer--;
+      b.y+=b.speed;
+      const floorY=H-stackedCols[b.col]*BLOCK_H;
+      if(b.y+b.h>=floorY){ blockHitBottom(b); continue; }
+    }
+  }
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life--; p.alpha=p.life/p.maxLife; });
+  draw();
+}
+
+// ── 그리기 ────────────────────────────────────────────────
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // 열 경계선
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+  for(let c=1;c<COLS;c++){ ctx.beginPath();ctx.moveTo(c*COL_W,0);ctx.lineTo(c*COL_W,H);ctx.stroke(); }
+  drawStacked();
+  // 위험 경계선 (꼭대기 2블록)
+  ctx.fillStyle='rgba(239,68,68,.04)';ctx.fillRect(0,0,W,BLOCK_H*2);
+  ctx.strokeStyle='rgba(239,68,68,.35)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(0,BLOCK_H*2);ctx.lineTo(W,BLOCK_H*2);ctx.stroke();
+  ctx.setLineDash([]);
+  blocks.forEach(b=>drawBlock(b));
+  particles.forEach(p=>{
+    ctx.save();ctx.globalAlpha=p.alpha;ctx.font=`${p.size}px serif`;ctx.fillText(p.emoji,p.x,p.y);ctx.restore();
+  });
+}
+
+function drawStacked(){
+  for(let col=0;col<COLS;col++){
+    const cnt=stackedCols[col]; if(cnt===0) continue;
+    for(let i=0;i<cnt;i++){
+      const data=stackedData[col][i];
+      const x=col*COL_W, y=H-(i+1)*BLOCK_H;
+      const danger=cnt/MAX_STACK;
+      const pad=5,r=10,rx=x+pad,ry=y+pad,rw=COL_W-pad*2,rh=BLOCK_H-pad*2;
+      ctx.save();
+      ctx.globalAlpha=0.55+danger*0.2;
+      ctx.shadowColor=danger>.6?'rgba(239,68,68,.6)':'rgba(0,0,0,.3)';
+      ctx.shadowBlur=danger>.6?10:3;
+      ctx.fillStyle=data.color;
+      rRect(rx,ry,rw,rh,r);ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle=danger>.6?'rgba(239,68,68,.3)':'rgba(0,0,0,.45)';
+      rRect(rx,ry,rw,rh,r);ctx.fill();
+      // 정답 표시
+      ctx.fillStyle='rgba(255,255,255,.75)';
+      ctx.font=`bold ${String(data.expr).length>10?10:12}px Noto Sans KR`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(`${data.expr}=${data.answer}`,x+COL_W/2,y+BLOCK_H/2);
+      // 위험 테두리
+      if(i===cnt-1&&danger>.4){
+        ctx.strokeStyle=`rgba(239,68,68,${.3+.3*Math.sin(Date.now()/200)})`;
+        ctx.lineWidth=2; rRect(rx,ry,rw,rh,r);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    // 열 게이지 (좌측 3px 바)
+    const fillH=(cnt/MAX_STACK)*H;
+    ctx.fillStyle=cnt/MAX_STACK>.7?'#EF4444':cnt/MAX_STACK>.4?'#F59E0B':'#10B981';
+    ctx.globalAlpha=.5;ctx.fillRect(col*COL_W,H-fillH,3,fillH);ctx.globalAlpha=1;
+  }
+}
+
+// ── 텍스트 자동 줄바꿈 + 배경 그리기 ─────────────────────
+function autoWrap(text, maxW, fs) {
+  ctx.font = `bold ${fs}px Noto Sans KR`;
+  if(ctx.measureText(text).width <= maxW) return [text];
+  // 공백 기준 줄바꿈 시도
+  const words = text.split(' ');
+  if(words.length > 1) {
+    const lines = []; let cur = '';
+    for(const w of words) {
+      const t = cur ? cur + ' ' + w : w;
+      if(ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; }
+      else cur = t;
+    }
+    if(cur) lines.push(cur);
+    return lines;
+  }
+  // 공백 없으면 글자 단위로 분리
+  const lines = []; let cur = '';
+  for(const ch of text) {
+    if(ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; }
+    else cur += ch;
+  }
+  if(cur) lines.push(cur);
+  return lines;
+}
+
+function drawBlockText(ctx, expr, midX, midY, rw, rh) {
+  const maxW = rw - 14; // 블록 내 여백
+
+  // expr의 \n 기준 분리 후 각 줄 자동 줄바꿈
+  const rawLines = String(expr).split('\n');
+
+  // 폰트 크기 후보 (크게 → 작게 시도)
+  let fs = 15, wrapped = [];
+  for(fs = 15; fs >= 10; fs--) {
+    wrapped = [];
+    for(const raw of rawLines) wrapped.push(...autoWrap(raw, maxW, fs));
+    wrapped.push('= ?');
+    // 전체 높이가 블록 안에 들어오면 확정
+    const totalH = wrapped.length * (fs + 4);
+    if(totalH <= rh - 12) break;
+  }
+
+  const lineGap = fs + 5;
+  const totalH  = wrapped.length * lineGap;
+  const startY  = midY - totalH / 2 + lineGap / 2;
+
+  ctx.font = `bold ${fs}px Noto Sans KR`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // 텍스트 전체 영역 배경 (반투명 검정 pill)
+  const bgW = Math.min(rw - 6,
+    Math.max(...wrapped.map(l => { ctx.font=`bold ${fs}px Noto Sans KR`; return ctx.measureText(l).width; })) + 16);
+  const bgH = totalH + 6;
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  rRect(midX - bgW/2, startY - lineGap/2 - 3, bgW, bgH, 7);
+  ctx.fill();
+
+  // 텍스트 출력
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${fs}px Noto Sans KR`;
+  wrapped.forEach((line, i) => {
+    // 마지막 줄(= ?)은 색상 차별화
+    if(line === '= ?') ctx.fillStyle = 'rgba(255,255,180,0.95)';
+    else               ctx.fillStyle = 'white';
+    ctx.fillText(line, midX, startY + i * lineGap);
+  });
+}
+
+function drawBlock(b){
+  ctx.save();ctx.globalAlpha=b.alpha;
+  const px=b.shakeTimer>0?b.x+(Math.random()-.5)*8:b.x, py=b.y;
+  const pad=5,r=12,rx=px+pad,ry=py+pad,rw=b.w-pad*2,rh=b.h-pad*2;
+  if(b.exploding){
+    ctx.beginPath();ctx.arc(px+b.w/2,py+b.h/2,b.explodeR,0,Math.PI*2);
+    ctx.fillStyle=b.color;ctx.globalAlpha=b.alpha*.6;ctx.fill();
+    ctx.restore();return;
+  }
+  ctx.shadowColor=b.glow;ctx.shadowBlur=b.targeted?22:8;
+  ctx.fillStyle=b.color;rRect(rx,ry,rw,rh,r);ctx.fill();
+  const g=ctx.createLinearGradient(rx,ry,rx,ry+rh*.4);
+  g.addColorStop(0,'rgba(255,255,255,.35)');g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g;rRect(rx,ry,rw,rh*.5,r);ctx.fill();
+  if(b.targeted){
+    ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2.5;
+    rRect(rx,ry,rw,rh,r);ctx.stroke();
+    const t=Date.now()/300;ctx.fillStyle=`rgba(255,255,255,${.5+.5*Math.sin(t)})`;
+    [[rx+5,ry+5],[rx+rw-5,ry+5],[rx+5,ry+rh-5],[rx+rw-5,ry+rh-5]].forEach(([cx,cy])=>{
+      ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();
+    });
+  }
+  ctx.shadowBlur=0;
+  const midX=px+b.w/2, midY=py+b.h/2;
+  drawBlockText(ctx, b.expr, midX, midY, rw, rh);
+  ctx.restore();
+}
+
+function rRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+// ── 파티클 ────────────────────────────────────────────────
+const EMOJIS=['⭐','💥','✨','🌟','💫','🎊','🎉'];
+function spawnParticles(cx,cy,color){
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2,sp=2+Math.random()*4;
+    particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
+      emoji:EMOJIS[rand(0,EMOJIS.length-1)],size:14+Math.random()*10,
+      life:35+rand(0,20),maxLife:55,alpha:1});
+  }
+}
+
+// ── HUD ───────────────────────────────────────────────────
+function updateHUD(){
+  document.getElementById('score-disp').textContent=score.toLocaleString();
+  document.getElementById('correct-disp').textContent=correctCount;
+  document.getElementById('destroyed-disp').textContent=destroyed;
+  document.getElementById('stacked-disp').textContent=missedCount;
+  document.getElementById('best-disp').textContent=bestScore.toLocaleString();
+  // 모바일 미니 HUD 동기화
+  const sm=document.getElementById('score-disp-m');  if(sm) sm.textContent=score.toLocaleString();
+  const lm=document.getElementById('level-disp-m');  if(lm) lm.textContent=level;
+  const bm=document.getElementById('best-disp-m');   if(bm) bm.textContent=bestScore.toLocaleString();
+  const cm=document.getElementById('correct-disp-m');if(cm) cm.textContent=correctCount;
+  const stm=document.getElementById('stacked-disp-m');if(stm) stm.textContent=missedCount;
+}
+function updateLives(){
+  document.querySelectorAll('.heart').forEach((h,i)=>h.classList.toggle('lost',i>=lives));
+}
+function updateCombo(c,mult){
+  const wrap=document.getElementById('combo-wrap');
+  if(c>=2){ wrap.classList.remove('hidden'); document.getElementById('combo-display').textContent=`🔥 ${c}콤보 ×${mult}`; }
+  else wrap.classList.add('hidden');
+}
+
+// ── 게임 제어 ─────────────────────────────────────────────
+function startGame(){
+  blocks=[];particles=[];
+  score=0;lives=3;level=1;combo=0;
+  correctCount=0;destroyed=0;missedCount=0;xpGained=0;
+  spawnTimer=0;spawnRate=DIFF[difficulty].spawnBase;
+  targetBlock=null;resetStacks();
+  gameRunning=true;gamePaused=false;
+  hide('screen-start');hide('screen-gameover');hide('screen-pause');
+  document.getElementById('game-btns').classList.remove('hidden');
+  document.getElementById('game-btns').style.display='flex';
+  document.body.classList.add('playing');
+  updateHUD();updateLives();updateCombo(0,1);
+  document.getElementById('answer-input').focus();
+  spawnBlock();
+  if(frameId) cancelAnimationFrame(frameId);
+  gameLoop();
+}
+
+function gameOver(){
+  gameRunning=false;cancelAnimationFrame(frameId);
+  document.body.classList.remove('playing');
+  const xp=parseInt(localStorage.getItem('qmath_xp')||'0')+xpGained;
+  localStorage.setItem('qmath_xp',xp);
+  const scores=JSON.parse(localStorage.getItem('qmath_tetris_scores')||'[]');
+  scores.push({grade,conceptId,score,destroyed,missedCount,correctCount,date:Date.now()});
+  localStorage.setItem('qmath_tetris_scores',JSON.stringify(scores));
+  show('screen-gameover');
+  document.getElementById('game-btns').classList.add('hidden');
+  document.getElementById('go-score').textContent=score.toLocaleString();
+  document.getElementById('go-best').textContent=bestScore.toLocaleString();
+  document.getElementById('go-xp').textContent='+'+xpGained+' XP';
+  document.getElementById('go-correct').textContent=correctCount;
+  document.getElementById('go-destroyed').textContent=destroyed;
+  document.getElementById('go-missed').textContent=missedCount;
+  const total=correctCount+missedCount;
+  document.getElementById('go-avg').textContent=total>0?Math.round(score/total)+'점':'-';
+  const pct=total>0?Math.round(correctCount/total*100):0;
+  document.getElementById('go-desc').textContent=`정답률 ${pct}% · 레벨 ${level} 도달`;
+  document.getElementById('go-emoji').textContent=pct>=80?'🏆':pct>=50?'🎉':'😅';
+  if(score===bestScore&&score>0) for(let i=0;i<20;i++) setTimeout(()=>domParticle(),i*80);
+}
+
+function togglePause(){
+  if(!gameRunning) return;
+  gamePaused=!gamePaused;
+  if(gamePaused){ show('screen-pause');cancelAnimationFrame(frameId); }
+  else          { hide('screen-pause');gameLoop(); }
+}
+
+function showSetup(){
+  gameRunning=false;cancelAnimationFrame(frameId);
+  window.location.href='tetris-start.html';
+}
+
+function domParticle(){
+  const el=document.createElement('div');el.className='particle-div';
+  el.textContent=EMOJIS[rand(0,EMOJIS.length-1)];
+  el.style.left=(Math.random()*90+5)+'vw';el.style.top=(Math.random()*40+20)+'vh';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1600);
+}
+function show(id){ document.getElementById(id)?.classList.remove('hidden'); }
+function hide(id){ document.getElementById(id)?.classList.add('hidden'); }
+
+// ── 캔버스 터치: 게임 중 → 일시정지 / 일시정지 중 → 재개 ──
+canvas.addEventListener('touchstart',(e)=>{
+  e.preventDefault();
+  if(!gameRunning) return;
+  togglePause();
+},{passive:false});
+
+// ── 캔버스 클릭으로 블록 타겟 변경 ───────────────────────
+canvas.addEventListener('click',(e)=>{
+  if(!gameRunning||gamePaused) return;
+  const rect=canvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(W/rect.width);
+  const my=(e.clientY-rect.top)*(H/rect.height);
+  const hit=blocks.filter(b=>!b.exploding&&mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h);
+  if(hit.length){ blocks.forEach(b=>b.targeted=false);targetBlock=hit[0];targetBlock.targeted=true;updateHint();document.getElementById('answer-input').focus(); }
+});
+
+// ── 초기화: tetris-start.html에서 설정값 읽어 자동 시작 ──
+document.addEventListener('DOMContentLoaded',()=>{
+  grade      = parseInt(localStorage.getItem('qmath_tetris_grade')   || '1');
+  conceptId  = localStorage.getItem('qmath_tetris_concept')          || 'add1';
+  difficulty = parseInt(localStorage.getItem('qmath_tetris_diff')    || '1');
+  // currentConcept 세팅 (블록 색상용)
+  const allConcepts = Object.values(GRADE_CONCEPTS).flat();
+  currentConcept = allConcepts.find(c=>c.id===conceptId) || null;
+  bestScore = parseInt(localStorage.getItem('qmath_tetris_best')||'0');
+  document.getElementById('best-disp').textContent = bestScore.toLocaleString();
+  resetStacks();
+  startGame();
+});
+</script>
+</body>
+</html>

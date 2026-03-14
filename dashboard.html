@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대시보드 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.card-hover{transition:all .3s cubic-bezier(.4,0,.2,1);border:2px solid rgba(99,91,255,.2);background:white;}
+.card-hover:hover{transform:translateY(-5px);box-shadow:0 24px 48px rgba(79,70,229,.2),0 0 0 1px rgba(79,70,229,.12);border-color:rgba(79,70,229,.3);}
+.progress-bar{background:linear-gradient(90deg,#4F46E5,#7C3AED,#EC4899);transition:width .8s ease;}
+.fade-in{animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:linear-gradient(#4F46E5,#7C3AED);border-radius:3px;}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
+.step-active{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 12px rgba(79,70,229,.35);}
+.step-done{background:linear-gradient(135deg,#059669,#10B981);color:white;}
+.question-card{border-left:4px solid #6366F1;background:white;}
+.type-badge{font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50" style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);box-shadow:0 4px 24px rgba(79,70,229,.4);">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div>
+        <div class="font-black text-white text-sm leading-tight">질문수학</div>
+        <div class="text-xs text-white/60">CREQUESSION Math</div>
+      </div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="index.html"     class="text-white/90 hover:text-white transition">홈</a>
+      <a href="learn.html"     class="text-white/90 hover:text-white transition">학습하기</a>
+      <a href="game.html"      data-nav="game.html" class="text-white/90 hover:text-white transition">게임</a>
+      <a href="tetris.html"   data-nav="tetris.html" class="text-white/90 hover:text-white transition">수학테트리스</a>
+      <a href="ai.html"        class="text-white/90 hover:text-white transition">AI 튜터</a>
+      <a href="test.html"      class="text-white/90 hover:text-white transition">레벨 테스트</a>
+      <a href="dashboard.html" class="text-white font-black border-b-2 border-white">대시보드</a>
+      <a href="admin.html"     class="text-white/90 hover:text-white transition">관리</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="user-area-loggedout">
+        <button onclick="showModal('loginModal')" class="text-sm text-white font-medium px-3 py-1.5 border border-white rounded-lg hover:bg-white hover:text-primary transition">로그인</button>
+      </div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white hidden sm:inline">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-4 py-8 fade-in">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
+    <div>
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-1.5 h-8 rounded-full" style="background:linear-gradient(135deg,#4338CA,#DB2777)"></div>
+        <h1 class="text-2xl font-black text-gray-900">학습 대시보드</h1>
+      </div>
+      <p class="text-gray-600 text-sm pl-4" id="dash-greeting">학습 현황을 한눈에 확인하세요</p>
+    </div>
+    <div class="flex gap-2">
+      <select id="period-select" onchange="updatePeriod()" class="border-2 border-indigo-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary bg-white">
+        <option value="7">최근 7일</option>
+        <option value="30">최근 30일</option>
+        <option value="all">전체</option>
+      </select>
+      <a href="test.html" class="gradient-bg text-white text-sm px-4 py-2 rounded-2xl shadow-lg hover:shadow-xl transition font-medium">레벨 테스트</a>
+    </div>
+  </div>
+
+  <!-- Summary Cards (그라디언트 4색) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-5 shadow-lg">
+      <div class="text-xs text-white/80 font-medium mb-1">완료한 개념</div>
+      <div class="text-3xl font-black" id="stat-concepts">12</div>
+      <div class="text-xs text-white/70 mt-1">↑ 3개 (이번 주)</div>
+    </div>
+    <div class="bg-gradient-to-br from-pink-400 to-rose-500 text-white rounded-2xl p-5 shadow-lg">
+      <div class="text-xs text-white/80 font-medium mb-1">총 학습 시간</div>
+      <div class="text-3xl font-black" id="stat-time">4.5h</div>
+      <div class="text-xs text-white/70 mt-1">↑ 1.2h (이번 주)</div>
+    </div>
+    <div class="bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl p-5 shadow-lg">
+      <div class="text-xs text-white/80 font-medium mb-1">연속 학습일</div>
+      <div class="text-3xl font-black" id="stat-streak">7일</div>
+      <div class="text-xs text-white/70 mt-1">🔥 계속하세요!</div>
+    </div>
+    <div class="bg-gradient-to-br from-green-400 to-emerald-500 text-white rounded-2xl p-5 shadow-lg">
+      <div class="text-xs text-white/80 font-medium mb-1">최근 레벨</div>
+      <div class="text-3xl font-black" id="stat-level">B+</div>
+      <div class="text-xs text-white/70 mt-1" id="stat-level-change">↑ 향상 중</div>
+    </div>
+  </div>
+
+  <!-- XP & 게임 통계 -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="game-stats-row">
+    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-5 shadow-sm card-hover">
+      <div class="text-xs text-gray-500 font-medium mb-1">내 레벨</div>
+      <div class="text-3xl font-black text-indigo-700" id="stat-level-xp">Lv.1</div>
+      <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
+        <div id="stat-xp-bar" class="progress-bar h-1.5 rounded-full" style="width:0%"></div>
+      </div>
+      <div class="text-xs text-gray-500 mt-1" id="stat-xp-text">0 / 500 XP</div>
+    </div>
+    <div class="bg-pink-50 border-2 border-pink-200 rounded-2xl p-5 shadow-sm card-hover">
+      <div class="text-xs text-gray-500 font-medium mb-1">획득한 별</div>
+      <div class="text-3xl font-black text-pink-700" id="stat-total-stars">0</div>
+      <div class="text-xs text-gray-500 mt-1">⭐ 누적 별점</div>
+    </div>
+    <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 shadow-sm card-hover">
+      <div class="text-xs text-gray-500 font-medium mb-1">퀴즈 최고점</div>
+      <div class="text-3xl font-black text-amber-700" id="stat-quiz-best">0</div>
+      <div class="text-xs text-gray-500 mt-1">🎯 퀴즈 레이스</div>
+    </div>
+    <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-5 shadow-sm card-hover">
+      <div class="text-xs text-gray-500 font-medium mb-1">플래시카드 완료</div>
+      <div class="text-3xl font-black text-green-700" id="stat-flashcard">0</div>
+      <div class="text-xs text-gray-500 mt-1">🃏 누적 세션</div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-indigo-400">
+      <h3 class="font-bold mb-4">주간 학습 시간 (분)</h3>
+      <canvas id="weeklyChart"></canvas>
+    </div>
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-purple-400">
+      <h3 class="font-bold mb-4">영역별 이해도</h3>
+      <canvas id="subjectChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Level Test History -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-pink-400 mb-6">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="text-lg">📊</span>
+      <h3 class="font-bold">레벨 테스트 이력</h3>
+    </div>
+    <div id="test-history" class="space-y-2"></div>
+    <a href="test.html" class="block mt-4 text-center text-sm text-primary font-medium hover:underline">새 테스트 받기 →</a>
+  </div>
+
+  <!-- 뱃지 컬렉션 -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-amber-400 mb-6">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="text-lg">🏅</span>
+      <h3 class="font-bold text-gray-900">획득한 뱃지</h3>
+    </div>
+    <div id="badge-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="grid lg:grid-cols-2 gap-6">
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-green-400">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-lg">📚</span>
+        <h3 class="font-bold">최근 학습 활동</h3>
+      </div>
+      <div class="space-y-3" id="recent-activity">
+        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
+          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-sm shrink-0">✓</div>
+          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">삼각형의 정의</div><div class="text-xs text-gray-500">오늘 · 6단계 완료</div></div>
+          <div class="text-xs text-green-500 font-medium shrink-0">100%</div>
+        </div>
+        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm shrink-0">📖</div>
+          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">분수와 소수</div><div class="text-xs text-gray-500">어제 · 4단계 진행 중</div></div>
+          <div class="text-xs text-blue-500 font-medium shrink-0">67%</div>
+        </div>
+        <div class="flex items-center gap-3 py-2 border-b border-indigo-50">
+          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-sm shrink-0">💬</div>
+          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">AI 튜터 대화</div><div class="text-xs text-gray-500">어제 · 직선과 선분</div></div>
+          <div class="text-xs text-purple-500 font-medium shrink-0">완료</div>
+        </div>
+        <div class="flex items-center gap-3 py-2">
+          <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-sm shrink-0">📊</div>
+          <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">레벨 테스트</div><div class="text-xs text-gray-500">3일 전 · B+ 달성</div></div>
+          <div class="text-xs text-amber-500 font-medium shrink-0">B+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goals -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-200 border-t-4 border-t-rose-400">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-lg">🎯</span>
+        <h3 class="font-bold">학습 목표 진도</h3>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-medium">도형 단원</span><span class="text-primary font-medium">8/10</span></div>
+          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:80%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-medium">수와 연산</span><span class="text-primary font-medium">5/12</span></div>
+          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:42%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-medium">측정 단원</span><span class="text-primary font-medium">3/8</span></div>
+          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:37%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-medium">통계와 그래프</span><span class="text-primary font-medium">2/6</span></div>
+          <div class="w-full bg-gray-100 rounded-full h-2"><div class="progress-bar h-2 rounded-full" style="width:33%"></div></div>
+        </div>
+      </div>
+      <a href="learn.html" class="block mt-5 gradient-bg text-white font-medium py-3 rounded-2xl shadow-lg hover:shadow-xl transition text-sm text-center">학습 계속하기 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl border-2 border-indigo-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-black">로그인</h2>
+      <button onclick="hideModal('loginModal')" class="text-gray-400 text-xl hover:text-gray-600">✕</button>
+    </div>
+    <div class="space-y-4">
+      <input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+      <select id="login-role" class="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+        <option value="student">학생</option>
+        <option value="teacher">교사</option>
+      </select>
+      <div>
+        <label class="block text-sm font-medium mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer hover:border-sky-400 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer hover:border-pink-400 transition has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full gradient-bg text-white font-bold py-3 rounded-2xl shadow-lg hover:shadow-xl transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  initGreeting();
+  loadTestHistory();
+  initCharts();
+  loadGameStats();
+});
+
+function initGreeting() {
+  const user = loadUser();
+  if(user) document.getElementById('dash-greeting').textContent = user.name + '님의 학습 현황';
+}
+
+function loadTestHistory() {
+  const results = JSON.parse(localStorage.getItem('qmath_test_results')||'[]');
+  const el = document.getElementById('test-history');
+  if(!results.length) {
+    el.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">아직 테스트 기록이 없습니다.</p>';
+    return;
+  }
+  const levelColor = {'A+':'text-purple-600','A':'text-blue-600','B+':'text-green-600','B':'text-green-500','C':'text-amber-500','D':'text-red-500'};
+  el.innerHTML = [...results].reverse().map(r => `
+    <div class="flex items-center justify-between py-2 border-b border-indigo-50 last:border-0">
+      <div class="text-sm text-gray-700">${r.date} · ${r.grade}학년</div>
+      <div class="flex items-center gap-3">
+        <div class="text-sm font-medium">${r.score}점</div>
+        <div class="text-sm font-bold ${levelColor[r.level]||''} w-8 text-right">${r.level}</div>
+      </div>
+    </div>
+  `).join('');
+  // Update stat-level
+  const latest = results[results.length-1];
+  if(latest) document.getElementById('stat-level').textContent = latest.level;
+}
+
+function initCharts() {
+  // Weekly
+  new Chart(document.getElementById('weeklyChart'), {
+    type:'bar',
+    data:{
+      labels:['월','화','수','목','금','토','일'],
+      datasets:[{
+        label:'학습 시간(분)',
+        data:[45,30,60,20,50,80,35],
+        backgroundColor:'rgba(79,70,229,0.7)',
+        borderRadius:6
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f3f4f6'}}}}
+  });
+  // Subject Radar
+  new Chart(document.getElementById('subjectChart'), {
+    type:'radar',
+    data:{
+      labels:['도형','수와 연산','측정','통계','규칙성'],
+      datasets:[{
+        label:'이해도',
+        data:[85,70,60,75,65],
+        backgroundColor:'rgba(124,58,237,.15)',
+        borderColor:'rgba(124,58,237,.8)',
+        pointBackgroundColor:'rgba(124,58,237,1)',
+        pointRadius:4
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#f3f4f6'}}}}
+  });
+}
+
+function updatePeriod() {
+  // In a real app this would filter data; here we just re-init charts
+  initCharts();
+}
+
+// ── 게임 통계 로드 ────────────────────────────────────────
+function loadGameStats() {
+  // XP & 레벨
+  const xp = parseInt(localStorage.getItem('qmath_xp') || '0');
+  const level = Math.floor(xp / 500) + 1;
+  const xpInLevel = xp % 500;
+  document.getElementById('stat-level-xp').textContent = 'Lv.' + level;
+  document.getElementById('stat-xp-bar').style.width = (xpInLevel / 5) + '%';
+  document.getElementById('stat-xp-text').textContent = xpInLevel + ' / 500 XP';
+
+  // 별점 합계
+  const stars = JSON.parse(localStorage.getItem('qmath_stars') || '{}');
+  const totalStars = Object.values(stars).reduce((a, b) => a + b, 0);
+  document.getElementById('stat-total-stars').textContent = totalStars;
+
+  // 퀴즈 최고점
+  const quizScores = JSON.parse(localStorage.getItem('qmath_quiz_scores') || '{}');
+  const bestQuiz = Math.max(0, ...Object.values(quizScores));
+  document.getElementById('stat-quiz-best').textContent = bestQuiz;
+
+  // 플래시카드 세션 수
+  const fcScores = JSON.parse(localStorage.getItem('qmath_flashcard_scores') || '[]');
+  document.getElementById('stat-flashcard').textContent = fcScores.length;
+
+  // 뱃지
+  loadBadges(xp, level, totalStars, Object.keys(stars).length);
+}
+
+// 뱃지 정의 및 획득 여부 체크
+function loadBadges(xp, level, totalStars, completedLessons) {
+  const BADGES = [
+    { id:'first', icon:'🌱', name:'첫 걸음', desc:'첫 개념 완료', check: completedLessons >= 1 },
+    { id:'star3', icon:'⭐', name:'별 수집가', desc:'별 10개 획득', check: totalStars >= 10 },
+    { id:'lv5',   icon:'🚀', name:'레벨 5', desc:'레벨 5 달성', check: level >= 5 },
+    { id:'xp500', icon:'💎', name:'다이아', desc:'XP 500 달성', check: xp >= 500 },
+    { id:'lv10',  icon:'👑', name:'수학 왕', desc:'레벨 10 달성', check: level >= 10 },
+    { id:'all10', icon:'🏆', name:'10개 완료', desc:'개념 10개 완료', check: completedLessons >= 10 },
+    { id:'all30', icon:'🎓', name:'30개 완료', desc:'개념 30개 완료', check: completedLessons >= 30 },
+    { id:'perfect',icon:'💯', name:'퍼펙트', desc:'별3 개 5개', check: Object.values(JSON.parse(localStorage.getItem('qmath_stars')||'{}')).filter(s=>s===3).length >= 5 },
+    { id:'streak7',icon:'🔥', name:'7일 연속', desc:'7일 연속 학습', check: (parseInt(localStorage.getItem('qmath_streak')||'0')) >= 7 },
+  ];
+
+  const grid = document.getElementById('badge-grid');
+  grid.innerHTML = BADGES.map(b => `
+    <div class="flex flex-col items-center p-3 rounded-xl border-2 ${b.check ? 'border-amber-200 bg-gradient-to-br from-yellow-50 to-amber-50' : 'border-gray-100 bg-gray-50 opacity-40'} text-center transition">
+      <div class="text-3xl mb-1">${b.icon}</div>
+      <div class="text-xs font-bold text-gray-800 leading-tight">${b.name}</div>
+      <div class="text-xs text-gray-500 mt-0.5">${b.desc}</div>
+      ${b.check ? '<div class="text-xs text-amber-600 font-bold mt-1">획득!</div>' : ''}
+    </div>
+  `).join('');
+}
+</script>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="mt-12 py-8 text-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

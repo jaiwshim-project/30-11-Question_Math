@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 튜터 — 질문수학</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4F46E5',secondary:'#7C3AED',accent:'#F59E0B',success:'#10B981'}}}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;}
+body{background:#EDEEFF;background-image:radial-gradient(ellipse 80% 60% at 0% 0%,rgba(79,70,229,.08) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 100% 100%,rgba(124,58,237,.07) 0%,transparent 55%);min-height:100vh;}
+.gradient-bg{background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%);}
+.chat-ai{background:linear-gradient(135deg,#FDF4FF,#EEF2FF);border:2px solid #DDD6FE;border-radius:1rem;border-bottom-left-radius:.25rem;}
+.chat-user{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 16px rgba(79,70,229,.35);border-radius:1rem;border-bottom-right-radius:.25rem;}
+.loader{border:3px solid #f3f3f3;border-top:3px solid #4F46E5;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{background:rgba(15,10,40,.65);backdrop-filter:blur(8px);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:linear-gradient(#4F46E5,#7C3AED);border-radius:3px;}
+nav{box-shadow:0 4px 24px rgba(79,70,229,.4)!important;}
+.step-active{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;box-shadow:0 4px 12px rgba(79,70,229,.35);}
+.step-done{background:linear-gradient(135deg,#059669,#10B981);color:white;}
+.question-card{border-left:4px solid #6366F1;background:white;}
+.type-badge{font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+.btn-scale{transition:all .25s;} .btn-scale:hover{transform:scale(1.04);}
+</style>
+</head>
+<body class="text-gray-900 h-screen flex flex-col">
+
+<!-- NAV -->
+<nav style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="shrink-0">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white font-black text-sm">Q</div>
+      <div><div class="font-black text-white text-sm leading-tight">질문수학</div><div class="text-xs text-white/60">CREQUESSION Math</div></div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="index.html"     class="text-white/90 hover:text-white transition">홈</a>
+      <a href="learn.html"     class="text-white/90 hover:text-white transition">학습하기</a>
+      <a href="game.html"      data-nav="game.html" class="text-white/90 hover:text-white transition">게임</a>
+      <a href="tetris.html"   data-nav="tetris.html" class="text-white/90 hover:text-white transition">수학테트리스</a>
+      <a href="ai.html"        class="text-white font-black border-b-2 border-white pb-0.5">AI 튜터</a>
+      <a href="test.html"      class="text-white/90 hover:text-white transition">레벨 테스트</a>
+      <a href="dashboard.html" class="text-white/90 hover:text-white transition">대시보드</a>
+      <a href="admin.html"     class="text-white/90 hover:text-white transition">관리</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="user-area-loggedout"><button onclick="showModal('loginModal')" class="text-sm border border-white text-white font-bold px-3 py-1.5 rounded-2xl hover:bg-white hover:text-primary transition">로그인</button></div>
+      <div id="user-area-loggedin" class="hidden flex items-center gap-2">
+        <div id="user-avatar" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-xs font-bold">학</div>
+        <span id="user-name-display" class="text-sm font-medium text-white hidden sm:inline">학생</span>
+        <button onclick="doLogout()" class="text-xs text-white/70 hover:text-white">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- AI 튜터 그라디언트 헤더 바 -->
+<div class="gradient-bg text-white px-4 py-4 shrink-0">
+  <div class="max-w-4xl mx-auto flex items-center gap-4">
+    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shrink-0">🤖</div>
+    <div>
+      <h1 class="text-lg font-black leading-tight">AI 수학 튜터</h1>
+      <p class="text-white/80 text-xs">Gemini AI가 질문수학 방식으로 수학 개념을 안내합니다</p>
+    </div>
+    <div class="ml-auto text-xs text-white/60 hidden sm:block">Powered by Gemini 2.0 Flash</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col max-w-4xl w-full mx-auto px-4 py-4 min-h-0">
+
+  <!-- API Key -->
+  <div id="api-key-section" class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-4 shrink-0">
+    <div class="flex items-start gap-3">
+      <span class="text-amber-500 text-xl shrink-0">🔑</span>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-amber-800 mb-1">Gemini API 키 설정</div>
+        <div class="text-sm text-amber-700 mb-3">Google AI Studio에서 발급한 API 키를 입력하세요. 키는 브라우저에만 저장됩니다.</div>
+        <div class="flex gap-2">
+          <input type="password" id="gemini-api-key" placeholder="AIza..." class="flex-1 min-w-0 border-2 border-amber-300 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500 bg-white">
+          <button onclick="saveApiKey()" class="shrink-0 bg-amber-500 text-white px-4 py-2 rounded-2xl text-sm font-bold hover:bg-amber-600 shadow-md transition">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Prompts -->
+  <div class="shrink-0 mb-3">
+    <div class="text-xs font-bold text-gray-600 mb-2">⚡ 빠른 질문</div>
+    <div class="flex flex-wrap gap-2">
+      <button onclick="quickPrompt('삼각형이란 무엇인가요? 질문수학 방식으로 설명해주세요.')"       class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl px-3 py-1.5 text-xs text-indigo-700 font-bold hover:bg-indigo-100 hover:border-indigo-400 transition">삼각형이란?</button>
+      <button onclick="quickPrompt('분수의 개념을 질문수학 방식으로 설명해주세요.')"              class="bg-pink-50 border-2 border-pink-200 rounded-2xl px-3 py-1.5 text-xs text-pink-700 font-bold hover:bg-pink-100 hover:border-pink-400 transition">분수란?</button>
+      <button onclick="quickPrompt('직선과 선분의 차이를 질문 형식으로 가르쳐주세요.')"          class="bg-green-50 border-2 border-green-200 rounded-2xl px-3 py-1.5 text-xs text-green-700 font-bold hover:bg-green-100 hover:border-green-400 transition">직선 vs 선분</button>
+      <button onclick="quickPrompt('그래프를 왜 사용하는지 질문 기반으로 설명해주세요.')"         class="bg-amber-50 border-2 border-amber-200 rounded-2xl px-3 py-1.5 text-xs text-amber-700 font-bold hover:bg-amber-100 hover:border-amber-400 transition">그래프 사용 이유</button>
+      <button onclick="quickPrompt('수포자가 수학을 어렵게 느끼는 이유와 질문수학으로 어떻게 해결하는지 알려주세요.')" class="bg-purple-50 border-2 border-purple-200 rounded-2xl px-3 py-1.5 text-xs text-purple-700 font-bold hover:bg-purple-100 hover:border-purple-400 transition">수포자 해결법</button>
+      <button onclick="quickPrompt('각도의 개념을 초등학생에게 질문 방식으로 설명해주세요.')"    class="bg-blue-50 border-2 border-blue-200 rounded-2xl px-3 py-1.5 text-xs text-blue-700 font-bold hover:bg-blue-100 hover:border-blue-400 transition">각도란?</button>
+    </div>
+  </div>
+
+  <!-- Chat Box -->
+  <div class="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border-2 border-indigo-100 overflow-hidden min-h-0">
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div class="chat-ai p-4 text-sm text-gray-700 fade-in">
+        <div class="font-bold text-primary mb-1">🤖 질문수학 AI 튜터</div>
+        <div>안녕하세요! 저는 <strong>질문수학 AI 튜터</strong>입니다.<br>
+        수학 개념을 질문을 통해 이해할 수 있도록 도와드릴게요.<br><br>
+        <strong>어떤 수학 개념이 궁금하신가요?</strong><br>
+        예: "삼각형이란 무엇인가요?", "분수를 어떻게 이해해야 하나요?"</div>
+      </div>
+    </div>
+
+    <!-- Typing indicator (hidden) -->
+    <div id="typing-indicator" class="hidden px-4 pb-2">
+      <div class="chat-ai p-3 text-sm text-gray-500 flex items-center gap-2 w-fit">
+        <span class="loader"></span> 생각하는 중...
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="border-t-2 border-indigo-50 p-3 bg-gray-50 shrink-0">
+      <div class="flex gap-2">
+        <input type="text" id="chat-input"
+          placeholder="수학 개념에 대해 질문하세요..."
+          class="flex-1 border-2 border-indigo-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white font-medium"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}">
+        <button onclick="sendChat()" class="shrink-0 gradient-bg text-white rounded-xl px-4 py-2.5 font-bold text-sm shadow-md hover:shadow-lg transition flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        </button>
+      </div>
+      <div class="flex justify-between items-center mt-1.5">
+        <button onclick="clearChat()" class="text-xs text-gray-500 hover:text-gray-700 font-medium">대화 초기화</button>
+        <span class="text-xs text-gray-400">Powered by Gemini 2.0 Flash</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-black">로그인</h2><button onclick="hideModal('loginModal')" class="text-gray-400 text-xl">✕</button></div>
+    <div class="space-y-4">
+      <input type="text" id="login-name" placeholder="이름" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary">
+      <select id="login-role" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary"><option value="student">학생</option><option value="teacher">교사</option></select>
+      <div>
+        <label class="block text-sm font-medium mb-2">나는 어떤 학생? 🦕🌸</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-sky-200 bg-sky-50 rounded-2xl cursor-pointer hover:border-sky-400 transition has-[:checked]:border-sky-500 has-[:checked]:bg-sky-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-boy" value="boy" class="sr-only" checked>
+            <span class="text-4xl">🦕</span><span class="text-xs font-black text-sky-700">남학생</span>
+          </label>
+          <label class="flex flex-col items-center gap-2 p-3 border-2 border-pink-200 bg-pink-50 rounded-2xl cursor-pointer hover:border-pink-400 transition has-[:checked]:border-pink-500 has-[:checked]:bg-pink-100">
+            <input type="radio" name="login-gender-radio" id="login-gender-girl" value="girl" class="sr-only">
+            <span class="text-4xl">🌸</span><span class="text-xs font-black text-pink-700">여학생</span>
+          </label>
+        </div>
+        <select id="login-gender" class="sr-only"><option value="boy">남학생</option><option value="girl">여학생</option></select>
+      </div>
+      <button onclick="doLogin()" class="w-full gradient-bg text-white font-bold py-3 rounded-2xl shadow-md hover:shadow-lg transition">로그인</button>
+    </div>
+  </div>
+</div>
+
+<footer style="background:linear-gradient(135deg,#4338CA 0%,#7C3AED 55%,#DB2777 100%)" class="mt-0 py-8 text-white shrink-0">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">Q</div>
+        <div>
+          <div class="font-black text-sm">질문수학</div>
+          <div class="text-white/60 text-xs">CREQUESSION Math</div>
+        </div>
+      </div>
+      <div class="flex gap-4 text-sm text-white/80">
+        <a href="index.html"     class="hover:text-white transition">홈</a>
+        <a href="learn.html"     class="hover:text-white transition">학습하기</a>
+        <a href="game.html"      class="hover:text-white transition">게임</a>
+        <a href="ai.html"        class="hover:text-white transition">AI 튜터</a>
+        <a href="dashboard.html" class="hover:text-white transition">대시보드</a>
+      </div>
+      <div class="text-white/50 text-xs">© 2024 질문수학. 초등수학을 재미있게!</div>
+    </div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+const SYSTEM_PROMPT = `당신은 질문수학(CREQUESSION Math) 전문 AI 튜터입니다.
+질문수학 핵심 원칙:
+- "수학 개념을 질문을 통해 이해하고 설명하도록 만드는 학습 방법"
+- 학습 흐름: 개념 → 질문 → 생각 → 설명 → 토론 → 문제풀이
+
+답변 규칙:
+1. 직접 답을 주지 말고 소크라테스식 질문으로 학생이 스스로 생각하게 유도하세요
+2. 단계별 질문을 3~5개 제시하여 개념을 탐구하도록 돕세요
+3. 학생이 개념을 말로 설명할 수 있도록 유도하세요
+4. 한국어로 답변하고 친근한 말투를 사용하세요
+5. 이모지를 적절히 활용하여 학습을 즐겁게 만드세요
+6. 답변 마지막에는 항상 "이제 ○○을 직접 설명해볼 수 있나요?" 같은 자기설명 유도 질문을 추가하세요`;
+
+let chatHistory = [];
+
+function saveApiKey() {
+  const key = document.getElementById('gemini-api-key').value.trim();
+  if(!key) return;
+  localStorage.setItem('gemini_api_key', key);
+  document.getElementById('api-key-section').style.display = 'none';
+}
+
+function loadApiKey() {
+  const key = localStorage.getItem('gemini_api_key');
+  if(key) {
+    document.getElementById('gemini-api-key').value = key;
+    document.getElementById('api-key-section').style.display = 'none';
+  }
+}
+
+function quickPrompt(text) {
+  document.getElementById('chat-input').value = text;
+  sendChat();
+}
+
+function appendMsg(html, isUser) {
+  const messages = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'fade-in ' + (isUser ? 'flex justify-end' : '');
+  div.innerHTML = isUser
+    ? `<div class="chat-user px-4 py-3 text-sm max-w-xs md:max-w-md">${html}</div>`
+    : `<div class="chat-ai p-4 text-sm text-gray-700">${html}</div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value = '';
+
+  appendMsg(msg.replace(/\n/g,'<br>'), true);
+  chatHistory.push({ role:'user', parts:[{ text: msg }] });
+
+  document.getElementById('typing-indicator').classList.remove('hidden');
+  const messages = document.getElementById('chat-messages');
+  messages.scrollTop = messages.scrollHeight;
+
+  const apiKey = localStorage.getItem('gemini_api_key');
+  if(!apiKey) {
+    document.getElementById('typing-indicator').classList.add('hidden');
+    appendMsg('<strong class="text-primary">🤖 AI 튜터</strong><br><br>API 키를 먼저 설정해주세요. 페이지 상단의 🔑 섹션에서 Gemini API 키를 입력하세요.<br><br>Google AI Studio(<strong>aistudio.google.com</strong>)에서 무료로 발급받을 수 있습니다.', false);
+    return;
+  }
+
+  try {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: chatHistory
+      })
+    });
+    const data = await resp.json();
+    document.getElementById('typing-indicator').classList.add('hidden');
+
+    if(data.error) throw new Error(data.error.message);
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '응답을 받지 못했습니다.';
+    chatHistory.push({ role:'model', parts:[{ text: reply }] });
+    const formatted = reply
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+    appendMsg('<strong class="text-primary">🤖 질문수학 AI 튜터</strong><br><br>' + formatted, false);
+  } catch(e) {
+    document.getElementById('typing-indicator').classList.add('hidden');
+    appendMsg(`<span class="text-red-500">오류가 발생했습니다: ${e.message}</span>`, false);
+  }
+}
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="chat-ai p-4 text-sm text-gray-700 fade-in">
+      <div class="font-bold text-primary mb-1">🤖 질문수학 AI 튜터</div>
+      <div>대화가 초기화되었습니다. 무엇이 궁금하신가요?</div>
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', loadApiKey);
+</script>
+</body>
+</html>
