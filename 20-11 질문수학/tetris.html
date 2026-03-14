@@ -378,14 +378,21 @@ const Q = {
   },
   shape1: () => pick([
     {expr:'삼각형의 변의 수',answer:3},{expr:'사각형의 변의 수',answer:4},
-    {expr:'오각형의 변의 수',answer:5},{expr:'삼각형의 꼭짓점 수',answer:3},
-    {expr:'사각형의 꼭짓점 수',answer:4},{expr:'오각형의 꼭짓점 수',answer:5},
-    {expr:'육각형의 변의 수',answer:6},
+    {expr:'오각형의 변의 수',answer:5},{expr:'육각형의 변의 수',answer:6},
+    {expr:'칠각형의 변의 수',answer:7},{expr:'팔각형의 변의 수',answer:8},
+    {expr:'삼각형의 꼭짓점 수',answer:3},{expr:'사각형의 꼭짓점 수',answer:4},
+    {expr:'오각형의 꼭짓점 수',answer:5},{expr:'육각형의 꼭짓점 수',answer:6},
+    {expr:'직사각형의 변의 수',answer:4},{expr:'정사각형의 꼭짓점 수',answer:4},
+    {expr:'원의 꼭짓점 수',answer:0},{expr:'삼각형의 각의 수',answer:3},
+    {expr:'사각형의 각의 수',answer:4},{expr:'오각형의 각의 수',answer:5},
   ]),
   time1: () => pick([
     {expr:'1시간 = □ 분',answer:60},{expr:'하루 = □ 시간',answer:24},
     {expr:'1주일 = □ 일',answer:7},{expr:'1달 = □ 주',answer:4},
     {expr:'반 시간 = □ 분',answer:30},{expr:'1년 = □ 달',answer:12},
+    {expr:'2시간 = □ 분',answer:120},{expr:'1분 = □ 초',answer:60},
+    {expr:'1년 = □ 일',answer:365},{expr:'1시간 반 = □ 분',answer:90},
+    {expr:'3시간 = □ 분',answer:180},{expr:'15분 = □ 시간의 □ 분',answer:15},
   ]),
 
   // ── 2학년 ──
@@ -433,6 +440,10 @@ const Q = {
     {expr:'1시간 = □ 초',answer:3600},{expr:'1분 = □ 초',answer:60},
     {expr:'2분 30초 = □ 초',answer:150},{expr:'120초 = □ 분',answer:2},
     {expr:'3분 = □ 초',answer:180},{expr:'1시간 = □ 분',answer:60},
+    {expr:'5분 = □ 초',answer:300},{expr:'240초 = □ 분',answer:4},
+    {expr:'1시간 30분 = □ 분',answer:90},{expr:'180초 = □ 분',answer:3},
+    {expr:'2시간 = □ 초',answer:7200},{expr:'45초 = □ 초 (그대로)',answer:45},
+    {expr:'4분 = □ 초',answer:240},{expr:'360초 = □ 분',answer:6},
   ]),
   graph3: () => {
     const data=[rand(3,10),rand(3,10),rand(3,10),rand(3,10)];
@@ -748,17 +759,28 @@ function selectDiff(d) {
   });
 }
 
-// ── 문제 생성 ─────────────────────────────────────────────
+// ── 문제 중복 방지: 최근 출제 이력 ───────────────────────
+const recentExprs = [];
+const HISTORY_SIZE = 8;
+
 function makeQuestion() {
   const fn = Q[conceptId];
   if(!fn) return {expr:'1 + 1', answer:2, op:'+'};
-  try {
-    const q = fn();
-    if(q.answer === undefined || isNaN(q.answer)) return {expr:'2 + 3', answer:5, op:'+'};
-    return q;
-  } catch(e) {
-    return {expr:'1 + 1', answer:2, op:'+'};
-  }
+  let q, attempts = 0;
+  do {
+    try {
+      q = fn();
+      if(q === undefined || q.answer === undefined || isNaN(q.answer))
+        q = {expr:'2 + 3', answer:5, op:'+'};
+    } catch(e) {
+      q = {expr:'1 + 1', answer:2, op:'+'};
+    }
+    attempts++;
+  } while(recentExprs.includes(q.expr) && attempts < 12);
+
+  recentExprs.push(q.expr);
+  if(recentExprs.length > HISTORY_SIZE) recentExprs.shift();
+  return q;
 }
 
 // ── 블록 색상 ─────────────────────────────────────────────
@@ -1125,6 +1147,7 @@ function startGame(){
   correctCount=0;destroyed=0;missedCount=0;xpGained=0;
   spawnTimer=0;spawnRate=DIFF[difficulty].spawnBase;
   targetBlock=null;resetStacks();
+  recentExprs.length=0;
   gameRunning=true;gamePaused=false;
   hide('screen-start');hide('screen-gameover');hide('screen-pause');
   document.getElementById('game-btns').classList.remove('hidden');
